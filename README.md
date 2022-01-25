@@ -5,4 +5,6 @@ standard localization texts provided by the Apple platform.
 
 https://applelocalization.com/
 
-https://github.com/kishikawakatsumi/applelocalization-data
+### Related Repository
+- https://github.com/kishikawakatsumi/applelocalization-data
+- https://github.com/kishikawakatsumi/applelocalization-tools
