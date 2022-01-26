@@ -39,7 +39,7 @@ router
 
     const searchWord = context.request.url.searchParams.get("q");
 
-    const languages = context.request.url.searchParams.getAll("l") || [];
+    const languages = context.request.url.searchParams.getAll("l") ?? [];
     const languageCodes = (() => {
       const codes = languages.flatMap(
         (language) => languageMapping[language],
@@ -52,13 +52,11 @@ router
       `q: ${searchWord}, l: ${languages}, b: ${bundle}`,
     );
 
-    const pageParam = context.request.url.searchParams.get("page") || "1";
-    const page = parseInt(pageParam);
+    const pageParam = context.request.url.searchParams.get("page") ?? "1";
+    const page = Math.max(parseInt(pageParam), 1);
 
-    const sizeParam = context.request.url.searchParams.get("size") || "200";
-    const maxSize = 200;
-    const minSize = 1;
-    const size = Math.max(Math.min(parseInt(sizeParam), maxSize), minSize);
+    const sizeParam = context.request.url.searchParams.get("size") ?? "200";
+    const size = Math.max(Math.min(parseInt(sizeParam), 200), 1);
 
     const builder = new QueryBuilder();
     const countResult = await client.queryObject<{ count: bigint }>(
@@ -118,6 +116,12 @@ app.use(async (context) => {
     root: `${Deno.cwd()}/static`,
     index: "index.html",
   });
+});
+
+app.addEventListener("listen", ({ hostname, port, secure }) => {
+  const scheme = secure ? "https" : "http";
+  const host = hostname ?? "localhost";
+  console.log(`Listening on: ${scheme}://${host}:${port}`);
 });
 
 await app.listen({ port: 8080 });

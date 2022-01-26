@@ -1,0 +1,14 @@
+name: Test
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          set -ex
+          docker build --rm --no-cache --build-arg .
