@@ -11,4 +11,4 @@ jobs:
       - name: Build
         run: |
           set -ex
-          docker build --rm --no-cache --build-arg .
+          docker build --rm --no-cache .

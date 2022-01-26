@@ -134,6 +134,7 @@ app.use(async (context, next) => {
       console.log(
         `NotFound: [${context.request.method}] ${context.request.url.toString()}`,
       );
+      return;
     }
     throw error;
   }
