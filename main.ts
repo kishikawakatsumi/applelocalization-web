@@ -1,12 +1,4 @@
-import {
-  Application,
-  connect,
-  isHttpError,
-  Pool,
-  Router,
-  send,
-  Status,
-} from "./deps.ts";
+import { Application, connect, Pool, Router, send } from "./deps.ts";
 import { QueryBuilder } from "./query_builder.ts";
 import { languageMapping } from "./language_mappings.ts";
 
@@ -124,20 +116,6 @@ app.use(async (context) => {
     root: `${Deno.cwd()}/static`,
     index: "index.html",
   });
-});
-
-app.use(async (context, next) => {
-  try {
-    await next();
-  } catch (error) {
-    if (isHttpError(error) && error.status === Status.NotFound) {
-      console.log(
-        `NotFound: [${context.request.method}] ${context.request.url.toString()}`,
-      );
-      return;
-    }
-    throw error;
-  }
 });
 
 app.addEventListener("listen", ({ hostname, port, secure }) => {
