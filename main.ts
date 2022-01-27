@@ -117,28 +117,32 @@ router
 
 const app = new Application();
 
-app.use(router.routes());
-app.use(router.allowedMethods());
+app.use(async (context, next) => {
+  await next();
+  console.log(
+    `${context.request.method} | ${context.response.status} | ${context.request.url}`,
+  );
+});
 
 app.use(async (context, next) => {
   try {
     await next();
   } catch (error) {
     if (isHttpError(error)) {
-      context.response.status = error.status;
       const body = `${error.status} | ${STATUS_TEXT.get(error.status)}`;
+      context.response.status = error.status;
       context.response.body = body;
 
       if (error.status === Status.NotFound) {
-        console.log(
-          `[${context.request.method}] ${error.status} ${context.request.url}`,
-        );
         return;
       }
     }
     throw error;
   }
 });
+
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 app.use(async (context) => {
   await send(context, context.request.url.pathname, {
