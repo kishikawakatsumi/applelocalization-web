@@ -26,7 +26,7 @@ router
     context.response.headers.set("Content-Type", "application/json");
     context.response.headers.set(
       "Cache-Control",
-      "s-maxage=3600, max-age=3600",
+      "s-maxage=604800, max-age=604800",
     );
 
     const cachedResponse = await redis.get(context.request.url.search);
