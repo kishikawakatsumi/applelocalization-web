@@ -1,4 +1,13 @@
-import { Application, connect, Pool, Router, send } from "./deps.ts";
+import {
+  Application,
+  connect,
+  isHttpError,
+  Pool,
+  Router,
+  send,
+  Status,
+  STATUS_TEXT,
+} from "./deps.ts";
 import { QueryBuilder } from "./query_builder.ts";
 import { languageMapping } from "./language_mappings.ts";
 
@@ -110,6 +119,26 @@ const app = new Application();
 
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+app.use(async (context, next) => {
+  try {
+    await next();
+  } catch (error) {
+    if (isHttpError(error)) {
+      context.response.status = error.status;
+      const body = `${error.status} | ${STATUS_TEXT.get(error.status)}`;
+      context.response.body = body;
+
+      if (error.status === Status.NotFound) {
+        console.log(
+          `[${context.request.method}] ${error.status} ${context.request.url}`,
+        );
+        return;
+      }
+    }
+    throw error;
+  }
+});
 
 app.use(async (context) => {
   await send(context, context.request.url.pathname, {
