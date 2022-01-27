@@ -129,9 +129,10 @@ app.use(async (context, next) => {
     await next();
   } catch (error) {
     if (isHttpError(error)) {
-      const body = `${error.status} | ${STATUS_TEXT.get(error.status)}`;
-      context.response.status = error.status;
-      context.response.body = body;
+      const status = error.status;
+      const statusText = STATUS_TEXT.get(status);
+      context.response.status = status;
+      context.response.body = `${status} | ${statusText}`;
 
       if (error.status === Status.NotFound) {
         return;
