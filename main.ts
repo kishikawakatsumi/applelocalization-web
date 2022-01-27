@@ -178,7 +178,18 @@ router
       `c: ${column}, o: ${o}, q: ${query}, l: ${languages}`,
     );
 
-    const searchWord = query + (o === "startsWith" ? "%" : "");
+    const searchWord = (() => {
+      if (o === "startsWith") {
+        const escaped = query
+          .replaceAll("\\", "\\\\")
+          .replaceAll("%", "\\%")
+          .replaceAll("_", "\\_")
+          .replaceAll("[", "\\[");
+        return `${escaped}%`;
+      } else {
+        return query;
+      }
+    })();
 
     const pageParam = context.request.url.searchParams.get("page") || "1";
     const page = parseInt(pageParam);
