@@ -58,7 +58,7 @@ router
 
     const bundle = context.request.url.searchParams.get("b");
     console.log(
-      `q: ${searchWord}, l: ${languages}, b: ${bundle}`,
+      `q: ${searchWord}, b: ${bundle}, l: ${languages}`,
     );
 
     const pageParam = context.request.url.searchParams.get("page") ?? "1";
@@ -155,6 +155,17 @@ router
       return;
     }
 
+    const languages = context.request.url.searchParams.getAll("l") || [];
+    const languageCodes = (() => {
+      const codes = languages.flatMap(
+        (language) => languageMapping[language],
+      );
+      return codes.length ? codes : Object.values(languageMapping).flat();
+    })();
+    const langCondition = languageCodes
+      .map((language) => `'${language}'`)
+      .join(", ");
+
     const query = context.request.url.searchParams.get("q") ?? "";
     if (!query) {
       const status = Status.BadRequest;
@@ -164,7 +175,7 @@ router
       return;
     }
     console.log(
-      `c: ${column}, o: ${o}, q: ${query}`,
+      `c: ${column}, o: ${o}, q: ${query}, l: ${languages}`,
     );
 
     const searchWord = query + (o === "startsWith" ? "%" : "");
@@ -184,6 +195,7 @@ router
       FROM
         localizations
       WHERE
+        language in (${langCondition}) AND
         ${field} ${operator};
       `,
       { searchWord },
@@ -200,6 +212,7 @@ router
       FROM
         localizations
       WHERE
+        language in (${langCondition}) AND
         ${field} ${operator}
       ORDER BY id, group_id, language
       LIMIT $size OFFSET $offset

@@ -895,7 +895,6 @@
                         <select id="cs-column">
                           <option value="key">Key</option>
                           <option value="localization">Localization</option>
-                          <option value="language">Language</option>
                           <option value="file">File</option>
                           <option value="bundle">Bundle</option>
                         </select>
@@ -1022,10 +1021,10 @@
 
       if (csSearchWord.trim()) {
         const endpoint = "/api/cs";
-        return `${endpoint}?c=${column.trim()}&o=${operator}&q=${csSearchWord.trim()}`
+        return `${endpoint}?c=${column.trim()}&o=${operator}&q=${csSearchWord.trim()}${languageFilter}`
       } else {
         const endpoint = "/api";
-        return `${endpoint}?q=${searchWord.trim()}${languageFilter}&b=${framework.trim()}`
+        return `${endpoint}?q=${searchWord.trim()}&b=${framework.trim()}${languageFilter}`
       }
     }
 
