@@ -113,6 +113,107 @@ router
     context.response.body = body;
 
     client.release();
+  })
+  .get("/api/cs", async (context) => {
+    context.response.headers.set("Content-Type", "application/json");
+    context.response.headers.set(
+      "Cache-Control",
+      "s-maxage=3600, max-age=3600",
+    );
+
+    const client = await pool.connect();
+
+    const column = context.request.url.searchParams.get("c") ?? "";
+    const fields: { [key: string]: string } = {
+      "key": "source",
+      "localization": "target",
+      "language": "language",
+      "file": "file_name",
+      "bundle": "bundle_name",
+    };
+    const field = fields[column];
+    if (!field) {
+      const status = Status.BadRequest;
+      const statusText = STATUS_TEXT.get(status);
+      context.response.status = status;
+      context.response.body = `${status} | ${statusText}`;
+      return;
+    }
+
+    const o = context.request.url.searchParams.get("o") ?? "";
+    const operators: { [key: string]: string } = {
+      "equal": "= $searchWord",
+      "notEqual": "<> $searchWord",
+      "startsWith": "LIKE $searchWord",
+    };
+    const operator = operators[o];
+    if (!operator) {
+      const status = Status.BadRequest;
+      const statusText = STATUS_TEXT.get(status);
+      context.response.status = status;
+      context.response.body = `${status} | ${statusText}`;
+      return;
+    }
+
+    const query = context.request.url.searchParams.get("q") ?? "";
+    if (!query) {
+      const status = Status.BadRequest;
+      const statusText = STATUS_TEXT.get(status);
+      context.response.status = status;
+      context.response.body = `${status} | ${statusText}`;
+      return;
+    }
+    console.log(
+      `c: ${column}, o: ${o}, q: ${query}`,
+    );
+
+    const searchWord = query + (o === "startsWith" ? "%" : "");
+
+    const pageParam = context.request.url.searchParams.get("page") || "1";
+    const page = parseInt(pageParam);
+
+    const sizeParam = context.request.url.searchParams.get("size") || "200";
+    const maxSize = 200;
+    const minSize = 1;
+    const size = Math.max(Math.min(parseInt(sizeParam), maxSize), minSize);
+
+    const countResult = await client.queryObject<{ count: bigint }>(
+      `
+      SELECT
+        COUNT(id) AS count
+      FROM
+        localizations
+      WHERE
+        ${field} ${operator};
+      `,
+      { searchWord },
+    );
+
+    const count = countResult.rows[0].count;
+    const offset = (page - 1) * size;
+    const totalPages = Math.ceil(Number(count) / size);
+
+    const results = await client.queryObject(
+      `
+      SELECT
+          id, group_id, source, target, language, file_name, bundle_name
+      FROM
+        localizations
+      WHERE
+        ${field} ${operator}
+      ORDER BY id, group_id, language
+      LIMIT $size OFFSET $offset
+      `,
+      { searchWord, offset, size },
+    );
+    console.log(results.query.args);
+
+    context.response.body = {
+      last_page: totalPages,
+      data: results.rows,
+    };
+
+    client.release();
   });
 
 const app = new Application();

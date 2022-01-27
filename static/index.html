@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=1200px, viewport-fit=cover">
+  <meta name="viewport" content="width=1200, viewport-fit=cover">
 
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -707,6 +707,7 @@
           <div class="dropdown-menu" id="dropdown-menu" role="menu">
             <div class="dropdown-content px-0 py-3">
               <div class="dropdown-item">
+
                 <div class="columns is-multiline">
                   <div class="column is-1 px-1 py-0 pb-1 switch">
                     <input id="checkbox-english" name="language" type="checkbox" value="English" checked>
@@ -879,6 +880,55 @@
                   </div>
                 </div>
               </div>
+
+              <hr class="dropdown-divider">
+
+              <div class="dropdown-item px-2 py-0">
+                <div class="has-text-grey">Advanced search</div>
+              </div>
+
+              <div class="dropdown-item">
+                <div class="field has-addons">
+                  <div class="field">
+                    <div class="control">
+                      <span class="select is-small ">
+                        <select id="cs-column">
+                          <option value="key">Key</option>
+                          <option value="localization">Localization</option>
+                          <option value="language">Language</option>
+                          <option value="file">File</option>
+                          <option value="bundle">Bundle</option>
+                        </select>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="field has-addons px-2">
+                    <div class="control">
+                      <span class="select is-small">
+                        <select id="cs-operator">
+                          <option value="equal">Equal to (=)</option>
+                          <option value="notEqual">Not equal to (&lt;&gt;)</option>
+                          <option value="startsWith">Starts with (LIKE)</option>
+                        </select>
+                      </span>
+                    </div>
+                    <div id="cs-search-control" class="control is-small">
+                      <input id="cs-search-field" class="input is-small" type="text" style="width: 20vw;">
+                    </div>
+                  </div>
+
+                  <div class="control">
+                    <button id="cs-search-button" class="button is-small is-info" type="submit" form="search-form">
+                      <span class="icon">
+                        <span class="fas fa-search"></span>
+                      </span>
+                      <span>Search</span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -941,16 +991,15 @@
     });
 
     table.on("dataLoading", function (data) {
-      table.dataLoader.showLoader()
-      document.getElementById("search-field").setAttribute("disabled", true);
-      document.getElementById("search-control").classList.add("is-loading");
-      document.getElementById("search-button").classList.add("is-loading");
+      setLoading(true);
     });
 
     table.on("dataProcessed", function () {
-      document.getElementById("search-field").removeAttribute("disabled");
-      document.getElementById("search-control").classList.remove("is-loading");
-      document.getElementById("search-button").classList.remove("is-loading");
+      setLoading(false);
+    });
+
+    table.on("dataLoadError", function (error) {
+      setLoading(false);
     });
 
     history.replaceState(null, '', location.href.split("?")[0]);
@@ -967,8 +1016,17 @@
         })
         .join("");
 
-      const endpoint = "/api";
-      return `${endpoint}?q=${searchWord.trim()}${languageFilter}&b=${framework.trim()}`
+      const column = document.getElementById("cs-column").value || "";
+      const operator = document.getElementById("cs-operator").value || "";
+      const csSearchWord = document.getElementById("cs-search-field").value || "";
+
+      if (csSearchWord.trim()) {
+        const endpoint = "/api/cs";
+        return `${endpoint}?c=${column.trim()}&o=${operator}&q=${csSearchWord.trim()}`
+      } else {
+        const endpoint = "/api";
+        return `${endpoint}?q=${searchWord.trim()}${languageFilter}&b=${framework.trim()}`
+      }
     }
 
     function columunDefs() {
@@ -1002,6 +1060,25 @@
           },
         },
       ];
+    }
+
+    function setLoading(loading) {
+      if (loading) {
+        table.dataLoader.showLoader()
+        document.getElementById("search-field").setAttribute("disabled", true);
+        document.getElementById("search-control").classList.add("is-loading");
+        document.getElementById("search-button").classList.add("is-loading");
+        document.getElementById("cs-search-field").setAttribute("disabled", true);
+        document.getElementById("cs-search-control").classList.add("is-loading");
+        document.getElementById("cs-search-button").classList.add("is-loading");
+      } else {
+        document.getElementById("search-field").removeAttribute("disabled");
+        document.getElementById("search-control").classList.remove("is-loading");
+        document.getElementById("search-button").classList.remove("is-loading");
+        document.getElementById("cs-search-field").removeAttribute("disabled");
+        document.getElementById("cs-search-control").classList.remove("is-loading");
+        document.getElementById("cs-search-button").classList.remove("is-loading");
+      }
     }
   </script>
 </body>
