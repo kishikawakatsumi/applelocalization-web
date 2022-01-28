@@ -1012,7 +1012,7 @@
       const bundle = (() => {
         const bundle = document.getElementById("bundle-select").value || "";
         if (!bundle && !searchWord) {
-          const bundles = shuffle(Array.from(document.getElementById("bundle-select").options))
+          const bundles = Array.from(document.getElementById("bundle-select").options)
             .slice(0, 30)
             .map((option) => option.value)
             .filter((option) => option);
@@ -1038,14 +1038,6 @@
         return `${endpoint}?q=${searchWord.trim()}&b=${bundle.trim()}${languageFilter}`
       }
     }
-
-    function shuffle(arr) {
-      for (var i = arr.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1)); //random index
-        [arr[i], arr[j]] = [arr[j], arr[i]]; // swap
-      }
-    }
-
 
     function columunDefs() {
       return [{
