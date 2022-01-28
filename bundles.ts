@@ -463,7 +463,7 @@ export const bundles = [
   "SoftwareUpdateServices.framework",
   "SoftwareUpdateSettings.framework",
   "SoftwareUpdateSettingsUI.framework",
-  SoundDetectionNotificationExtension.appex,
+  "SoundDetectionNotificationExtension.appex",
   "SpeechRecognitionCommandAndControl.framework",
   "SpeechRecognitionCommandServices.framework",
   "SpotlightServices.framework",
