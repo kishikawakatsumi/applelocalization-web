@@ -67,9 +67,9 @@ router
     const sizeParam = context.request.url.searchParams.get("size") ?? "200";
     const size = Math.max(Math.min(parseInt(sizeParam), 200), 1);
 
-    const builder = new QueryBuilder();
+    const queryBuilder = new QueryBuilder();
     const countResult = await client.queryObject<{ count: bigint }>(
-      builder.build(
+      queryBuilder.build(
         ["COUNT(id) AS count"],
         languageCodes.length
           ? languageCodes
@@ -85,7 +85,7 @@ router
     const totalPages = Math.ceil(Number(count) / size);
 
     const results = await client.queryObject(
-      builder.build(
+      queryBuilder.build(
         [
           "id",
           "group_id",

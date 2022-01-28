@@ -1,3 +1,5 @@
+import { bundles } from "./bundles.ts";
+
 export class QueryBuilder {
   build(
     fields: string[],
@@ -42,10 +44,11 @@ export class QueryBuilder {
         ;
         `;
     } else {
+      const someBundle = bundles[Math.floor(Math.random() * bundles.length)];
       return `
         ${selecteStatement}
             WHERE
-              bundle_name = ${bundle ? "$bundle" : "'UIKitCore.framework'"} AND
+              bundle_name = ${bundle ? "$bundle" : `'${someBundle}'`} AND
               language in (${langCondition})
             )
         ${orderBy}
