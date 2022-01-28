@@ -145,7 +145,7 @@
 
           <div class="control has-icons-left">
             <span class="select is-small">
-              <select id="framework-picker">
+              <select id="bundle-select">
                 <option></option>
                 <option>AACCore.framework</option>
                 <option>ABMHelper.framework</option>
@@ -968,7 +968,7 @@
   <script>
     const bundle = new URL(document.location).searchParams.get("b") || "";
     if (bundle) {
-      document.getElementById("framework-picker").value = bundle;
+      document.getElementById("bundle-select").value = bundle;
     }
 
     const paginationSize = 200;
@@ -1009,7 +1009,17 @@
 
     function buildQuery() {
       const searchWord = document.getElementById("search-field").value || "";
-      const framework = document.getElementById("framework-picker").value || "";
+      const bundle = (() => {
+        const bundle = document.getElementById("bundle-select").value || "";
+        if (!bundle && !searchWord) {
+          const bundles = Array.from(document.getElementById("bundle-select").options)
+            .map((option) => option.value)
+            .filter((option) => option);
+          return bundles[Math.floor(Math.random() * bundles.length)];
+        }
+        return bundle;
+      })();
+
       const languageFilter = Array.from(document.querySelectorAll('input[name="language"]:checked')).map((el) => {
           return `&l=${el.value.trim()}`;
         })
@@ -1024,7 +1034,7 @@
         return `${endpoint}?c=${column.trim()}&o=${operator}&q=${csSearchWord.trim()}${languageFilter}`
       } else {
         const endpoint = "/api";
-        return `${endpoint}?q=${searchWord.trim()}&b=${framework.trim()}${languageFilter}`
+        return `${endpoint}?q=${searchWord.trim()}&b=${bundle.trim()}${languageFilter}`
       }
     }
 
