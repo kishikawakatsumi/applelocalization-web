@@ -80,9 +80,9 @@ router
       { searchWord, bundle },
     );
 
-    const count = countResult.rows[0].count;
+    const count = Number(countResult.rows[0].count);
     const offset = (page - 1) * size;
-    const totalPages = Math.ceil(Number(count) / size);
+    const totalPages = Math.ceil(count / size);
 
     const results = await client.queryObject(
       queryBuilder.build(
@@ -213,9 +213,9 @@ router
       { searchWord },
     );
 
-    const count = countResult.rows[0].count;
+    const count = Number(countResult.rows[0].count);
     const offset = (page - 1) * size;
-    const totalPages = Math.ceil(Number(count) / size);
+    const totalPages = Math.ceil(count / size);
 
     const results = await client.queryObject(
       `
