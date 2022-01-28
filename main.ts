@@ -106,8 +106,9 @@ router
     console.log(results.query.args);
 
     const body = {
-      last_page: totalPages,
       data: results.rows,
+      last_page: totalPages,
+      total: count,
     };
     await redis.set(context.request.url.search, JSON.stringify(body));
     context.response.body = body;
@@ -233,8 +234,9 @@ router
     console.log(results.query.args);
 
     context.response.body = {
-      last_page: totalPages,
       data: results.rows,
+      last_page: totalPages,
+      total: count,
     };
 
     client.release();
