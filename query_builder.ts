@@ -45,8 +45,6 @@ export class QueryBuilder {
         `;
     } else {
       const someBundle = bundles[Math.floor(Math.random() * bundles.length)];
-      console.log(`someBundle: ${someBundle}`);
-
       return `
         ${selecteStatement}
             WHERE
