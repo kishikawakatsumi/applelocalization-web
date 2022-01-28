@@ -108,6 +108,7 @@
             <a class="has-text-dark" href="/">
               <i class="fal fa-globe mr-2"></i><span>Apple Localization Terms Glossary</span>
             </a>
+            <span id="total-count" class="is-size-7 has-text-grey-light px-4"><span></span>
           </h1>
         </div>
 
@@ -974,7 +975,6 @@
     const paginationSize = 200;
     const table = new Tabulator("#table", {
       height: "84vh",
-      ajaxURL: buildQuery(),
       progressiveLoad: "scroll",
       paginationSize,
       groupBy: "group_id",
@@ -987,6 +987,16 @@
         tooltip: true,
       },
       columns: columunDefs(),
+      ajaxURL: buildQuery(),
+      ajaxResponse: function (url, params, response) {
+        const f = new Intl.NumberFormat();
+        const total = response.total;
+        const lastPage = response.last_page || table.getPageMax();
+        const dataCount = 4164769;
+        document.getElementById("total-count").textContent =
+          `${f.format(total !== undefined ? total : table.getPageSize() * lastPage)} / ${f.format(dataCount)}`;
+        return response;
+      },
     });
 
     table.on("dataLoading", (data) => {
@@ -1094,6 +1104,13 @@
             urlPrefix: "?b=",
           },
         },
+        {
+          title: "#",
+          field: "id",
+          minWidth: 54,
+          formatter: "rownum",
+          hozAlign: "right"
+        }
       ];
     }
 
