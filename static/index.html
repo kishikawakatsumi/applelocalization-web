@@ -1035,6 +1035,14 @@
           `${f.format(total !== undefined ? total : table.getPageSize() * lastPage)} / ${f.format(dataCount)}`;
         return response;
       },
+      langs: {
+        default: {
+          data: {
+            loading: `<span class="fad fa-spinner-third fa-spin fa-fw"></span><span class="p-2">Loading ...</span>`,
+            error: "Error",
+          },
+        },
+      }
     });
 
     table.on("dataLoading", (data) => {
