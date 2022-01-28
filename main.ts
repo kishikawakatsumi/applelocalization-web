@@ -57,6 +57,13 @@ router
     })();
 
     const bundle = context.request.url.searchParams.get("b");
+    if (!searchWord && !bundle) {
+      const status = Status.BadRequest;
+      const statusText = STATUS_TEXT.get(status);
+      context.response.status = status;
+      context.response.body = `${status} | ${statusText}`;
+      return;
+    }
     console.log(
       `q: ${searchWord}, b: ${bundle}, l: ${languages}`,
     );

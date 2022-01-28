@@ -16,45 +16,32 @@ export class QueryBuilder {
       ? "LIMIT $limit OFFSET $offset"
       : "";
 
-    const selecteStatement = `
+    const selectStatement = `
       SELECT
-          ${fields.join(", ")}
-        FROM
-          localizations
-        WHERE
-          language in (${langCondition}) AND
-          group_id in (
-            SELECT DISTINCT
-              group_id FROM localizations
+        ${fields.join(", ")}
+      FROM
+        localizations
+      WHERE
+        language in (${langCondition}) AND
+        group_id in (
+          SELECT DISTINCT
+            group_id FROM localizations
       `;
     const orderBy = fields.includes("id")
       ? "ORDER BY id, group_id, language"
       : "";
 
-    if (searchWord) {
-      return `
-        ${selecteStatement}
-            WHERE
-              ${bundle ? `bundle_name = $bundle AND` : ""}
-              language in (${langCondition}) AND
-              target &@ $searchWord
-            )
-            ${orderBy}
-        ${range}
-        ;
-        `;
-    } else {
-      const someBundle = bundles[Math.floor(Math.random() * bundles.length)];
-      return `
-        ${selecteStatement}
-            WHERE
-              bundle_name = ${bundle ? "$bundle" : `'${someBundle}'`} AND
-              language in (${langCondition})
-            )
+    const searchCondition = searchWord ? "AND target &@ $searchWord" : "";
+    return `
+        ${selectStatement}
+          WHERE
+            ${bundle ? `bundle_name = $bundle AND` : ""}
+            language in (${langCondition})
+            ${searchCondition}
+          )
         ${orderBy}
         ${range}
         ;
         `;
-    }
   }
 }
