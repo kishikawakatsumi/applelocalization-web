@@ -1,5 +1,3 @@
-import { bundles } from "./bundles.ts";
-
 export class QueryBuilder {
   build(
     fields: string[],
