@@ -1012,7 +1012,7 @@
       const bundle = (() => {
         const bundle = document.getElementById("bundle-select").value || "";
         if (!bundle && !searchWord) {
-          const bundles = shuffle(Array.from(document.getElementById("bundle-select").options))
+          const bundles = Array.from(document.getElementById("bundle-select").options)
             .slice(0, 30)
             .map((option) => option.value)
             .filter((option) => option);
