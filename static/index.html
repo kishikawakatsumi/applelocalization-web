@@ -102,11 +102,35 @@
 <body>
   <div class="block pt-3">
     <div class="container">
-      <h1 class="title is-5 mb-3">
-        <a class="has-text-dark" href="/">
-          <i class="fal fa-globe mr-2"></i><span>Apple Localization Terms Glossary</span>
-        </a>
-      </h1>
+      <div class="columns">
+        <div class="column">
+          <h1 class="title is-5 mb-3">
+            <a class="has-text-dark" href="/">
+              <i class="fal fa-globe mr-2"></i><span>Apple Localization Terms Glossary</span>
+            </a>
+          </h1>
+        </div>
+
+        <div class="column">
+          <div class="content has-text-centered">
+            <span class="p-2">
+              <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web/issues/new"
+                target="_blank" rel="nofollow noopener noreferrer">
+                <span class="far fa-comment-alt-smile mr-1"></span>Feedback</a>
+            </span>
+            <span class="p-2">
+              <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web" target="_blank"
+                rel="nofollow noopener noreferrer">
+                <span class="fab fa-github mr-1"></span>Source Code</a>
+            </span>
+            <span class="p-2">
+              <a class="has-text-dark" href="https://twitter.com/k_katsumi" target="_blank"
+                rel="nofollow noopener noreferrer">
+                <span class="far fa-at mr-1"></span>Maintainer</a>
+            </span>
+          </div>
+        </div>
+      </div>
 
       <div class="block">
         <div class="field is-grouped">
@@ -700,7 +724,7 @@
               </span>
               <span class="has-text-grey">Languages</span>
               <span class="icon is-small">
-                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                <span class="fas fa-angle-down" aria-hidden="true"></span>
               </span>
             </button>
           </div>
@@ -940,26 +964,6 @@
       <div id="table" class="table is-bordered is-narrow is-hoverable"></div>
     </div>
   </div>
-
-  <footer class="footer">
-    <div class="content has-text-centered">
-      <span class="p-2">
-        <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web/issues/new"
-          target="_blank" rel="nofollow noopener noreferrer">
-          <span class="far fa-comment-alt-smile mr-1"></span>Feedback</a>
-      </span>
-      <span class="p-2">
-        <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web" target="_blank"
-          rel="nofollow noopener noreferrer">
-          <span class="fab fa-github mr-1"></span>Source Code</a>
-      </span>
-      <span class="p-2">
-        <a class="has-text-dark" href="https://twitter.com/k_katsumi" target="_blank"
-          rel="nofollow noopener noreferrer">
-          <span class="far fa-at mr-1"></span>Maintainer</a>
-      </span>
-    </div>
-  </footer>
 
   <script>
     const bundle = new URL(document.location).searchParams.get("b") || "";
