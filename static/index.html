@@ -1012,10 +1012,10 @@
       const bundle = (() => {
         const bundle = document.getElementById("bundle-select").value || "";
         if (!bundle && !searchWord) {
-          const bundles = Array.from(document.getElementById("bundle-select").options)
-            .map((option) => option.value)
-            .filter((option) => option);
-          return bundles[Math.floor(Math.random() * bundles.length)];
+          // const bundles = Array.from(document.getElementById("bundle-select").options)
+          //   .map((option) => option.value)
+          //   .filter((option) => option);
+          // return bundles[Math.floor(Math.random() * bundles.length)];
         }
         return bundle;
       })();
