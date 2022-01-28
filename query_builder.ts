@@ -31,30 +31,17 @@ export class QueryBuilder {
       ? "ORDER BY id, group_id, language"
       : "";
 
-    if (searchWord) {
-      return `
+    const searchCondition = searchWord ? "AND target &@ $searchWord" : "";
+    return `
         ${selecteStatement}
             WHERE
               ${bundle ? `bundle_name = $bundle AND` : ""}
-              language in (${langCondition}) AND
-              target &@ $searchWord
+              language in (${langCondition})
+              ${searchCondition}
             )
             ${orderBy}
         ${range}
         ;
         `;
-    } else {
-      const someBundle = bundles[Math.floor(Math.random() * bundles.length)];
-      return `
-        ${selecteStatement}
-            WHERE
-              bundle_name = ${bundle ? "$bundle" : `'${someBundle}'`} AND
-              language in (${langCondition})
-            )
-        ${orderBy}
-        ${range}
-        ;
-        `;
-    }
   }
 }
