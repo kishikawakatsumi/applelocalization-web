@@ -40,6 +40,39 @@
       border: 1px solid #dbdbdb;
     }
 
+    .tabulator .tabulator-loader {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      height: 100%;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .tabulator .tabulator-loader .tabulator-loader-msg {
+      display: inline-block;
+      margin: 0 auto;
+      padding: 10px 20px;
+      border-radius: 4px;
+      background: #fff;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .tabulator .tabulator-loader .tabulator-loader-msg.tabulator-loading {
+      border: 1px solid hsl(0, 0%, 71%);
+      color: hsl(0, 0%, 48%);
+    }
+
+    .tabulator .tabulator-loader .tabulator-loader-msg.tabulator-error {
+      border: 1px solid hsl(348, 86%, 43%);
+      color: hsl(348, 100%, 61%);
+    }
+
     .tabulator-row.tabulator-group {
       box-sizing: border-box;
       border-bottom: 1px solid #F0F0F0;
@@ -110,7 +143,7 @@
         <div class="column pb-0">
           <h1 class="title is-5 mb-3">
             <a class="has-text-dark" href="/">
-              <i class="fal fa-globe mr-2"></i><span>Apple Localization Terms Glossary</span>
+              <span class="fal fa-globe mr-2"></span><span>Apple Localization Terms Glossary</span>
             </a>
             <span id="total-count" class="is-size-7 has-text-grey-light px-4"><span></span>
           </h1>
