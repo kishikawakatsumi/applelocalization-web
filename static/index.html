@@ -145,7 +145,8 @@
             <a class="has-text-dark" href="/">
               <span class="fal fa-globe mr-2"></span><span>Apple Localization Terms Glossary</span>
             </a>
-            <span id="total-count" class="is-size-7 has-text-grey-light px-4"><span></span>
+            <span id="data-count" class="is-size-7 has-text-grey-light pl-4"></span>
+            <span id="total-count" class="is-size-7 has-text-grey-light pr-4"></span>
           </h1>
         </div>
 
@@ -1051,6 +1052,12 @@
 
     table.on("dataProcessed", () => {
       setLoading(false);
+
+      const dataCount = table.getDataCount();
+      if (dataCount !== undefined) {
+        const f = new Intl.NumberFormat();
+        document.getElementById("data-count").textContent = `${f.format(dataCount)} /`;
+      }
     });
 
     table.on("dataLoadError", (error) => {
