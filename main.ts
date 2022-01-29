@@ -14,8 +14,7 @@ import { languageMapping } from "./language_mappings.ts";
 const POSTGRES_PORT = 10000;
 const POOL_CONNECTIONS = 16;
 const pool = new Pool({
-  // hostname: Deno.env.get("POSTGRES_HOST"),
-  hostname: "applelocalization-data-dev",
+  hostname: Deno.env.get("POSTGRES_HOST"),
   port: POSTGRES_PORT,
   user: Deno.env.get("POSTGRES_USER"),
   password: Deno.env.get("POSTGRES_PASSWORD"),
