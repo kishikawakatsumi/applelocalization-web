@@ -18,12 +18,12 @@ export class QueryBuilder {
       SELECT
         ${fields.join(", ")}
       FROM
-        localizations
+        ios
       WHERE
         language in (${langCondition}) AND
         group_id in (
           SELECT DISTINCT
-            group_id FROM localizations
+            group_id FROM ios
       `;
     const orderBy = fields.includes("id")
       ? "ORDER BY id, group_id, language"

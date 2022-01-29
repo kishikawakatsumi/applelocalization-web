@@ -14,7 +14,8 @@ import { languageMapping } from "./language_mappings.ts";
 const POSTGRES_PORT = 10000;
 const POOL_CONNECTIONS = 16;
 const pool = new Pool({
-  hostname: Deno.env.get("POSTGRES_HOST"),
+  // hostname: Deno.env.get("POSTGRES_HOST"),
+  hostname: "applelocalization-data-dev",
   port: POSTGRES_PORT,
   user: Deno.env.get("POSTGRES_USER"),
   password: Deno.env.get("POSTGRES_PASSWORD"),
@@ -212,7 +213,7 @@ router
       SELECT
         COUNT(id) AS count
       FROM
-        localizations
+        ios
       WHERE
         language in (${langCondition}) AND
         ${field} ${operator};
@@ -229,7 +230,7 @@ router
       SELECT
           id, group_id, source, target, language, file_name, bundle_name
       FROM
-        localizations
+        ios
       WHERE
         language in (${langCondition}) AND
         ${field} ${operator}
