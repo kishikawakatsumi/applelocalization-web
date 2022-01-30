@@ -6,7 +6,7 @@ import {
   STATUS_TEXT,
 } from "../deps.ts";
 import { query } from "../services/db.ts";
-import { get, set } from "../services/cache.ts";
+import * as cache from "../services/cache.ts";
 import { languageMapping } from "../models/language_mappings.ts";
 import { QueryBuilder } from "../utils/query_builder.ts";
 
@@ -15,10 +15,12 @@ export async function search<
   P extends RouteParams<R> = RouteParams<R>,
   // deno-lint-ignore no-explicit-any
   S extends State = Record<string, any>,
->(context: RouterContext<R, P, S>) {
+>(context: RouterContext<R, P, S>, platform: string) {
   setResponseHeader(context);
 
-  const cachedResponse = await get(context.request.url.search);
+  const cacheKey =
+    `${context.request.url.pathname}${context.request.url.search}`;
+  const cachedResponse = await cache.get(cacheKey);
   if (cachedResponse) {
     context.response.body = cachedResponse;
     return;
@@ -58,7 +60,7 @@ export async function search<
         : Object.values(languageMapping).flat(),
       searchWord,
       bundle,
-      "ios",
+      platform,
     ),
     { searchWord, bundle },
   );
@@ -81,7 +83,7 @@ export async function search<
       languageCodes,
       searchWord,
       bundle,
-      "ios",
+      platform,
       offset,
       size,
     ),
@@ -94,7 +96,7 @@ export async function search<
     last_page: totalPages,
     total: count,
   };
-  await set(context.request.url.search, JSON.stringify(body));
+  await cache.set(cacheKey, JSON.stringify(body));
   context.response.body = body;
 }
 
@@ -103,7 +105,7 @@ export async function searchAdvanced<
   P extends RouteParams<R> = RouteParams<R>,
   // deno-lint-ignore no-explicit-any
   S extends State = Record<string, any>,
->(context: RouterContext<R, P, S>) {
+>(context: RouterContext<R, P, S>, platform: string) {
   setResponseHeader(context);
 
   const column = context.request.url.searchParams.get("c") ?? "";
@@ -178,7 +180,7 @@ export async function searchAdvanced<
     SELECT
       COUNT(id) AS count
     FROM
-      ios
+      ${platform}
     WHERE
       language in (${langCondition}) AND
       ${field} ${operator};
@@ -195,7 +197,7 @@ export async function searchAdvanced<
     SELECT
         id, group_id, source, target, language, file_name, bundle_name
     FROM
-      ios
+      ${platform}
     WHERE
       language in (${langCondition}) AND
       ${field} ${operator}

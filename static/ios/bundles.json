@@ -1,4 +1,4 @@
-export const bundles = [
+[
   "AACCore.framework",
   "ABMHelper.framework",
   "AMPCoreUI.framework",
@@ -550,5 +550,5 @@ export const bundles = [
   "iCloudQuotaUI.framework",
   "iTunesStore.framework",
   "iTunesStoreUI.framework",
-  "iWorkImport.framework",
-];
+  "iWorkImport.framework"
+]
