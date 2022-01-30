@@ -1,30 +1,12 @@
 import {
   Application,
-  connect,
   isHttpError,
-  Pool,
   Router,
   send,
   Status,
   STATUS_TEXT,
 } from "./deps.ts";
-import { QueryBuilder } from "./query_builder.ts";
-import { languageMapping } from "./language_mappings.ts";
-
-const POSTGRES_PORT = 10000;
-const POOL_CONNECTIONS = 16;
-const pool = new Pool({
-  hostname: Deno.env.get("POSTGRES_HOST"),
-  port: POSTGRES_PORT,
-  user: Deno.env.get("POSTGRES_USER"),
-  password: Deno.env.get("POSTGRES_PASSWORD"),
-  database: Deno.env.get("POSTGRES_DB"),
-}, POOL_CONNECTIONS);
-
-const redis = await connect({
-  hostname: "applelocalization-redis",
-  port: 10000,
-});
+import { search, searchAdvanced } from "./handlers/search.ts";
 
 const router = new Router();
 router
@@ -32,221 +14,16 @@ router
     context.response.body = { status: "pass" };
   })
   .get("/api", async (context) => {
-    context.response.headers.set("Content-Type", "application/json");
-    context.response.headers.set(
-      "Cache-Control",
-      "s-maxage=604800, max-age=604800",
-    );
-
-    const cachedResponse = await redis.get(context.request.url.search);
-    if (cachedResponse) {
-      context.response.body = cachedResponse;
-      return;
-    }
-
-    const client = await pool.connect();
-
-    const searchWord = context.request.url.searchParams.get("q");
-
-    const languages = context.request.url.searchParams.getAll("l") ?? [];
-    const languageCodes = (() => {
-      const codes = languages.flatMap(
-        (language) => languageMapping[language],
-      );
-      return codes.length ? codes : Object.values(languageMapping).flat();
-    })();
-
-    const bundle = context.request.url.searchParams.get("b");
-    if (!searchWord && !bundle) {
-      const status = Status.BadRequest;
-      const statusText = STATUS_TEXT.get(status);
-      context.response.status = status;
-      context.response.body = `${status} | ${statusText}`;
-      return;
-    }
-    console.log(
-      `q: ${searchWord}, b: ${bundle}, l: ${languages}`,
-    );
-
-    const pageParam = context.request.url.searchParams.get("page") ?? "1";
-    const page = Math.max(parseInt(pageParam), 1);
-
-    const sizeParam = context.request.url.searchParams.get("size") ?? "200";
-    const size = Math.max(Math.min(parseInt(sizeParam), 200), 1);
-
-    const queryBuilder = new QueryBuilder();
-    const countResult = await client.queryObject<{ count: bigint }>(
-      queryBuilder.build(
-        ["COUNT(id) AS count"],
-        languageCodes.length
-          ? languageCodes
-          : Object.values(languageMapping).flat(),
-        searchWord,
-        bundle,
-      ),
-      { searchWord, bundle },
-    );
-
-    const count = Number(countResult.rows[0].count);
-    const offset = (page - 1) * size;
-    const totalPages = Math.ceil(count / size);
-
-    const results = await client.queryObject(
-      queryBuilder.build(
-        [
-          "id",
-          "group_id",
-          "source",
-          "target",
-          "language",
-          "file_name",
-          "bundle_name",
-        ],
-        languageCodes,
-        searchWord,
-        bundle,
-        offset,
-        size,
-      ),
-      { searchWord, bundle, limit: size, offset },
-    );
-    console.log(results.query.args);
-
-    const body = {
-      data: results.rows,
-      last_page: totalPages,
-      total: count,
-    };
-    await redis.set(context.request.url.search, JSON.stringify(body));
-    context.response.body = body;
-
-    client.release();
+    await search(context);
+  })
+  .get("/api/ios/search", async (context) => {
+    await search(context);
   })
   .get("/api/cs", async (context) => {
-    context.response.headers.set("Content-Type", "application/json");
-    context.response.headers.set(
-      "Cache-Control",
-      "s-maxage=3600, max-age=3600",
-    );
-
-    const client = await pool.connect();
-
-    const column = context.request.url.searchParams.get("c") ?? "";
-    const fields: { [key: string]: string } = {
-      "key": "source",
-      "localization": "target",
-      "language": "language",
-      "file": "file_name",
-      "bundle": "bundle_name",
-    };
-    const field = fields[column];
-    if (!field) {
-      const status = Status.BadRequest;
-      const statusText = STATUS_TEXT.get(status);
-      context.response.status = status;
-      context.response.body = `${status} | ${statusText}`;
-      return;
-    }
-
-    const o = context.request.url.searchParams.get("o") ?? "";
-    const operators: { [key: string]: string } = {
-      "equal": "= $searchWord",
-      "notEqual": "<> $searchWord",
-      "startsWith": "LIKE $searchWord",
-    };
-    const operator = operators[o];
-    if (!operator) {
-      const status = Status.BadRequest;
-      const statusText = STATUS_TEXT.get(status);
-      context.response.status = status;
-      context.response.body = `${status} | ${statusText}`;
-      return;
-    }
-
-    const languages = context.request.url.searchParams.getAll("l") || [];
-    const languageCodes = (() => {
-      const codes = languages.flatMap(
-        (language) => languageMapping[language],
-      );
-      return codes.length ? codes : Object.values(languageMapping).flat();
-    })();
-    const langCondition = languageCodes
-      .map((language) => `'${language}'`)
-      .join(", ");
-
-    const query = context.request.url.searchParams.get("q") ?? "";
-    if (!query) {
-      const status = Status.BadRequest;
-      const statusText = STATUS_TEXT.get(status);
-      context.response.status = status;
-      context.response.body = `${status} | ${statusText}`;
-      return;
-    }
-    console.log(
-      `c: ${column}, o: ${o}, q: ${query}, l: ${languages}`,
-    );
-
-    const searchWord = (() => {
-      if (o === "startsWith") {
-        const escaped = query
-          .replaceAll("\\", "\\\\")
-          .replaceAll("%", "\\%")
-          .replaceAll("_", "\\_")
-          .replaceAll("[", "\\[");
-        return `${escaped}%`;
-      } else {
-        return query;
-      }
-    })();
-
-    const pageParam = context.request.url.searchParams.get("page") || "1";
-    const page = parseInt(pageParam);
-
-    const sizeParam = context.request.url.searchParams.get("size") || "200";
-    const maxSize = 200;
-    const minSize = 1;
-    const size = Math.max(Math.min(parseInt(sizeParam), maxSize), minSize);
-
-    const countResult = await client.queryObject<{ count: bigint }>(
-      `
-      SELECT
-        COUNT(id) AS count
-      FROM
-        ios
-      WHERE
-        language in (${langCondition}) AND
-        ${field} ${operator};
-      `,
-      { searchWord },
-    );
-
-    const count = Number(countResult.rows[0].count);
-    const offset = (page - 1) * size;
-    const totalPages = Math.ceil(count / size);
-
-    const results = await client.queryObject(
-      `
-      SELECT
-          id, group_id, source, target, language, file_name, bundle_name
-      FROM
-        ios
-      WHERE
-        language in (${langCondition}) AND
-        ${field} ${operator}
-      ORDER BY id, group_id, language
-      LIMIT $size OFFSET $offset
-      `,
-      { searchWord, offset, size },
-    );
-    console.log(results.query.args);
-
-    context.response.body = {
-      data: results.rows,
-      last_page: totalPages,
-      total: count,
-    };
-
-    client.release();
+    await searchAdvanced(context);
+  })
+  .get("/api/ios/search/advanced", async (context) => {
+    await searchAdvanced(context);
   });
 
 const app = new Application();

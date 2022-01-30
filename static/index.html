@@ -1094,10 +1094,10 @@
       const csSearchWord = document.getElementById("cs-search-field").value || "";
 
       if (csSearchWord.trim()) {
-        const endpoint = "/api/cs";
+        const endpoint = "/api/ios/search/advanced";
         return `${endpoint}?c=${column.trim()}&o=${operator}&q=${csSearchWord.trim()}${languageFilter}`
       } else {
-        const endpoint = "/api";
+        const endpoint = "/api/ios/search";
         return `${endpoint}?q=${searchWord.trim()}&b=${bundle.trim()}${languageFilter}`
       }
     }
