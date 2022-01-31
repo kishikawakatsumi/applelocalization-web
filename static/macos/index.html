@@ -2569,7 +2569,7 @@
         const f = new Intl.NumberFormat();
         const total = response.total;
         const lastPage = response.last_page || table.getPageMax();
-        const dataCount = 6761528;
+        const dataCount = 9549490;
         document.getElementById("total-count").textContent =
           `${f.format(total !== undefined ? total : table.getPageSize() * lastPage)} / ${f.format(dataCount)}`;
         return response;
