@@ -142,7 +142,7 @@
       <div class="columns">
         <div class="column pb-0">
           <h1 class="title is-inline-block is-5 mb-3">
-            <a class="has-text-dark" href="/">
+            <a class="has-text-dark" href="/macos">
               <span class="fal fa-globe mr-2"></span><span>Apple Localization Terms Glossary</span>
             </a>
           </h1>
@@ -2544,9 +2544,36 @@
   </div>
 
   <script>
-    const bundle = new URL(document.location).searchParams.get("b") || "";
-    if (bundle) {
-      document.getElementById("bundle-select").value = bundle;
+    const searchParams = new URL(document.location).searchParams;
+    const columnQuery = searchParams.get("c") || "";
+    if (columnQuery) {
+      document.getElementById("sa-column").value = columnQuery;
+    }
+    const operatorQuery = searchParams.get("o") || "";
+    if (operatorQuery) {
+      document.getElementById("sa-operator").value = operatorQuery;
+    }
+    const searchQuery = searchParams.get("q") || "";
+    if (searchQuery) {
+      if (columnQuery || operatorQuery) {
+        document.getElementById("sa-search-field").value = searchQuery;
+      } else {
+        document.getElementById("search-field").value = searchQuery;
+      }
+    }
+    const bundleQuery = searchParams.get("b") || "";
+    if (bundleQuery) {
+      document.getElementById("bundle-select").value = bundleQuery;
+    }
+    const languageQuery = searchParams.getAll("l") || [];
+    if (languageQuery) {
+      for (const language of languageQuery) {
+        for (const checkbox of Array.from(document.querySelectorAll('input[name="language"]'))) {
+          if (checkbox.value === language) {
+            checkbox.checked = true;
+          }
+        }
+      }
     }
 
     const paginationSize = 200;
@@ -2566,6 +2593,12 @@
       columns: columunDefs(),
       ajaxURL: buildQuery(),
       ajaxResponse: function (url, params, response) {
+        const location = new URL(`${document.location.origin}${url}`);
+        if (!document.getElementById("bundle-select").value) {
+          location.searchParams.delete("b");
+        }
+        history.pushState(null, '', location.search);
+
         const f = new Intl.NumberFormat();
         const total = response.total;
         const lastPage = response.last_page || table.getPageMax();
@@ -2602,8 +2635,6 @@
       setLoading(false);
     });
 
-    history.replaceState(null, '', location.href.split("?")[0]);
-
     function search() {
       table.setData(buildQuery());
     }
@@ -2628,16 +2659,16 @@
 
       const column = document.getElementById("sa-column").value || "";
       const operator = document.getElementById("sa-operator").value || "";
-      const csSearchWord = document.getElementById("sa-search-field").value || "";
+      const saSearchWord = document.getElementById("sa-search-field").value || "";
 
-      if (csSearchWord.trim()) {
+      if (saSearchWord.trim()) {
         const endpoint = "/api/macos/search/advanced";
-        const query = `${endpoint}?c=${column.trim()}&o=${operator}&q=${csSearchWord.trim()}${languageFilter}`
-        return query
+        const query = `?c=${column.trim()}&o=${operator}&q=${saSearchWord.trim()}${languageFilter}`;
+        return `${endpoint}${query}`
       } else {
         const endpoint = "/api/macos/search";
-        const query = `${endpoint}?q=${searchWord.trim()}&b=${bundle.trim()}${languageFilter}`
-        return query
+        const query = `?q=${searchWord.trim()}&b=${bundle.trim()}${languageFilter}`
+        return `${endpoint}${query}`
       }
     }
 
