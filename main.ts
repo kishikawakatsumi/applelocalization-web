@@ -7,6 +7,7 @@ import {
   STATUS_TEXT,
 } from "./deps.ts";
 import { search, searchAdvanced } from "./handlers/search.ts";
+import { get } from "./handlers/get.ts";
 
 const router = new Router();
 router
@@ -14,16 +15,23 @@ router
     context.response.body = { status: "pass" };
   })
   .get("/api", async (context) => {
-    await search(context);
-  })
-  .get("/api/ios/search", async (context) => {
-    await search(context);
+    await search(context, "ios");
   })
   .get("/api/cs", async (context) => {
-    await searchAdvanced(context);
+    await searchAdvanced(context, "ios");
   })
-  .get("/api/ios/search/advanced", async (context) => {
-    await searchAdvanced(context);
+  .get("/api/:platform/search", async (context) => {
+    if (context.request.url.searchParams.get("cache")) {
+      const pathname = context.request.url.pathname;
+      const search = context.request.url.search;
+      const key = `${pathname}${search.replace("&cache=true", "")}`;
+      await get(context, key);
+    } else {
+      await search(context, context.params.platform);
+    }
+  })
+  .get("/api/:platform/search/advanced", async (context) => {
+    await searchAdvanced(context, context.params.platform);
   });
 
 const app = new Application();
