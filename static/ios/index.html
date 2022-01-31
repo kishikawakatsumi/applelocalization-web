@@ -977,7 +977,7 @@
                   <div class="field">
                     <div class="control">
                       <span class="select is-small ">
-                        <select id="cs-column">
+                        <select id="sa-column">
                           <option value="key">Key</option>
                           <option value="localization">Localization</option>
                           <option value="file">File</option>
@@ -989,21 +989,21 @@
                   <div class="field has-addons px-2">
                     <div class="control">
                       <span class="select is-small">
-                        <select id="cs-operator">
+                        <select id="sa-operator">
                           <option value="equal">Equal to (=)</option>
                           <option value="notEqual">Not equal to (&lt;&gt;)</option>
                           <option value="startsWith">Starts with (LIKE)</option>
                         </select>
                       </span>
                     </div>
-                    <div id="cs-search-control" class="control is-small">
-                      <input id="cs-search-field" class="input is-small" type="text" form="search-form"
+                    <div id="sa-search-control" class="control is-small">
+                      <input id="sa-search-field" class="input is-small" type="text" form="search-form"
                         style="width: 20vw;">
                     </div>
                   </div>
 
                   <div class="control">
-                    <button id="cs-search-button" class="button is-small is-info" type="submit" form="search-form">
+                    <button id="sa-search-button" class="button is-small is-info" type="submit" form="search-form">
                       <span class="icon">
                         <span class="fas fa-search"></span>
                       </span>
@@ -1138,9 +1138,9 @@
         })
         .join("");
 
-      const column = document.getElementById("cs-column").value || "";
-      const operator = document.getElementById("cs-operator").value || "";
-      const csSearchWord = document.getElementById("cs-search-field").value || "";
+      const column = document.getElementById("sa-column").value || "";
+      const operator = document.getElementById("sa-operator").value || "";
+      const csSearchWord = document.getElementById("sa-search-field").value || "";
 
       if (csSearchWord.trim()) {
         const endpoint = "/api/ios/search/advanced";
@@ -1300,16 +1300,16 @@
         document.getElementById("search-field").setAttribute("disabled", true);
         document.getElementById("search-control").classList.add("is-loading");
         document.getElementById("search-button").classList.add("is-loading");
-        document.getElementById("cs-search-field").setAttribute("disabled", true);
-        document.getElementById("cs-search-control").classList.add("is-loading");
-        document.getElementById("cs-search-button").classList.add("is-loading");
+        document.getElementById("sa-search-field").setAttribute("disabled", true);
+        document.getElementById("sa-search-control").classList.add("is-loading");
+        document.getElementById("sa-search-button").classList.add("is-loading");
       } else {
         document.getElementById("search-field").removeAttribute("disabled");
         document.getElementById("search-control").classList.remove("is-loading");
         document.getElementById("search-button").classList.remove("is-loading");
-        document.getElementById("cs-search-field").removeAttribute("disabled");
-        document.getElementById("cs-search-control").classList.remove("is-loading");
-        document.getElementById("cs-search-button").classList.remove("is-loading");
+        document.getElementById("sa-search-field").removeAttribute("disabled");
+        document.getElementById("sa-search-control").classList.remove("is-loading");
+        document.getElementById("sa-search-button").classList.remove("is-loading");
       }
     }
   </script>
