@@ -1026,7 +1026,7 @@
                     <a href="#" onclick="return false;" class="button is-small is-info is-selected">
                       <span>iOS</span>
                       <span class="icon is-small">
-                        <span class="fal fa-mobile pl-2"></span>
+                        <span class="fal fa-mobile px-2"></span>
                       </span>
                     </a>
                   </p>
@@ -1034,7 +1034,7 @@
                     <a href="/macos" class="button is-small">
                       <span>macOS</span>
                       <span class="icon is-small">
-                        <span class="fal fa-desktop pl-2"></span>
+                        <span class="fal fa-desktop px-2"></span>
                       </span>
                     </a>
                   </p>
@@ -1125,7 +1125,6 @@
         const bundle = document.getElementById("bundle-select").value || "";
         if (!bundle && !searchWord) {
           const bundles = Array.from(document.getElementById("bundle-select").options)
-            .slice(0, 60)
             .map((option) => option.value)
             .filter((option) => option);
           return bundles[Math.floor(Math.random() * bundles.length)];
