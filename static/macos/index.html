@@ -2583,7 +2583,7 @@
       paginationSize,
       groupBy: "group_id",
       groupHeader: (value, count, data, group) => {
-        return data[0].source + "<span margin-left:10px;'>(" + count + " item)</span>";
+        return `${data[0].source}<span style="margin-left: 10px;">(${count} item)</span>`;
       },
       columnDefaults: {
         headerSort: false,
@@ -2593,11 +2593,17 @@
       columns: columunDefs(),
       ajaxURL: buildQuery(),
       ajaxResponse: function (url, params, response) {
-        const location = new URL(`${document.location.origin}${url}`);
+        const currentLocation = new URL(`${document.location.origin}${url}`);
+        const searchParams = currentLocation.searchParams;
         if (!document.getElementById("bundle-select").value) {
-          location.searchParams.delete("b");
+          searchParams.delete("b");
         }
-        history.pushState(null, '', location.search);
+        if (!document.getElementById("search-field").value && !document.getElementById("bundle-select").value &&
+          !document.getElementById("sa-search-field").value) {
+          history.replaceState(null, "", "/macos");
+        } else {
+          history.pushState(null, "", currentLocation.search);
+        }
 
         const f = new Intl.NumberFormat();
         const total = response.total;
