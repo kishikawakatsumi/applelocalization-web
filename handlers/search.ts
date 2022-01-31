@@ -18,8 +18,7 @@ export async function search<
 >(context: RouterContext<R, P, S>, platform: string) {
   setResponseHeader(context);
 
-  const cacheKey =
-    `${context.request.url.pathname}${context.request.url.search}`;
+  const cacheKey = key(context);
   const cachedResponse = await cache.get(cacheKey);
   if (cachedResponse) {
     context.response.body = cachedResponse;
@@ -107,6 +106,13 @@ export async function searchAdvanced<
   S extends State = Record<string, any>,
 >(context: RouterContext<R, P, S>, platform: string) {
   setResponseHeader(context);
+
+  const cacheKey = key(context);
+  const cachedResponse = await cache.get(cacheKey);
+  if (cachedResponse) {
+    context.response.body = cachedResponse;
+    return;
+  }
 
   const column = context.request.url.searchParams.get("c") ?? "";
   const fields: { [key: string]: string } = {
@@ -208,11 +214,13 @@ export async function searchAdvanced<
   );
   console.log(results.query.args);
 
-  context.response.body = {
+  const body = {
     data: results.rows,
     last_page: totalPages,
     total: count,
   };
+  await cache.set(cacheKey, JSON.stringify(body));
+  context.response.body = body;
 }
 
 function setResponseHeader<
@@ -237,4 +245,13 @@ function sendResponse<
   const statusText = STATUS_TEXT.get(status);
   context.response.status = status;
   context.response.body = `${status} | ${statusText}`;
+}
+
+function key<
+  R extends string,
+  P extends RouteParams<R> = RouteParams<R>,
+  // deno-lint-ignore no-explicit-any
+  S extends State = Record<string, any>,
+>(context: RouterContext<R, P, S>) {
+  return `${context.request.url.pathname}${context.request.url.search}`;
 }
