@@ -1,6 +1,8 @@
 import {
   Application,
+  configure,
   isHttpError,
+  renderFile,
   Router,
   send,
   Status,
@@ -9,16 +11,37 @@ import {
 import { search, searchAdvanced } from "./handlers/search.ts";
 import { get } from "./handlers/get.ts";
 
+const views = `${Deno.cwd()}/views`;
+configure({
+  views,
+});
+const bundles = {
+  ios: JSON.parse(await Deno.readTextFile(`${views}/ios/bundles.json`)),
+  macos: JSON.parse(await Deno.readTextFile(`${views}/macos/bundles.json`)),
+};
+
 const router = new Router();
 router
   .get("/healthz", (context) => {
     context.response.body = { status: "pass" };
   })
-  .get("/api", async (context) => {
-    await search(context, "ios");
+  .get("/", async (context) => {
+    context.response.body = `${await renderFile("index.html", {
+      platform: "ios",
+      bundles: bundles.ios,
+    })}`;
   })
-  .get("/api/cs", async (context) => {
-    await searchAdvanced(context, "ios");
+  .get("/ios", async (context) => {
+    context.response.body = `${await renderFile("index.html", {
+      platform: "ios",
+      bundles: bundles.ios,
+    })}`;
+  })
+  .get("/macos", async (context) => {
+    context.response.body = `${await renderFile("index.html", {
+      platform: "macos",
+      bundles: bundles.macos,
+    })}`;
   })
   .get("/api/:platform/search", async (context) => {
     if (context.request.url.searchParams.get("cache")) {
@@ -67,7 +90,6 @@ app.use(router.allowedMethods());
 app.use(async (context) => {
   await send(context, context.request.url.pathname, {
     root: `${Deno.cwd()}/static`,
-    index: "index.html",
   });
 });
 

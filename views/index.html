@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1024, viewport-fit=cover">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Apple Localization Terms Glossary" />
+  <meta name="twitter:description"
+    content="An unofficial Apple localization terms glossary that allows you to search for standard localization texts provided by the Apple platform." />
+  <meta name="twitter:image" content="https://applelocalization.com/og.png" />
+  <meta name="twitter:site" content="@k_katsumi" />
+  <meta property="og:image" content="https://applelocalization.com/fb.png" />
+  <meta property="og:url" content="https://applelocalization.com/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Apple Localization Terms Glossary">
+  <meta property="og:description"
+    content="An unofficial Apple localization terms glossary that allows you to search for standard localization texts provided by the Apple platform." />
+  <meta name="description"
+    content="An unofficial Apple localization terms glossary that allows you to search for standard localization texts provided by the Apple platform." />
+  <meta property="og:site_name" content="Apple Localization Terms Glossary" />
+
+  <title>Apple Localization Terms Glossary</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.0.10/dist/css/tabulator_simple.min.css">
+  <link rel="stylesheet" href="index.css">
+
+  <script src="https://unpkg.com/tabulator-tables@5.0.10/dist/js/tabulator.min.js"></script>
+  <script src="https://kit.fontawesome.com/3aaad93f68.js" crossorigin="anonymous"></script>
+  <script defer data-domain="applelocalization.com" src="https://plausible.io/js/plausible.js"></script>
+</head>
+
+<body>
+  <div class="block pt-3">
+    <div class="container">
+      <div class="columns">
+        <div class="column pb-0">
+          <h1 class="title is-inline-block is-5 mb-3">
+            <a class="has-text-dark" href="<%= it.platform === "macos" ? "/macos" : "/" %>">
+              <span class="fal fa-globe mr-2"></span><span>Apple Localization Terms Glossary</span>
+            </a>
+          </h1>
+
+          <div class="dropdown is-hoverable">
+            <div class="dropdown-trigger">
+              <a class="has-text-grey" aria-haspopup="true" aria-controls="dropdown-menu-platform">
+                <span class="is-size-6 has-text-weight-medium pl-1">
+                  for <%= it.platform === "macos" ? "macOS" : "iOS" %>
+                </span>
+                <span class="icon is-size-7" style="width: 1rem;">
+                  <i class="fal fa-angle-down" aria-hidden="true"></i>
+                </span>
+              </a>
+            </div>
+            <div class="dropdown-menu" id="dropdown-menu-platform" role="menu">
+              <div class="dropdown-content">
+                <% if (it.platform === "macos") { %>
+                <a href="#" onclick="return false;" class="dropdown-item">
+                  <span>macOS</span><span class="fal fa-desktop pl-2"></span>
+                </a>
+                <a href="/" class="dropdown-item">
+                  <span>iOS</span><span class="fal fa-mobile pl-2"></span>
+                </a>
+                <% } else { %>
+                <a href="#" onclick="return false;" class="dropdown-item">
+                  <span>iOS</span><span class="fal fa-mobile pl-2"></span>
+                </a>
+                <a href="/macos" class="dropdown-item">
+                  <span>macOS</span><span class="fal fa-desktop pl-2"></span>
+                </a>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <div class="is-inline-block is-size-7 has-text-grey-light">
+            <span id="data-count" class="pl-4"></span>
+            <span id="total-count"></span> / <%= it.platform === "macos" ? 9549490 : 4164769 %>
+          </div>
+        </div>
+
+        <div class="column pb-0">
+          <div class="content has-text-right">
+            <span class="p-2">
+              <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web/issues/new"
+                target="_blank" rel="nofollow noopener noreferrer">
+                <span class="far fa-comment-alt-smile mr-1"></span>Feedback</a>
+            </span>
+            <span class="p-2">
+              <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web" target="_blank"
+                rel="nofollow noopener noreferrer">
+                <span class="fab fa-github mr-1"></span>Source Code</a>
+            </span>
+            <span class="p-2">
+              <a class="has-text-dark" href="https://twitter.com/k_katsumi" target="_blank"
+                rel="nofollow noopener noreferrer">
+                <span class="far fa-at mr-1"></span>Maintainer</a>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="field is-grouped">
+          <div id="search-control" class="control has-icons-left is-small is-expanded">
+            <form id="search-form" onsubmit="search(); return false;">
+            </form>
+            <input id="search-field" class="input is-small" type="text" form="search-form">
+            <span class="icon is-small is-left">
+              <span class="fas fa-search"></span>
+            </span>
+          </div>
+
+          <div class="control has-icons-left">
+            <span class="select is-small">
+              <% if (it.platform === "macos") { %>
+              <select id="bundle-select" style="max-width: 357px;">
+              <% } else { %>
+              <select id="bundle-select">
+              <% } %>
+                <option></option>
+                <% it.bundles.forEach(function(bundle) { %>
+                <option value="<%= bundle %>"><%= bundle %></option>
+                <% }) %>
+              </select>
+            </span>
+            <span class="icon is-small is-left">
+              <span class="fas fa-toolbox"></span>
+            </span>
+          </div>
+
+          <div class="control">
+            <button id="search-button" class="button is-small is-info" type="submit" form="search-form">
+              <span class="icon">
+                <span class="fas fa-search"></span>
+              </span>
+              <span>Search</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="dropdown is-hoverable language-filter">
+          <div class="dropdown-trigger">
+            <button class="button is-small px-5" aria-haspopup="true" aria-controls="dropdown-menu-language-filter">
+              <span class="icon is-small">
+                <span class="fad fa-filter"></span>
+              </span>
+              <span class="has-text-grey">Languages</span>
+              <span class="icon is-small">
+                <span class="fal fa-angle-down" aria-hidden="true"></span>
+              </span>
+            </button>
+          </div>
+          <div class="dropdown-menu" id="dropdown-menu-language-filter" role="menu">
+            <div class="dropdown-content px-0 py-3">
+              <div class="dropdown-item">
+
+                <div class="columns is-multiline">
+                  <%~ includeFile("language-filter.html") %>
+                </div>
+              </div>
+
+              <hr class="dropdown-divider">
+
+              <div class="dropdown-item px-2 py-0">
+                <div class="has-text-grey">Advanced search</div>
+              </div>
+
+              <div class="dropdown-item">
+                <div class="field has-addons">
+                  <div class="field">
+                    <div class="control">
+                      <span class="select is-small ">
+                        <select id="sa-column">
+                          <option value="key">Key</option>
+                          <option value="localization">Localization</option>
+                          <option value="file">File</option>
+                          <option value="bundle">Bundle</option>
+                        </select>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="field has-addons px-2">
+                    <div class="control">
+                      <span class="select is-small">
+                        <select id="sa-operator">
+                          <option value="equal">Equal to (=)</option>
+                          <option value="notEqual">Not equal to (&lt;&gt;)</option>
+                          <option value="startsWith">Starts with (LIKE)</option>
+                        </select>
+                      </span>
+                    </div>
+                    <div id="sa-search-control" class="control is-small">
+                      <input id="sa-search-field" class="input is-small" type="text" form="search-form"
+                        style="width: 20vw;">
+                    </div>
+                  </div>
+
+                  <div class="control">
+                    <button id="sa-search-button" class="button is-small is-info" type="submit" form="search-form">
+                      <span class="icon">
+                        <span class="fas fa-search"></span>
+                      </span>
+                      <span>Search</span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+
+              <hr class="dropdown-divider">
+
+              <div class="dropdown-item px-2 py-0">
+                <div class="has-text-grey">Platform</div>
+              </div>
+
+              <div class="dropdown-item">
+                <div class="field has-addons">
+                  <p class="control">
+                    <% if (it.platform === "macos") { %>
+                    <a href="/" class="button is-small">
+                    <% } else { %>
+                    <a href="#" onclick="return false;" class="button is-small is-info is-selected">
+                    <% } %>
+                      <span>iOS</span>
+                      <span class="icon is-small">
+                        <span class="fal fa-mobile px-2"></span>
+                      </span>
+                    </a>
+                  </p>
+                  <p class="control">
+                    <% if (it.platform === "macos") { %>
+                    <a href="#" onclick="return false;" class="button is-small is-info is-selected">
+                    <% } else { %>
+                    <a href="/macos" class="button is-small">
+                    <% } %>
+                      <span>macOS</span>
+                      <span class="icon is-small">
+                        <span class="fal fa-desktop px-2"></span>
+                      </span>
+                    </a>
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="container is-fluid">
+      <div id="table" class="table is-bordered is-narrow is-hoverable"></div>
+    </div>
+  </div>
+
+  <script src="index.js" type="module"></script>
+</body>
+
+</html>

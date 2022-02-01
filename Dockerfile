@@ -3,10 +3,10 @@ FROM denoland/deno:ubuntu-1.17.2
 WORKDIR /app
 
 COPY deps.ts .
-RUN deno cache deps.ts
+RUN deno cache --unstable deps.ts
 
 ADD . .
-RUN deno cache main.ts
+RUN deno cache --unstable main.ts
 
 EXPOSE 8080
 CMD ["run", "--allow-env", "--allow-net", "--allow-read", "main.ts"]
