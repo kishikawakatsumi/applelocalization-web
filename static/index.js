@@ -44,6 +44,7 @@ const table = new Tabulator("#table", {
   paginationSize,
   groupBy: "group_id",
   groupHeader: (_value, count, data, _group) => {
+    console.log(_value);
     return `${data[0].source}<span style="margin-left: 10px;">(${count} item)</span>`;
   },
   columnDefaults: {
