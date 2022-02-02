@@ -43,7 +43,7 @@ const table = new Tabulator("#table", {
   progressiveLoad: "scroll",
   paginationSize,
   groupBy: "group_id",
-  groupHeader: (value, count, data, group) => {
+  groupHeader: (_value, count, data, _group) => {
     return `${data[0].source}<span style="margin-left: 10px;">(${count} item)</span>`;
   },
   columnDefaults: {
@@ -53,7 +53,7 @@ const table = new Tabulator("#table", {
   },
   columns: columunDefs(),
   ajaxURL: buildQuery(),
-  ajaxResponse: function (url, params, response) {
+  ajaxResponse: function (url, _params, response) {
     const currentLocation = new URL(`${document.location.origin}${url}`);
     const searchParams = currentLocation.searchParams;
     if (!document.getElementById("bundle-select").value) {
@@ -88,7 +88,7 @@ const table = new Tabulator("#table", {
   },
 });
 
-table.on("dataLoading", (data) => {
+table.on("dataLoading", (_data) => {
   setLoading(true);
 });
 
@@ -103,7 +103,7 @@ table.on("dataProcessed", () => {
   }
 });
 
-table.on("dataLoadError", (error) => {
+table.on("dataLoadError", (_error) => {
   setLoading(false);
 });
 
@@ -167,7 +167,7 @@ function columunDefs() {
       title: "Language",
       field: "language",
       minWidth: 84,
-      formatter: (cell, formatterParams, onRendered) => {
+      formatter: (cell, _formatterParams, _onRendered) => {
         const value = cell.getValue();
         return languageCodeToName(value);
       },
