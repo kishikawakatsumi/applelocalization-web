@@ -34,7 +34,7 @@
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
   <link rel="stylesheet" href="https://unpkg.com/tabulator-tables@5.0.10/dist/css/tabulator_simple.min.css">
-  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="index.css<%= it.cb %>">
 
   <script src="https://unpkg.com/tabulator-tables@5.0.10/dist/js/tabulator.min.js"></script>
   <script src="https://kit.fontawesome.com/3aaad93f68.js" crossorigin="anonymous"></script>
@@ -86,7 +86,7 @@
 
           <div class="is-inline-block is-size-7 has-text-grey-light">
             <span id="data-count" class="pl-4"></span>
-            <span id="total-count"></span> / <%= it.platform === "macos" ? 9549490 : 4164769 %>
+            <span id="total-count"></span> / <%= it.platform === "macos" ? "9,549,490" : "4,164,769" %>
           </div>
         </div>
 
@@ -126,14 +126,14 @@
             <span class="select is-small">
               <% if (it.platform === "macos") { %>
               <select id="bundle-select" style="max-width: 357px;">
-              <% } else { %>
-              <select id="bundle-select">
-              <% } %>
-                <option></option>
-                <% it.bundles.forEach(function(bundle) { %>
-                <option value="<%= bundle %>"><%= bundle %></option>
-                <% }) %>
-              </select>
+                <% } else { %>
+                <select id="bundle-select">
+                  <% } %>
+                  <option></option>
+                  <% it.bundles.forEach(function(bundle) { %>
+                  <option value="<%= bundle %>"><%= bundle %></option>
+                  <% }) %>
+                </select>
             </span>
             <span class="icon is-small is-left">
               <span class="fas fa-toolbox"></span>
@@ -230,26 +230,26 @@
                   <p class="control">
                     <% if (it.platform === "macos") { %>
                     <a href="/" class="button is-small">
-                    <% } else { %>
-                    <a href="#" onclick="return false;" class="button is-small is-info is-selected">
-                    <% } %>
-                      <span>iOS</span>
-                      <span class="icon is-small">
-                        <span class="fal fa-mobile px-2"></span>
-                      </span>
-                    </a>
+                      <% } else { %>
+                      <a href="#" onclick="return false;" class="button is-small is-info is-selected">
+                        <% } %>
+                        <span>iOS</span>
+                        <span class="icon is-small">
+                          <span class="fal fa-mobile px-2"></span>
+                        </span>
+                      </a>
                   </p>
                   <p class="control">
                     <% if (it.platform === "macos") { %>
                     <a href="#" onclick="return false;" class="button is-small is-info is-selected">
-                    <% } else { %>
-                    <a href="/macos" class="button is-small">
-                    <% } %>
-                      <span>macOS</span>
-                      <span class="icon is-small">
-                        <span class="fal fa-desktop px-2"></span>
-                      </span>
-                    </a>
+                      <% } else { %>
+                      <a href="/macos" class="button is-small">
+                        <% } %>
+                        <span>macOS</span>
+                        <span class="icon is-small">
+                          <span class="fal fa-desktop px-2"></span>
+                        </span>
+                      </a>
                   </p>
                 </div>
               </div>
@@ -267,7 +267,7 @@
     </div>
   </div>
 
-  <script src="index.js" type="module"></script>
+  <script src="index.js<%= it.cb %>" type="module"></script>
 </body>
 
 </html>
