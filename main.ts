@@ -20,6 +20,8 @@ const bundles = {
   macos: JSON.parse(await Deno.readTextFile(`${views}/macos/bundles.json`)),
 };
 
+const cacheBuster = `?v=${Deno.env.get("RENDER_GIT_COMMIT")}`;
+
 const router = new Router();
 router
   .get("/healthz", (context) => {
@@ -29,18 +31,21 @@ router
     context.response.body = `${await renderFile("index.html", {
       platform: "ios",
       bundles: bundles.ios,
+      cb: cacheBuster,
     })}`;
   })
   .get("/ios", async (context) => {
     context.response.body = `${await renderFile("index.html", {
       platform: "ios",
       bundles: bundles.ios,
+      cb: cacheBuster,
     })}`;
   })
   .get("/macos", async (context) => {
     context.response.body = `${await renderFile("index.html", {
       platform: "macos",
       bundles: bundles.macos,
+      cb: cacheBuster,
     })}`;
   })
   .get("/api/:platform/search", async (context) => {
