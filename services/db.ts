@@ -24,5 +24,5 @@ export async function ping() {
   const client = await pool.connect();
   const results = await client.queryObject("SELECT 1;");
   client.release();
-  return results;
+  return results.rowCount === 1;
 }

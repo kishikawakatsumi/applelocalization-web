@@ -1,4 +1,4 @@
-import { RouteParams, RouterContext, State } from "../deps.ts";
+import { RouteParams, RouterContext, State, Status } from "../deps.ts";
 import { ping } from "../services/db.ts";
 
 export async function healthCheck<
@@ -7,5 +7,7 @@ export async function healthCheck<
   // deno-lint-ignore no-explicit-any
   S extends State = Record<string, any>,
 >(context: RouterContext<R, P, S>) {
-  context.response.body = await ping();
+  const isOK = await ping();
+  context.response.status = isOK ? Status.OK : Status.InternalServerError;
+  context.response.body = isOK ? "pass" : "fail";
 }

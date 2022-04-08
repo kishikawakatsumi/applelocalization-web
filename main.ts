@@ -25,10 +25,7 @@ const cacheBuster = `?v=${Deno.env.get("RENDER_GIT_COMMIT")}`;
 
 const router = new Router();
 router
-  .get("/healthz", (context) => {
-    context.response.body = { status: "pass" };
-  })
-  .get("/ping", async (context) => {
+  .get("/healthz", async (context) => {
     await healthCheck(context);
   })
   .get("/", async (context) => {
