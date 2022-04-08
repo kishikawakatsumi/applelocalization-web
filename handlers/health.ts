@@ -9,5 +9,5 @@ export async function healthCheck<
 >(context: RouterContext<R, P, S>) {
   const isOK = await ping();
   context.response.status = isOK ? Status.OK : Status.InternalServerError;
-  context.response.body = isOK ? "pass" : "fail";
+  context.response.body = { status: isOK ? "pass" : "fail" };
 }
