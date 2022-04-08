@@ -19,3 +19,10 @@ export async function query<T>(
   client.release();
   return results;
 }
+
+export async function ping() {
+  const client = await pool.connect();
+  const results = await client.queryObject("SELECT 1;");
+  client.release();
+  return results;
+}

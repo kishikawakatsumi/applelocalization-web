@@ -9,6 +9,7 @@ import {
   STATUS_TEXT,
 } from "./deps.ts";
 import { search, searchAdvanced } from "./handlers/search.ts";
+import { healthCheck } from "./handlers/health.ts";
 import { get } from "./handlers/get.ts";
 
 const views = `${Deno.cwd()}/views`;
@@ -26,6 +27,9 @@ const router = new Router();
 router
   .get("/healthz", (context) => {
     context.response.body = { status: "pass" };
+  })
+  .get("/ping", async (context) => {
+    await healthCheck(context);
   })
   .get("/", async (context) => {
     context.response.body = `${await renderFile("index.html", {
