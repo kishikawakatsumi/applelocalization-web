@@ -1,16 +1,26 @@
 import { connect, Redis } from "../deps.ts";
 
 export async function get(key: string) {
-  const redis = await connection();
-  const value = await redis.get(key);
-  redis.close();
-  return value;
+  try {
+    const redis = await connection();
+    const value = await redis.get(key);
+    redis.close();
+    return value;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 export async function set(key: string, value: string) {
-  const redis = await connection();
-  await redis.set(key, value);
-  redis.close();
+  try {
+    const redis = await connection();
+    await redis.set(key, value);
+    redis.close();
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 }
 
 async function connection(): Promise<Redis> {
