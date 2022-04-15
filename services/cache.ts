@@ -25,7 +25,7 @@ export async function set(key: string, value: string) {
 
 async function connection(): Promise<Redis> {
   return await connect({
-    hostname: "applelocalization-redis",
-    port: 10000,
+    hostname: "red-c9cni410gd05ddkq9960",
+    port: 6379,
   });
 }
