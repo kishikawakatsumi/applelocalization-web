@@ -25,7 +25,7 @@ export async function set(key: string, value: string) {
 
 async function connection(): Promise<Redis> {
   return await connect({
-    hostname: "red-c9cni410gd05ddkq9960",
+    hostname: Deno.env.get("REDIS_HOST") as string,
     port: 6379,
   });
 }
