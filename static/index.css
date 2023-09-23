@@ -2,7 +2,7 @@
   border: 1px solid #dbdbdb;
 }
 
-.tabulator .tabulator-loader {
+.tabulator .tabulator-alert {
   position: absolute;
   display: flex;
   align-items: center;
@@ -15,7 +15,7 @@
   text-align: center;
 }
 
-.tabulator .tabulator-loader .tabulator-loader-msg {
+.tabulator .tabulator-alert .tabulator-alert-msg {
   display: inline-block;
   margin: 0 auto;
   padding: 8px 20px;
@@ -25,12 +25,12 @@
   font-size: 1rem;
 }
 
-.tabulator .tabulator-loader .tabulator-loader-msg.tabulator-loading {
+.tabulator .tabulator-alert .tabulator-alert-msg.tabulator-alert-state-msg {
   border: 1px solid hsl(0, 0%, 71%);
   color: hsl(0, 0%, 48%);
 }
 
-.tabulator .tabulator-loader .tabulator-loader-msg.tabulator-error {
+.tabulator .tabulator-alert .tabulator-alert-msg.tabulator-alert-state-error {
   border: 1px solid hsl(348, 86%, 43%);
   color: hsl(348, 100%, 61%);
 }
