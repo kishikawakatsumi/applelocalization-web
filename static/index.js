@@ -340,7 +340,8 @@ function languageCodeToName(code) {
 
 function setLoading(loading) {
   if (loading) {
-    table.dataLoader.showLoader();
+    table.dataLoader.alertLoader();
+
     document.getElementById("search-field").setAttribute("disabled", true);
     document.getElementById("search-control").classList.add("is-loading");
     document.getElementById("search-button").classList.add("is-loading");
