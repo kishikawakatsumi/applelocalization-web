@@ -1,7 +1,14 @@
 "use strict";
 
 const pathname = document.location.pathname;
-const platform = pathname === "/macos" ? "macos" : "ios";
+const platform = pathname.startsWith("/macos") ? "macos" : "ios";
+const version = (() => {
+  const version = pathname.split("/")[2];
+  if (version) {
+    return `/${version}`;
+  }
+  return "";
+})();
 
 const searchParams = new URL(document.location).searchParams;
 const columnQuery = searchParams.get("c") || "";
@@ -64,7 +71,15 @@ const table = new Tabulator("#table", {
       !document.getElementById("bundle-select").value &&
       !document.getElementById("sa-search-field").value
     ) {
-      history.replaceState(null, "", platform === "macos" ? "/macos" : "/");
+      history.replaceState(
+        null,
+        "",
+        platform === "macos"
+          ? `/macos${version}`
+          : version
+          ? `/ios${version}`
+          : "/"
+      );
     } else {
       history.pushState(null, "", currentLocation.search);
     }
@@ -140,11 +155,11 @@ function buildQuery() {
   const saSearchWord = document.getElementById("sa-search-field").value || "";
 
   if (saSearchWord.trim()) {
-    const endpoint = `/api/${platform}/search/advanced`;
+    const endpoint = `/api/${platform}${version}/search/advanced`;
     const query = `?c=${column.trim()}&o=${operator}&q=${saSearchWord.trim()}${languageFilter}`;
     return `${endpoint}${query}`;
   } else {
-    const endpoint = `/api/${platform}/search`;
+    const endpoint = `/api/${platform}${version}/search`;
     const query = `?q=${searchWord.trim()}&b=${bundle.trim()}${languageFilter}`;
     return `${endpoint}${query}`;
   }

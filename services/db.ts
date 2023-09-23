@@ -1,10 +1,10 @@
 import { Pool } from "../deps.ts";
+import "https://deno.land/std/dotenv/load.ts";
 
-const POSTGRES_PORT = 10000;
 const POOL_CONNECTIONS = 16;
 const pool = new Pool({
   hostname: Deno.env.get("POSTGRES_HOST"),
-  port: POSTGRES_PORT,
+  port: Deno.env.get("POSTGRES_PORT") ?? 5432,
   user: Deno.env.get("POSTGRES_USER"),
   password: Deno.env.get("POSTGRES_PASSWORD"),
   database: Deno.env.get("POSTGRES_DB"),

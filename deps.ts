@@ -6,7 +6,7 @@ export {
   Status,
   STATUS_TEXT,
 } from "https://deno.land/x/oak/mod.ts";
-export { configure, renderFile } from "https://deno.land/x/eta/mod.ts";
+export { Eta } from "https://deno.land/x/eta@v3.1.0/src/index.ts";
 export type {
   RouteParams,
   RouterContext,
