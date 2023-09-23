@@ -51,17 +51,26 @@ export async function search<
   const size = Math.max(Math.min(parseInt(sizeParam), 200), 1);
 
   const queryBuilder = new QueryBuilder();
-  const countResult = await query<{ count: bigint }>(
-    queryBuilder.build(
-      ["COUNT(id) AS count"],
-      languageCodes.length
-        ? languageCodes
-        : Object.values(languageMapping).flat(),
+
+  const groupResult = await query<{ group_id: string }>(
+    queryBuilder.buildGroups(
+      languageCodes,
       searchWord,
       bundle,
       platform,
     ),
     { searchWord, bundle },
+  );
+  const groups = groupResult.rows.map((row) => row.group_id);
+
+  const countResult = await query<{ count: bigint }>(
+    queryBuilder.build(
+      ["COUNT(id) AS count"],
+      languageCodes,
+      groups,
+      platform,
+    ),
+    {},
   );
 
   const count = Number(countResult.rows[0].count);
@@ -80,13 +89,12 @@ export async function search<
         "bundle_name",
       ],
       languageCodes,
-      searchWord,
-      bundle,
+      groups,
       platform,
       offset,
       size,
     ),
-    { searchWord, bundle, limit: size, offset },
+    { limit: size, offset },
   );
   console.log(results.query.args);
 

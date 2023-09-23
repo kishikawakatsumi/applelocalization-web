@@ -1,8 +1,7 @@
 import {
   Application,
-  configure,
+  Eta,
   isHttpError,
-  renderFile,
   Router,
   send,
   Status,
@@ -13,12 +12,51 @@ import { healthCheck } from "./handlers/health.ts";
 import { get } from "./handlers/get.ts";
 
 const views = `${Deno.cwd()}/views`;
-configure({
+const eta = new Eta({
   views,
 });
-const bundles = {
-  ios: JSON.parse(await Deno.readTextFile(`${views}/ios/bundles.json`)),
-  macos: JSON.parse(await Deno.readTextFile(`${views}/macos/bundles.json`)),
+
+const Platform = {
+  ios: {
+    latest: {
+      name: "iOS",
+      version: "16",
+      path: "/",
+      bundle: JSON.parse(
+        await Deno.readTextFile(`${views}/ios16/bundles.json`),
+      ),
+      count: "4,013,858",
+    },
+    15: {
+      name: "iOS",
+      version: "15",
+      path: "/ios/15",
+      bundle: JSON.parse(
+        await Deno.readTextFile(`${views}/ios15/bundles.json`),
+      ),
+      count: "5,643,937",
+    },
+  },
+  macos: {
+    latest: {
+      name: "macOS",
+      version: "13",
+      path: "/macos",
+      bundle: JSON.parse(
+        await Deno.readTextFile(`${views}/macos13/bundles.json`),
+      ),
+      count: "5,379,251",
+    },
+    12: {
+      name: "macOS",
+      version: "12",
+      path: "/macos/12",
+      bundle: JSON.parse(
+        await Deno.readTextFile(`${views}/macos12/bundles.json`),
+      ),
+      count: "25,292,608",
+    },
+  },
 };
 
 const cacheBuster = `?v=${Deno.env.get("RENDER_GIT_COMMIT")}`;
@@ -28,26 +66,26 @@ router
   .get("/healthz", async (context) => {
     await healthCheck(context);
   })
-  .get("/", async (context) => {
-    context.response.body = `${await renderFile("index.html", {
-      platform: "ios",
-      bundles: bundles.ios,
-      cb: cacheBuster,
-    })}`;
+  .get("/", (context) => {
+    context.response.body = renderBody(Platform.ios.latest);
   })
-  .get("/ios", async (context) => {
-    context.response.body = `${await renderFile("index.html", {
-      platform: "ios",
-      bundles: bundles.ios,
-      cb: cacheBuster,
-    })}`;
+  .get("/ios", (context) => {
+    context.response.body = renderBody(Platform.ios.latest);
   })
-  .get("/macos", async (context) => {
-    context.response.body = `${await renderFile("index.html", {
-      platform: "macos",
-      bundles: bundles.macos,
-      cb: cacheBuster,
-    })}`;
+  .get("/macos", (context) => {
+    context.response.body = renderBody(Platform.macos.latest);
+  })
+  .get(`/ios/${Platform.ios.latest.version}`, (context) => {
+    context.response.body = renderBody(Platform.ios.latest);
+  })
+  .get(`/macos/${Platform.macos.latest.version}`, (context) => {
+    context.response.body = renderBody(Platform.macos.latest);
+  })
+  .get("/ios/15", (context) => {
+    context.response.body = renderBody(Platform.ios["15"]);
+  })
+  .get("/macos/12", (context) => {
+    context.response.body = renderBody(Platform.macos["12"]);
   })
   .get("/api/:platform/search", async (context) => {
     if (context.request.url.searchParams.get("cache")) {
@@ -56,12 +94,57 @@ router
       const key = `${pathname}${search.replace("&cache=true", "")}`;
       await get(context, key);
     } else {
-      await search(context, context.params.platform);
+      const platform = context.params.platform;
+      const version = Platform[platform].latest.version;
+      await search(context, `${platform}${version}`);
     }
   })
-  .get("/api/:platform/search/advanced", async (context) => {
-    await searchAdvanced(context, context.params.platform);
+  .get("/api/:platform/:version/search", async (context) => {
+    if (context.request.url.searchParams.get("cache")) {
+      const pathname = context.request.url.pathname;
+      const search = context.request.url.search;
+      const key = `${pathname}${search.replace("&cache=true", "")}`;
+      await get(context, key);
+    } else {
+      const platform = context.params.platform;
+      const version = context.params.version;
+      await search(context, `${platform}${version}`);
+    }
+  })
+  .redirect(
+    "/api/ios/search/advanced",
+    `/api/ios/${Platform.ios.latest.version}/advanced`,
+  )
+  .redirect(
+    "/api/macos/search/advanced",
+    `/api/macos/${Platform.macos.latest.version}/search/advanced`,
+  )
+  .get("/api/:platform/:version/search/advanced", async (context) => {
+    const platform = context.params.platform;
+    const version = context.params.version;
+    await searchAdvanced(context, `${platform}${version}`);
   });
+
+function renderBody(
+  platform: {
+    name: string;
+    version: string;
+    path: string;
+    bundle: string;
+    count: string;
+  },
+) {
+  return `${
+    eta.render("index.html", {
+      platform: platform.name,
+      version: platform.version,
+      path: platform.path,
+      bundles: platform.bundle,
+      count: platform.count,
+      cb: cacheBuster,
+    })
+  }`;
+}
 
 const app = new Application();
 
@@ -78,7 +161,7 @@ app.use(async (context, next) => {
   } catch (error) {
     if (isHttpError(error)) {
       const status = error.status;
-      const statusText = STATUS_TEXT.get(status);
+      const statusText = STATUS_TEXT[status];
       context.response.status = status;
       context.response.body = `${status} | ${statusText}`;
 
