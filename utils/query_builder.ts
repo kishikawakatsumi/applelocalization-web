@@ -2,18 +2,12 @@ export class QueryBuilder {
   build(
     fields: string[],
     languages: string[],
-    searchWord: string | null,
-    bundle: string | null,
+    groups: string[],
     table: string,
     offset?: number,
     limit?: number,
   ) {
-    const langCondition = languages
-      .map((language) => `'${language}'`)
-      .join(", ");
-    const range = limit !== undefined && offset !== undefined
-      ? "LIMIT $limit OFFSET $offset"
-      : "";
+    const langCondition = this.langCondition(languages);
 
     const selectStatement = `
       SELECT
@@ -22,25 +16,45 @@ export class QueryBuilder {
         ${table}
       WHERE
         language in (${langCondition}) AND
-        group_id in (
-          SELECT DISTINCT
-            group_id FROM ${table}
+        group_id in (${groups.join(", ")})
       `;
     const orderBy = fields.includes("id")
       ? "ORDER BY id, group_id, language"
       : "";
+    const range = limit !== undefined && offset !== undefined
+      ? "LIMIT $limit OFFSET $offset"
+      : "";
 
-    const searchCondition = searchWord ? "AND target &@ $searchWord" : "";
     return `
         ${selectStatement}
-          WHERE
-            ${bundle ? `bundle_name = $bundle AND` : ""}
-            language in (${langCondition})
-            ${searchCondition}
-          )
         ${orderBy}
         ${range}
         ;
         `;
+  }
+
+  buildGroups(
+    languages: string[],
+    searchWord: string | null,
+    bundle: string | null,
+    table: string,
+  ) {
+    return `
+      SELECT DISTINCT
+        group_id FROM ${table}
+      WHERE
+        ${bundle ? `bundle_name = $bundle AND` : ""}
+        language in (${this.langCondition(languages)})
+        ${this.searchCondition(searchWord)}
+      ;
+      `;
+  }
+
+  langCondition(languages: string[]) {
+    return languages.map((language) => `'${language}'`).join(", ");
+  }
+
+  searchCondition(searchWord: string | null) {
+    return searchWord ? "AND target &@ $searchWord" : "";
   }
 }
