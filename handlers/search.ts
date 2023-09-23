@@ -7,8 +7,19 @@ import {
 } from "../deps.ts";
 import { query } from "../services/db.ts";
 import * as cache from "../services/cache.ts";
-import { languageMapping } from "../models/language_mappings.ts";
 import { QueryBuilder } from "../utils/query_builder.ts";
+
+import { languageMapping as iOS15 } from "../models/ios15/language_mappings.ts";
+import { languageMapping as iOS16 } from "../models/ios16/language_mappings.ts";
+import { languageMapping as macOS12 } from "../models/macos12/language_mappings.ts";
+import { languageMapping as macOS13 } from "../models/macos13/language_mappings.ts";
+
+const languageMappings: Record<string, { [key: string]: string[] }> = {
+  "ios15": iOS15,
+  "ios16": iOS16,
+  "macos12": macOS12,
+  "macos13": macOS13,
+};
 
 export async function search<
   R extends string,
@@ -28,12 +39,7 @@ export async function search<
   const searchWord = context.request.url.searchParams.get("q");
 
   const languages = context.request.url.searchParams.getAll("l") ?? [];
-  const languageCodes = (() => {
-    const codes = languages.flatMap(
-      (language) => languageMapping[language],
-    );
-    return codes.length ? codes : Object.values(languageMapping).flat();
-  })();
+  const languageCodes = langCodes(platform, languages);
 
   const bundle = context.request.url.searchParams.get("b");
   if (!searchWord && !bundle) {
@@ -149,12 +155,8 @@ export async function searchAdvanced<
   }
 
   const languages = context.request.url.searchParams.getAll("l") || [];
-  const languageCodes = (() => {
-    const codes = languages.flatMap(
-      (language) => languageMapping[language],
-    );
-    return codes.length ? codes : Object.values(languageMapping).flat();
-  })();
+  const languageCodes = langCodes(platform, languages);
+
   const langCondition = languageCodes
     .map((language) => `'${language}'`)
     .join(", ");
@@ -262,4 +264,12 @@ function key<
   S extends State = Record<string, any>,
 >(context: RouterContext<R, P, S>) {
   return `${context.request.url.pathname}${context.request.url.search}`;
+}
+
+function langCodes(platform: string, languages: string[]) {
+  const mapping = languageMappings[platform];
+  const codes = languages.flatMap(
+    (language) => mapping[language],
+  );
+  return codes.length ? codes : Object.values(mapping).flat();
 }
