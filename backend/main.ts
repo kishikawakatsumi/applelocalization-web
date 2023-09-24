@@ -18,7 +18,8 @@ const eta = new Eta({
   views: templates,
 });
 
-const Platform = {
+// deno-lint-ignore no-explicit-any
+const Platform: Record<string, any> = {
   ios: {
     latest: {
       name: "iOS",
