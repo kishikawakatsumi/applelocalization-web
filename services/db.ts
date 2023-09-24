@@ -1,5 +1,4 @@
 import { Pool } from "../deps.ts";
-import "https://deno.land/std/dotenv/load.ts";
 
 const POOL_CONNECTIONS = 16;
 const pool = new Pool({

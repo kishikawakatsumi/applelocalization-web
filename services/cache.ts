@@ -1,5 +1,4 @@
 import { connect, Redis } from "../deps.ts";
-import "https://deno.land/std/dotenv/load.ts";
 
 export async function get(key: string) {
   if (Deno.env.get("DISABLE_CACHE") === "true") {
