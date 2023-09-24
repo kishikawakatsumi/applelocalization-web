@@ -1,7 +1,7 @@
 import { connect, Redis } from "../deps.ts";
 
 export async function get(key: string) {
-  if (Deno.env.get("DISABLE_CACHE") === "true") {
+  if (Deno.env.get("REDIS_HOST") === undefined) {
     return null;
   }
   try {
@@ -16,7 +16,7 @@ export async function get(key: string) {
 }
 
 export async function set(key: string, value: string) {
-  if (Deno.env.get("DISABLE_CACHE") === "true") {
+  if (Deno.env.get("REDIS_HOST") === undefined) {
     return;
   }
   try {
