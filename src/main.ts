@@ -11,9 +11,11 @@ import { search, searchAdvanced } from "./handlers/search.ts";
 import { healthCheck } from "./handlers/health.ts";
 import { get } from "./handlers/get.ts";
 
-const views = `${Deno.cwd()}/views`;
+const templates = `${Deno.cwd()}/dist/templates`;
+const models = `${Deno.cwd()}/models`;
+
 const eta = new Eta({
-  views,
+  views: templates,
 });
 
 const Platform = {
@@ -23,7 +25,7 @@ const Platform = {
       version: "16",
       path: "/",
       bundle: JSON.parse(
-        await Deno.readTextFile(`${views}/ios16/bundles.json`),
+        await Deno.readTextFile(`${models}/ios16/bundles.json`),
       ),
       count: "4,013,858",
     },
@@ -32,7 +34,7 @@ const Platform = {
       version: "15",
       path: "/ios/15",
       bundle: JSON.parse(
-        await Deno.readTextFile(`${views}/ios15/bundles.json`),
+        await Deno.readTextFile(`${models}/ios15/bundles.json`),
       ),
       count: "5,643,937",
     },
@@ -43,7 +45,7 @@ const Platform = {
       version: "13",
       path: "/macos",
       bundle: JSON.parse(
-        await Deno.readTextFile(`${views}/macos13/bundles.json`),
+        await Deno.readTextFile(`${models}/macos13/bundles.json`),
       ),
       count: "5,379,251",
     },
@@ -52,14 +54,12 @@ const Platform = {
       version: "12",
       path: "/macos/12",
       bundle: JSON.parse(
-        await Deno.readTextFile(`${views}/macos12/bundles.json`),
+        await Deno.readTextFile(`${models}/macos12/bundles.json`),
       ),
       count: "25,292,608",
     },
   },
 };
-
-const cacheBuster = `?v=${Deno.env.get("RENDER_GIT_COMMIT")}`;
 
 const router = new Router();
 router
@@ -138,7 +138,6 @@ function renderBody(
       path: platform.path,
       bundles: platform.bundle,
       count: platform.count,
-      cb: cacheBuster,
     })
   }`;
 }
@@ -175,7 +174,7 @@ app.use(router.allowedMethods());
 
 app.use(async (context) => {
   await send(context, context.request.url.pathname, {
-    root: `${Deno.cwd()}/static`,
+    root: `${Deno.cwd()}/dist`,
   });
 });
 
