@@ -5,6 +5,7 @@
 .github
 .gitignore
 .vscode
+scripts
 Dockerfile
 README.md
 SECURITY.md
