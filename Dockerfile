@@ -18,10 +18,10 @@ WORKDIR /app
 
 COPY --from=node /build/dist ./dist
 
-COPY src/deps.ts .
+COPY backend/deps.ts .
 RUN deno cache --reload deps.ts
 
-ADD src .
+ADD backend .
 RUN deno cache main.ts
 
 EXPOSE 8080

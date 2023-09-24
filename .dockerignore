@@ -1,11 +1,12 @@
 .DS_Store
 .env
+.env.example
 .dockerignore
 .git
 .github
 .gitignore
 .vscode
-scripts
+docker-compose.yml
 Dockerfile
 README.md
 SECURITY.md

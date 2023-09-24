@@ -5,7 +5,7 @@ const CopyWebbackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: {
-    index: "./index.js",
+    index: "./frontend/index.js",
   },
   output: {
     globalObject: "self",
@@ -65,12 +65,12 @@ module.exports = {
     new HtmlWebpackPlugin({
       chunks: ["index"],
       filename: "templates/index.html",
-      template: "index.html",
+      template: "frontend/index.html",
     }),
     new CopyWebbackPlugin({
       patterns: [
-        { from: "templates/*.*", to: "templates/[name][ext]" },
-        { from: "static/*.*", to: "static/[name][ext]" },
+        { from: "frontend/templates/*.*", to: "templates/[name][ext]" },
+        { from: "frontend/static/*.*", to: "static/[name][ext]" },
       ],
     }),
   ],
