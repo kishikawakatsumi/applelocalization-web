@@ -16,7 +16,7 @@ export class QueryBuilder {
         ${table}
       WHERE
         language in (${langCondition})
-        ${groups.length > 0 ? `AND group_id in (${groups.join(", ")})` : ""}
+        ${groups.length > 0 ? `AND group_id in (${groups.join(", ")})` : "AND FALSE"}
       `;
     const orderBy = fields.includes("id")
       ? "ORDER BY id, group_id, language"
