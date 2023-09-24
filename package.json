@@ -15,7 +15,7 @@
     "tabulator-tables": "5.5.2"
   },
   "devDependencies": {
-    "autoprefixer": "10.4.15",
+    "autoprefixer": "10.4.16",
     "copy-webpack-plugin": "11.0.0",
     "css-loader": "6.8.1",
     "handlebars-loader": "1.7.3",
