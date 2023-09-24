@@ -5,23 +5,28 @@ standard localization texts provided by the Apple platform.
 
 https://applelocalization.com/
 
+## Release Note
 
-# Release Note
+### [iOS 16, macOS 13] - 2023-09-24
 
-## [iOS 16, macOS 13] - 2023-09-24
-### Added
+#### Added
+
 - iOS 16
 - macOS 13
 
-## [macOS 12] - 2022-01-31
-### Added
+### [macOS 12] - 2022-01-31
+
+#### Added
+
 - macOS 12
 
-## [iOS 15] - 2022-01-26
-### Added
+### [iOS 15] - 2022-01-26
+
+#### Added
+
 - iOS 15
 
-### Related Repository
+## Related Repository
 
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools
