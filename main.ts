@@ -111,14 +111,11 @@ router
       await search(context, `${platform}${version}`);
     }
   })
-  .redirect(
-    "/api/ios/search/advanced",
-    `/api/ios/${Platform.ios.latest.version}/advanced`,
-  )
-  .redirect(
-    "/api/macos/search/advanced",
-    `/api/macos/${Platform.macos.latest.version}/search/advanced`,
-  )
+  .get("/api/:platform/search/advanced", async (context) => {
+    const platform = context.params.platform;
+    const version = Platform[platform].latest.version;
+    await searchAdvanced(context, `${platform}${version}`);
+  })
   .get("/api/:platform/:version/search/advanced", async (context) => {
     const platform = context.params.platform;
     const version = context.params.version;
