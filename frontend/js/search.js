@@ -101,7 +101,7 @@ export class Search {
       langs: {
         default: {
           data: {
-            loading: `<span class="fad fa-spinner-third fa-spin fa-fw"></span><span class="p-2">Loading ...</span>`,
+            loading: `<span class="fa-duotone fa-spinner-third fa-spin fa-fw"></span><span class="p-2">Loading ...</span>`,
             error: "Error",
           },
         },

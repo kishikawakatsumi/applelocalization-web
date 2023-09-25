@@ -6,7 +6,6 @@ import {
   STATUS_TEXT,
 } from "../deps.ts";
 import { query } from "../services/db.ts";
-import * as cache from "../services/cache.ts";
 import { QueryBuilder } from "../utils/query_builder.ts";
 
 import { languageMapping as iOS15 } from "../models/ios15/language_mappings.ts";
@@ -28,13 +27,6 @@ export async function search<
   S extends State = Record<string, any>,
 >(context: RouterContext<R, P, S>, platform: string) {
   setResponseHeader(context);
-
-  const cacheKey = key(context);
-  const cachedResponse = await cache.get(cacheKey);
-  if (cachedResponse) {
-    context.response.body = cachedResponse;
-    return;
-  }
 
   const searchWord = context.request.url.searchParams.get("q");
 
@@ -109,7 +101,6 @@ export async function search<
     last_page: totalPages,
     total: count,
   };
-  await cache.set(cacheKey, JSON.stringify(body));
   context.response.body = body;
 }
 
@@ -120,13 +111,6 @@ export async function searchAdvanced<
   S extends State = Record<string, any>,
 >(context: RouterContext<R, P, S>, platform: string) {
   setResponseHeader(context);
-
-  const cacheKey = key(context);
-  const cachedResponse = await cache.get(cacheKey);
-  if (cachedResponse) {
-    context.response.body = cachedResponse;
-    return;
-  }
 
   const column = context.request.url.searchParams.get("c") ?? "";
   const fields: { [key: string]: string } = {
@@ -229,7 +213,6 @@ export async function searchAdvanced<
     last_page: totalPages,
     total: count,
   };
-  await cache.set(cacheKey, JSON.stringify(body));
   context.response.body = body;
 }
 
@@ -252,18 +235,9 @@ function sendResponse<
   // deno-lint-ignore no-explicit-any
   S extends State = Record<string, any>,
 >(context: RouterContext<R, P, S>, status: Status) {
-  const statusText = STATUS_TEXT.get(status);
+  const statusText: string = STATUS_TEXT[status];
   context.response.status = status;
   context.response.body = `${status} | ${statusText}`;
-}
-
-function key<
-  R extends string,
-  P extends RouteParams<R> = RouteParams<R>,
-  // deno-lint-ignore no-explicit-any
-  S extends State = Record<string, any>,
->(context: RouterContext<R, P, S>) {
-  return `${context.request.url.pathname}${context.request.url.search}`;
 }
 
 function langCodes(platform: string, languages: string[]) {

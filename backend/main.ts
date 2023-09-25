@@ -9,7 +9,6 @@ import {
 } from "./deps.ts";
 import { search, searchAdvanced } from "./handlers/search.ts";
 import { healthCheck } from "./handlers/health.ts";
-import { get } from "./handlers/get.ts";
 
 const templates = `${Deno.cwd()}/dist/templates`;
 const models = `${Deno.cwd()}/models`;
@@ -89,28 +88,14 @@ router
     context.response.body = renderBody(Platform.macos["12"]);
   })
   .get("/api/:platform/search", async (context) => {
-    if (context.request.url.searchParams.get("cache")) {
-      const pathname = context.request.url.pathname;
-      const search = context.request.url.search;
-      const key = `${pathname}${search.replace("&cache=true", "")}`;
-      await get(context, key);
-    } else {
-      const platform = context.params.platform;
-      const version = Platform[platform].latest.version;
-      await search(context, `${platform}${version}`);
-    }
+    const platform = context.params.platform;
+    const version = Platform[platform].latest.version;
+    await search(context, `${platform}${version}`);
   })
   .get("/api/:platform/:version/search", async (context) => {
-    if (context.request.url.searchParams.get("cache")) {
-      const pathname = context.request.url.pathname;
-      const search = context.request.url.search;
-      const key = `${pathname}${search.replace("&cache=true", "")}`;
-      await get(context, key);
-    } else {
-      const platform = context.params.platform;
-      const version = context.params.version;
-      await search(context, `${platform}${version}`);
-    }
+    const platform = context.params.platform;
+    const version = context.params.version;
+    await search(context, `${platform}${version}`);
   })
   .get("/api/:platform/search/advanced", async (context) => {
     const platform = context.params.platform;
