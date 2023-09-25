@@ -58,6 +58,21 @@ export const languageMapping: { [key: string]: string[] } = {
   Catalan: [
     "ca",
   ],
+  "Simplified Chinese": [
+    "zh-Hans",
+    "zh_CN",
+  ],
+  "Traditional Chinese": [
+    "zh-Hant",
+    "zh_HK",
+    "zh_TW",
+  ],
+  Cantonese: [
+    "yue_CN",
+  ],
+  Croatian: [
+    "hr",
+  ],
   Czech: [
     "cs",
   ],
@@ -83,9 +98,6 @@ export const languageMapping: { [key: string]: string[] } = {
   Hindi: [
     "hi",
     "hi_Latn",
-  ],
-  Croatian: [
-    "hr",
   ],
   Hungarian: [
     "hu",
@@ -157,17 +169,5 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Vietnamese: [
     "vi",
-  ],
-  "Simplified Chinese": [
-    "zh-Hans",
-    "zh_CN",
-  ],
-  "Traditional Chinese": [
-    "zh-Hant",
-    "zh_HK",
-    "zh_TW",
-  ],
-  Cantonese: [
-    "yue_CN",
   ],
 };
