@@ -10,7 +10,7 @@ import {
   faDesktop,
   faMonitorHeartRate,
 } from "@fortawesome/pro-light-svg-icons";
-import { faFilter } from "@fortawesome/pro-duotone-svg-icons";
+import { faFilter, faSpinnerThird } from "@fortawesome/pro-duotone-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 
 library.add(
@@ -28,6 +28,7 @@ library.add(
   faMonitorHeartRate,
 
   faFilter,
+  faSpinnerThird,
 
   faGithub
 );
