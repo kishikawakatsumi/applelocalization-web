@@ -139,9 +139,6 @@ export const languageMapping: { [key: string]: string[] } = {
     "ca~applewatch",
     "ca~iphone",
   ],
-  "Central Khmer": [
-    "km",
-  ],
   Croatian: [
     "hr",
     "hr-iphoneos",
@@ -247,6 +244,9 @@ export const languageMapping: { [key: string]: string[] } = {
     "kk-tvos",
     "kk~applewatch",
     "kk~iphone",
+  ],
+  "Central Khmer": [
+    "km",
   ],
   Korean: [
     "ko",
