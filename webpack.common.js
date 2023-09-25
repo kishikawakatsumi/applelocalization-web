@@ -18,37 +18,6 @@ module.exports = {
     rules: [
       { test: /\.html$/, loader: "handlebars-loader" },
       {
-        test: /\.scss$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-          },
-          {
-            loader: "css-loader",
-            options: {
-              url: false,
-              sourceMap: true,
-              importLoaders: 2,
-            },
-          },
-          {
-            loader: "postcss-loader",
-            options: {
-              sourceMap: true,
-              postcssOptions: {
-                plugins: ["autoprefixer"],
-              },
-            },
-          },
-          {
-            loader: "sass-loader",
-            options: {
-              sourceMap: true,
-            },
-          },
-        ],
-      },
-      {
         test: /\.css$/i,
         use: [MiniCssExtractPlugin.loader, "css-loader"],
       },
@@ -59,19 +28,19 @@ module.exports = {
     ],
   },
   plugins: [
-    new MiniCssExtractPlugin({
-      filename: "[name].[contenthash].css",
+    new CopyWebbackPlugin({
+      patterns: [
+        { from: "frontend/templates/*.*", to: "templates/[name][ext]" },
+        { from: "frontend/static/*.*", to: "static/[name][ext]" },
+      ],
     }),
     new HtmlWebpackPlugin({
       chunks: ["index"],
       filename: "templates/index.html",
       template: "frontend/index.html",
     }),
-    new CopyWebbackPlugin({
-      patterns: [
-        { from: "frontend/templates/*.*", to: "templates/[name][ext]" },
-        { from: "frontend/static/*.*", to: "static/[name][ext]" },
-      ],
+    new MiniCssExtractPlugin({
+      filename: "[name].[contenthash].css",
     }),
   ],
 };
