@@ -11,7 +11,7 @@ import "./js/icon.js";
 import { Search } from "./js/search.js";
 
 const { enableAutoPageviews } = Plausible({
-  domain: "swift-ast-explorer.com",
+  domain: "applelocalization.com",
 });
 enableAutoPageviews();
 
