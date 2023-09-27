@@ -17,6 +17,12 @@ const eta = new Eta({
   views: templates,
 });
 
+async function readBundle(platform: string, version: string) {
+  return JSON.parse(
+    await Deno.readTextFile(`${models}/${platform}${version}/bundles.json`),
+  );
+}
+
 // deno-lint-ignore no-explicit-any
 const Platform: Record<string, any> = {
   ios: {
@@ -24,18 +30,14 @@ const Platform: Record<string, any> = {
       name: "iOS",
       version: "16",
       path: "/",
-      bundle: JSON.parse(
-        await Deno.readTextFile(`${models}/ios16/bundles.json`),
-      ),
+      bundle: await readBundle("ios", "16"),
       count: "4,013,858",
     },
     15: {
       name: "iOS",
       version: "15",
       path: "/ios/15",
-      bundle: JSON.parse(
-        await Deno.readTextFile(`${models}/ios15/bundles.json`),
-      ),
+      bundle: await readBundle("ios", "15"),
       count: "5,643,937",
     },
   },
@@ -44,18 +46,14 @@ const Platform: Record<string, any> = {
       name: "macOS",
       version: "13",
       path: "/macos",
-      bundle: JSON.parse(
-        await Deno.readTextFile(`${models}/macos13/bundles.json`),
-      ),
+      bundle: await readBundle("macos", "13"),
       count: "5,379,251",
     },
     12: {
       name: "macOS",
       version: "12",
       path: "/macos/12",
-      bundle: JSON.parse(
-        await Deno.readTextFile(`${models}/macos12/bundles.json`),
-      ),
+      bundle: await readBundle("macos", "12"),
       count: "25,292,608",
     },
   },
