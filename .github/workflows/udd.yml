@@ -18,7 +18,7 @@ jobs:
           deno run -A https://deno.land/x/udd/main.ts backend/deps.ts
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
-        id: pr
+        id: cpr
         with:
           commit-message: "Update dependencies"
           title: Update dependencies
@@ -27,3 +27,9 @@ jobs:
           branch: deno-dependency-updates
           author: GitHub <noreply@github.com>
           delete-branch: true
+          token: ${{ secrets.GH_PAT }}
+      - name: Enable Pull Request Automerge
+        if: ${{ steps.cpr.outputs.pull-request-url }}
+        run: gh pr merge --merge --auto ${{ steps.cpr.outputs.pull-request-url }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
