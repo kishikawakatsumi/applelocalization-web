@@ -34,7 +34,7 @@
 </head>
 
 <body>
-  <div class="block pt-3">
+  <div id="header" class="block pt-3">
     <div class="container">
       <div class="columns">
         <div class="column pb-0">
@@ -44,14 +44,14 @@
             </a>
           </h1>
 
-          <div class="dropdown is-hoverable">
+          <div id="dropdown-platform" class="dropdown is-hoverable">
             <div class="dropdown-trigger">
               <a class="has-text-grey" aria-haspopup="true" aria-controls="dropdown-menu-platform">
                 <span class="is-size-6 has-text-weight-medium pl-1">
                   for <%= it.platform %> <%= it.version %>
                 </span>
                 <span class="icon is-size-7" style="width: 1rem;">
-                  <i class="fa-light fa-angle-down" aria-hidden="true"></i>
+                  <i class="fa-solid fa-angle-down" aria-hidden="true"></i>
                 </span>
               </a>
             </div>
@@ -108,8 +108,7 @@
       <div class="block">
         <div class="field is-grouped">
           <div id="search-control" class="control has-icons-left is-small is-expanded">
-            <form id="search-form" onsubmit="search(); return false;">
-            </form>
+            <form id="search-form"></form>
             <input id="search-field" class="input is-small" type="text" form="search-form">
             <span class="icon is-small is-left">
               <span class="fa-solid fa-search"></span>
@@ -135,120 +134,136 @@
           </div>
 
           <div class="control">
+            <div id="dropdown-filter" class="dropdown is-right">
+              <div class="dropdown-trigger">
+                <button id="dropdown-filter-trigger" class="button is-small" aria-haspopup="true"
+                  aria-controls="dropdown-menu-filter">
+                  <span class="icon is-small is-left has-text-grey-light">
+                    <span class="fa-light fa-sliders"></span>
+                  </span>
+                  <span class="has-text-grey px-5">Languages</span>
+                  <span class="icon is-small is-right has-text-grey">
+                    <span class="fa-solid fa-angle-down" aria-hidden="true"></span>
+                  </span>
+                </button>
+              </div>
+              <div id="dropdown-menu-filter" class="dropdown-menu" role="menu">
+                <div class="dropdown-content px-0 py-3">
+                  <div class="dropdown-item">
+
+                    <div class="columns is-multiline">
+                      <%~ include("language-filter.html") %>
+                    </div>
+                  </div>
+
+                  <hr class="dropdown-divider">
+
+                  <div class="dropdown-item px-2 py-0">
+                    <div class="has-text-grey">Advanced search</div>
+                  </div>
+
+                  <div class="dropdown-item">
+                    <div class="field is-grouped">
+                      <div class="field">
+                        <div class="control">
+                          <span class="select is-small ">
+                            <select id="sa-column">
+                              <option value="key">Key</option>
+                              <option value="localization">Localization</option>
+                              <option value="file">File</option>
+                              <option value="bundle">Bundle</option>
+                            </select>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="field has-addons px-2">
+                        <div class="control">
+                          <span class="select is-small">
+                            <select id="sa-operator">
+                              <option value="equal">Equal to (=)</option>
+                              <option value="notEqual">Not equal to (&lt;&gt;)</option>
+                              <option value="startsWith">Starts with (LIKE)</option>
+                            </select>
+                          </span>
+                        </div>
+                        <div id="sa-search-control" class="control is-small">
+                          <input id="sa-search-field" class="input is-small" type="text" form="search-form"
+                            style="width: 20vw;">
+                        </div>
+                      </div>
+                      <div class="control">
+                        <button id="sa-search-button" class="button is-small is-info" type="submit" form="search-form">
+                          <span class="icon">
+                            <span class="fa-solid fa-search"></span>
+                          </span>
+                          <span>Search</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <hr class="dropdown-divider">
+
+                  <div class="dropdown-item px-2 py-0">
+                    <div class="has-text-grey">Platform</div>
+                  </div>
+
+                  <div class="dropdown-item">
+                    <div class="field has-addons">
+                      <p class="control">
+                        <a <% if (it.platform === "iOS" && it.version === "16") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/" class="button is-small"
+                          <% } %>>
+                          <span>iOS 16</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-mobile px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
+                        <a <% if (it.platform === "iOS" && it.version === "15") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/ios/15"
+                          class="button is-small" <% } %>>
+                          <span>iOS 15</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-mobile px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
+                        <a <% if (it.platform === "macOS" && it.version === "13") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/macos/13"
+                          class="button is-small" <% } %>>
+                          <span>macOS 13</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-desktop px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
+                        <a <% if (it.platform === "macOS" && it.version === "12") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/macos/12"
+                          class="button is-small" <% } %>>
+                          <span>macOS 12</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-desktop px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="control">
             <button id="search-button" class="button is-small is-info" type="submit" form="search-form">
               <span class="icon">
                 <span class="fa-solid fa-search"></span>
               </span>
               <span>Search</span>
             </button>
-          </div>
-        </div>
-
-        <div class="dropdown is-hoverable language-filter">
-          <div class="dropdown-trigger">
-            <button class="button is-small px-5" aria-haspopup="true" aria-controls="dropdown-menu-language-filter">
-              <span class="icon is-small">
-                <span class="fa-duotone fa-filter"></span>
-              </span>
-              <span class="has-text-grey">Languages</span>
-              <span class="icon is-small">
-                <span class="fa-light fa-angle-down" aria-hidden="true"></span>
-              </span>
-            </button>
-          </div>
-          <div class="dropdown-menu" id="dropdown-menu-language-filter" role="menu">
-            <div class="dropdown-content px-0 py-3">
-              <div class="dropdown-item">
-
-                <div class="columns is-multiline">
-                  <%~ include("language-filter.html") %>
-                </div>
-              </div>
-
-              <hr class="dropdown-divider">
-
-              <div class="dropdown-item px-2 py-0">
-                <div class="has-text-grey">Advanced search</div>
-              </div>
-
-              <div class="dropdown-item">
-                <div class="field has-addons">
-                  <div class="field">
-                    <div class="control">
-                      <span class="select is-small ">
-                        <select id="sa-column">
-                          <option value="key">Key</option>
-                          <option value="localization">Localization</option>
-                          <option value="file">File</option>
-                          <option value="bundle">Bundle</option>
-                        </select>
-                      </span>
-                    </div>
-                  </div>
-                  <div class="field has-addons px-2">
-                    <div class="control">
-                      <span class="select is-small">
-                        <select id="sa-operator">
-                          <option value="equal">Equal to (=)</option>
-                          <option value="notEqual">Not equal to (&lt;&gt;)</option>
-                          <option value="startsWith">Starts with (LIKE)</option>
-                        </select>
-                      </span>
-                    </div>
-                    <div id="sa-search-control" class="control is-small">
-                      <input id="sa-search-field" class="input is-small" type="text" form="search-form"
-                        style="width: 20vw;">
-                    </div>
-                  </div>
-
-                  <div class="control">
-                    <button id="sa-search-button" class="button is-small is-info" type="submit" form="search-form">
-                      <span class="icon">
-                        <span class="fa-solid fa-search"></span>
-                      </span>
-                      <span>Search</span>
-                    </button>
-                  </div>
-
-                </div>
-              </div>
-
-              <hr class="dropdown-divider">
-
-              <div class="dropdown-item px-2 py-0">
-                <div class="has-text-grey">Platform</div>
-              </div>
-
-              <div class="dropdown-item">
-                <div class="field has-addons">
-                  <p class="control">
-                    <% if (it.platform === "macOS") { %>
-                    <a href="/" class="button is-small">
-                      <% } else { %>
-                      <a href="#" onclick="return false;" class="button is-small is-info is-selected">
-                        <% } %>
-                        <span>iOS</span>
-                        <span class="icon is-small">
-                          <span class="fa-light fa-mobile px-2"></span>
-                        </span>
-                      </a>
-                  </p>
-                  <p class="control">
-                    <% if (it.platform === "macOS") { %>
-                    <a href="#" onclick="return false;" class="button is-small is-info is-selected">
-                      <% } else { %>
-                      <a href="/macos" class="button is-small">
-                        <% } %>
-                        <span>macOS</span>
-                        <span class="icon is-small">
-                          <span class="fa-light fa-desktop px-2"></span>
-                        </span>
-                      </a>
-                  </p>
-                </div>
-              </div>
-
-            </div>
           </div>
         </div>
       </div>

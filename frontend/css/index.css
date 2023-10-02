@@ -1,5 +1,11 @@
-.language-filter {
-  width: 100%;
+body {
+  height: 100vh;
+  height: 100svh;
+  margin: 0;
+}
+
+#dropdown-menu-filter {
+  right: calc(-0.75rem - 79px);
 }
 
 .switch {
