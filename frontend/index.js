@@ -9,11 +9,21 @@ import "./css/table.css";
 import Plausible from "plausible-tracker";
 import "./js/icon.js";
 
-import { Search } from "./js/search.js";
+import { init } from "./js/search.js";
+import { setupDropdownTrigger } from "./js/dropdown";
 
 const { enableAutoPageviews } = Plausible({
   domain: "applelocalization.com",
 });
 enableAutoPageviews();
 
-Search.init();
+new ResizeObserver(() => {
+  const container = document.querySelector(".container");
+  const dropdownMenu = document.getElementById("dropdown-menu-filter");
+
+  const containerWidth = container.offsetWidth;
+  dropdownMenu.style.width = `${containerWidth}px`;
+}).observe(document.body);
+
+setupDropdownTrigger();
+init();
