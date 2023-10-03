@@ -234,6 +234,11 @@ function columunDefs() {
       title: "Localization",
       field: "target",
       width: "38vw",
+      formatter: (cell, _formatterParams, _onRendered) => {
+        const value = cell.getValue();
+        const lang = cell.getData().language;
+        return `<span lang="${lang}">${value}</span>`;
+      },
     },
     {
       title: "Language",
