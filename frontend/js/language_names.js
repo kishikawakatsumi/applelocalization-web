@@ -109,6 +109,7 @@ export function languageCodeToName(code) {
     .replace("-iphoneos", "")
     .replace("-macos", "")
     .replace("-tvos", "")
+    .replace("~appletv", "")
     .replace("~applewatch", "")
     .replace("~ipad", "")
     .replace("~iphone", "");

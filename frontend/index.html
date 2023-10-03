@@ -64,6 +64,9 @@
                   <span>iOS 15</span><span class="fa-light fa-mobile pl-2"></span>
                 </a>
                 <a href="/macos" class="dropdown-item">
+                  <span>macOS 14</span><span class="fa-light fa-desktop pl-2"></span>
+                </a>
+                <a href="/macos/13" class="dropdown-item">
                   <span>macOS 13</span><span class="fa-light fa-desktop pl-2"></span>
                 </a>
                 <a href="/macos/12" class="dropdown-item">
@@ -227,6 +230,16 @@
                           <span>iOS 15</span>
                           <span class="icon is-small">
                             <span class="fa-light fa-mobile px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
+                        <a <% if (it.platform === "macOS" && it.version === "14") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/macos/"
+                          class="button is-small" <% } %>>
+                          <span>macOS 14</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-desktop px-2"></span>
                           </span>
                         </a>
                       </p>

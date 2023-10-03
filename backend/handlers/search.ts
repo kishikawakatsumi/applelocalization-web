@@ -12,12 +12,14 @@ import { languageMapping as iOS15 } from "../models/ios15/language_mappings.ts";
 import { languageMapping as iOS16 } from "../models/ios16/language_mappings.ts";
 import { languageMapping as macOS12 } from "../models/macos12/language_mappings.ts";
 import { languageMapping as macOS13 } from "../models/macos13/language_mappings.ts";
+import { languageMapping as macOS14 } from "../models/macos14/language_mappings.ts";
 
 const languageMappings: Record<string, { [key: string]: string[] }> = {
   "ios15": iOS15,
   "ios16": iOS16,
   "macos12": macOS12,
   "macos13": macOS13,
+  "macos14": macOS14,
 };
 
 export async function search<
