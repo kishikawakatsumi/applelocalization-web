@@ -105,6 +105,7 @@ export function init() {
         },
       },
     },
+    placeholder: "No Results Found",
   });
 
   table.on("dataLoading", (_data) => {
