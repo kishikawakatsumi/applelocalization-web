@@ -7,6 +7,12 @@ https://applelocalization.com/
 
 ## Release Note
 
+### [macOS 14] - 2023-10-03
+
+#### Added
+
+- macOS 14
+
 ### [iOS 16, macOS 13] - 2023-09-24
 
 #### Added
