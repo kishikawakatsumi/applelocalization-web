@@ -281,6 +281,9 @@ function columunDefs() {
       minWidth: 54,
       formatter: "rownum",
       hozAlign: "right",
+      tooltip: (_event, cell, _onRender) => {
+        return cell.getRow().getPosition();
+      },
     },
   ];
 }
