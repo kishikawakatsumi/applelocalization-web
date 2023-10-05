@@ -31,7 +31,7 @@ module.exports = {
     new CopyWebbackPlugin({
       patterns: [
         { from: "frontend/templates/*.*", to: "templates/[name][ext]" },
-        { from: "frontend/static/*.*", to: "static/[name][ext]" },
+        { from: "frontend/static/*.*", to: "[name][ext]" },
       ],
     }),
     new HtmlWebpackPlugin({
