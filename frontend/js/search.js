@@ -238,7 +238,7 @@ function columunDefs() {
       formatter: (cell, _formatterParams, _onRendered) => {
         const value = cell.getValue();
         const lang = cell.getData().language;
-        return `<span lang="${lang}">${value}</span>`;
+        return `<span lang="${lang}">${escapeHtml(value)}</span>`;
       },
     },
     {
@@ -289,4 +289,10 @@ function tableHeight() {
   const viewport = CSS.supports("height", "100svh") ? "100svh" : "100vh";
   const headerHeight = document.getElementById("header").offsetHeight;
   return `calc(${viewport} - ${headerHeight}px - 1.5rem - 0.75rem)`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
 }
