@@ -2,6 +2,10 @@
   border: 1px solid #dbdbdb;
 }
 
+.tabulator .tabulator-tableholder .tabulator-placeholder {
+  width: 100% !important;
+}
+
 .tabulator .tabulator-alert {
   position: absolute;
   display: flex;
