@@ -15,7 +15,7 @@
     "tabulator-tables": "5.5.2"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "11.0.0",
+    "copy-webpack-plugin": "12.0.1",
     "css-loader": "6.9.0",
     "handlebars-loader": "1.7.3",
     "html-webpack-plugin": "5.6.0",
