@@ -20,7 +20,7 @@
     "handlebars-loader": "1.7.3",
     "html-webpack-plugin": "5.6.0",
     "mini-css-extract-plugin": "2.8.0",
-    "webpack": "5.90.1",
+    "webpack": "5.90.2",
     "webpack-bundle-analyzer": "4.10.1",
     "webpack-cli": "5.1.4",
     "webpack-merge": "5.10.0"
