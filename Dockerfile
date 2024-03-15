@@ -12,7 +12,7 @@ COPY webpack.*.js ./
 COPY . .
 RUN npx webpack --config webpack.prod.js
 
-FROM denoland/deno:ubuntu-1.37.0
+FROM denoland/deno
 
 WORKDIR /app
 
