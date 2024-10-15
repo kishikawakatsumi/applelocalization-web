@@ -28,8 +28,11 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          timeout: 60m
+          command_timeout: 60m
           script: |
             cd applelocalization-web
+            git pull --rebase origin main
 
             docker compose down
             docker system prune --all -f
