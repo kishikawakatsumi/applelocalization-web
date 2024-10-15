@@ -28,6 +28,13 @@ const Platform: Record<string, any> = {
   ios: {
     latest: {
       name: "iOS",
+      version: "17",
+      path: "/",
+      bundle: await readBundle("ios", "17"),
+      count: "9,175,537",
+    },
+    16: {
+      name: "iOS",
       version: "16",
       path: "/",
       bundle: await readBundle("ios", "16"),
@@ -85,6 +92,9 @@ router
   })
   .get(`/macos/${Platform.macos.latest.version}`, (context) => {
     context.response.body = renderBody(Platform.macos.latest);
+  })
+  .get("/ios/16", (context) => {
+    context.response.body = renderBody(Platform.ios["16"]);
   })
   .get("/ios/15", (context) => {
     context.response.body = renderBody(Platform.ios["15"]);
