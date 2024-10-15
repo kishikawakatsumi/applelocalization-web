@@ -19,6 +19,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
+          build-args: FONTAWESOME_TOKEN=${{ secrets.FONTAWESOME_TOKEN }}
           push: true
           tags: kishikawakatsumi/applelocalization-web:latest
 
