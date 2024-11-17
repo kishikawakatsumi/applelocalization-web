@@ -21,7 +21,7 @@ jobs:
           push: true
           tags: kishikawakatsumi/applelocalization-web:latest
 
-      - uses: appleboy/ssh-action@v1.1.0
+      - uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
