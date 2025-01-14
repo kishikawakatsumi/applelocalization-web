@@ -51,6 +51,13 @@ const Platform: Record<string, any> = {
   macos: {
     latest: {
       name: "macOS",
+      version: "15",
+      path: "/macos",
+      bundle: await readBundle("macos", "15"),
+      count: "67,316,775",
+    },
+    14: {
+      name: "macOS",
       version: "14",
       path: "/macos",
       bundle: await readBundle("macos", "14"),
@@ -98,6 +105,9 @@ router
   })
   .get("/ios/15", (context) => {
     context.response.body = renderBody(Platform.ios["15"]);
+  })
+  .get("/macos/14", (context) => {
+    context.response.body = renderBody(Platform.macos["14"]);
   })
   .get("/macos/13", (context) => {
     context.response.body = renderBody(Platform.macos["13"]);
