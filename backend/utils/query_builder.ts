@@ -16,11 +16,11 @@ export class QueryBuilder {
         ${table}
       WHERE
         language in (${langCondition})
-        ${groups.length > 0 ? `AND group_id in (${groups.join(", ")})` : "AND FALSE"}
+        ${
+      groups.length > 0 ? `AND group_id in (${groups.join(", ")})` : "AND FALSE"
+    }
       `;
-    const orderBy = fields.includes("id")
-      ? "ORDER BY id, group_id, language"
-      : "";
+    const orderBy = fields.includes("id") ? "ORDER BY group_id, language" : "";
     const range = limit !== undefined && offset !== undefined
       ? "LIMIT $limit OFFSET $offset"
       : "";

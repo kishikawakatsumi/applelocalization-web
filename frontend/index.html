@@ -58,6 +58,12 @@
             <div class="dropdown-menu" id="dropdown-menu-platform" role="menu">
               <div class="dropdown-content">
                 <a href="/" class="dropdown-item">
+                  <span>iOS 26</span><span class="fa-light fa-mobile pl-2"></span>
+                </a>
+                <a href="/ios/18" class="dropdown-item">
+                  <span>iOS 18</span><span class="fa-light fa-mobile pl-2"></span>
+                </a>
+                <a href="/ios/17" class="dropdown-item">
                   <span>iOS 17</span><span class="fa-light fa-mobile pl-2"></span>
                 </a>
                 <a href="/ios/16" class="dropdown-item">
@@ -67,6 +73,9 @@
                   <span>iOS 15</span><span class="fa-light fa-mobile pl-2"></span>
                 </a>
                 <a href="/macos" class="dropdown-item">
+                  <span>macOS 26</span><span class="fa-light fa-desktop pl-2"></span>
+                </a>
+                <a href="/macos/15" class="dropdown-item">
                   <span>macOS 15</span><span class="fa-light fa-desktop pl-2"></span>
                 </a>
                 <a href="/macos/14" class="dropdown-item">
@@ -220,6 +229,26 @@
                   <div class="dropdown-item">
                     <div class="field has-addons">
                       <p class="control">
+                        <a <% if (it.platform === "iOS" && it.version === "26") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/ios/26"
+                          class="button is-small" <% } %>>
+                          <span>iOS 26</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-mobile px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
+                        <a <% if (it.platform === "iOS" && it.version === "18") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/ios/18"
+                          class="button is-small" <% } %>>
+                          <span>iOS 18</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-mobile px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
                         <a <% if (it.platform === "iOS" && it.version === "17") { %>href="#" onclick="return false;"
                           class="button is-small is-info is-selected" <% } else { %>href="/" class="button is-small"
                           <% } %>>
@@ -246,6 +275,16 @@
                           <span>iOS 15</span>
                           <span class="icon is-small">
                             <span class="fa-light fa-mobile px-2"></span>
+                          </span>
+                        </a>
+                      </p>
+                      <p class="control">
+                        <a <% if (it.platform === "macOS" && it.version === "26") { %>href="#" onclick="return false;"
+                          class="button is-small is-info is-selected" <% } else { %>href="/macos/"
+                          class="button is-small" <% } %>>
+                          <span>macOS 26</span>
+                          <span class="icon is-small">
+                            <span class="fa-light fa-desktop px-2"></span>
                           </span>
                         </a>
                       </p>
