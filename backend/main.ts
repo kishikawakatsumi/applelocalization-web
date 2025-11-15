@@ -28,15 +28,29 @@ const Platform: Record<string, any> = {
   ios: {
     latest: {
       name: "iOS",
-      version: "17",
+      version: "26",
       path: "/",
+      bundle: await readBundle("ios", "26"),
+      count: "16,339,749",
+    },
+    18: {
+      name: "iOS",
+      version: "18",
+      path: "/ios/18",
+      bundle: await readBundle("ios", "18"),
+      count: "11,935,831",
+    },
+    17: {
+      name: "iOS",
+      version: "17",
+      path: "/ios/17",
       bundle: await readBundle("ios", "17"),
       count: "9,175,537",
     },
     16: {
       name: "iOS",
       version: "16",
-      path: "/",
+      path: "/ios/16",
       bundle: await readBundle("ios", "16"),
       count: "7,298,644",
     },
@@ -51,22 +65,29 @@ const Platform: Record<string, any> = {
   macos: {
     latest: {
       name: "macOS",
-      version: "15",
+      version: "26",
       path: "/macos",
+      bundle: await readBundle("macos", "26"),
+      count: "18,371,166",
+    },
+    15: {
+      name: "macOS",
+      version: "15",
+      path: "/macos/15",
       bundle: await readBundle("macos", "15"),
       count: "67,316,775",
     },
     14: {
       name: "macOS",
       version: "14",
-      path: "/macos",
+      path: "/macos/14",
       bundle: await readBundle("macos", "14"),
       count: "14,383,340",
     },
     13: {
       name: "macOS",
       version: "13",
-      path: "/macos",
+      path: "/macos/13",
       bundle: await readBundle("macos", "13"),
       count: "13,254,016",
     },
@@ -100,11 +121,26 @@ router
   .get(`/macos/${Platform.macos.latest.version}`, (context) => {
     context.response.body = renderBody(Platform.macos.latest);
   })
+  .get("/ios/26", (context) => {
+    context.response.body = renderBody(Platform.ios["26"]);
+  })
+  .get("/ios/18", (context) => {
+    context.response.body = renderBody(Platform.ios["18"]);
+  })
+  .get("/ios/17", (context) => {
+    context.response.body = renderBody(Platform.ios["17"]);
+  })
   .get("/ios/16", (context) => {
     context.response.body = renderBody(Platform.ios["16"]);
   })
   .get("/ios/15", (context) => {
     context.response.body = renderBody(Platform.ios["15"]);
+  })
+  .get("/macos/26", (context) => {
+    context.response.body = renderBody(Platform.macos["26"]);
+  })
+  .get("/macos/15", (context) => {
+    context.response.body = renderBody(Platform.macos["15"]);
   })
   .get("/macos/14", (context) => {
     context.response.body = renderBody(Platform.macos["14"]);

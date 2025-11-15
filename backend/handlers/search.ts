@@ -11,19 +11,25 @@ import { QueryBuilder } from "../utils/query_builder.ts";
 import { languageMapping as iOS15 } from "../models/ios15/language_mappings.ts";
 import { languageMapping as iOS16 } from "../models/ios16/language_mappings.ts";
 import { languageMapping as iOS17 } from "../models/ios17/language_mappings.ts";
+import { languageMapping as iOS18 } from "../models/ios18/language_mappings.ts";
+import { languageMapping as iOS26 } from "../models/ios26/language_mappings.ts";
 import { languageMapping as macOS12 } from "../models/macos12/language_mappings.ts";
 import { languageMapping as macOS13 } from "../models/macos13/language_mappings.ts";
 import { languageMapping as macOS14 } from "../models/macos14/language_mappings.ts";
 import { languageMapping as macOS15 } from "../models/macos15/language_mappings.ts";
+import { languageMapping as macOS26 } from "../models/macos26/language_mappings.ts";
 
 const languageMappings: Record<string, { [key: string]: string[] }> = {
   "ios15": iOS15,
   "ios16": iOS16,
   "ios17": iOS17,
+  "ios18": iOS18,
+  "ios26": iOS26,
   "macos12": macOS12,
   "macos13": macOS13,
   "macos14": macOS14,
   "macos15": macOS15,
+  "macos26": macOS26,
 };
 
 export async function search<
@@ -207,7 +213,7 @@ export async function searchAdvanced<
     WHERE
       language in (${langCondition}) AND
       ${field} ${operator}
-    ORDER BY id, group_id, language
+    ORDER BY group_id, language
     LIMIT $size OFFSET $offset
     `,
     { searchWord, offset, size },

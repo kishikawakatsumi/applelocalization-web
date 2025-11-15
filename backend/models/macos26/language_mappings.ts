@@ -1,6 +1,5 @@
 export const languageMapping: { [key: string]: string[] } = {
   English: [
-    "Base",
     "English",
     "en",
     "en-GB",
@@ -26,7 +25,6 @@ export const languageMapping: { [key: string]: string[] } = {
     "en_GB~ipad",
     "en_GB~iphone",
     "en_IN",
-    "en_SG",
     "en~appletv",
     "en~applewatch",
     "en~ipad",
@@ -39,7 +37,6 @@ export const languageMapping: { [key: string]: string[] } = {
     "fr-iphoneos",
     "fr-macos",
     "fr-tvos",
-    "fr_BE",
     "fr_CA",
     "fr_CA-iphoneos",
     "fr_CA-macos",
@@ -48,7 +45,6 @@ export const languageMapping: { [key: string]: string[] } = {
     "fr_CA~applewatch",
     "fr_CA~ipad",
     "fr_CA~iphone",
-    "fr_CH",
     "fr~appletv",
     "fr~applewatch",
     "fr~ipad",
@@ -60,8 +56,6 @@ export const languageMapping: { [key: string]: string[] } = {
     "de-iphoneos",
     "de-macos",
     "de-tvos",
-    "de_AT",
-    "de_CH",
     "de~appletv",
     "de~applewatch",
     "de~ipad",
@@ -132,7 +126,6 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Bengali: [
     "bn",
-    "bn_Latn",
   ],
   Bulgarian: [
     "bg",
@@ -182,7 +175,6 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Cantonese: [
     "yue_CN",
-    "yue_CN~appletv",
   ],
   Croatian: [
     "hr",
@@ -220,7 +212,6 @@ export const languageMapping: { [key: string]: string[] } = {
     "nl-iphoneos",
     "nl-macos",
     "nl-tvos",
-    "nl_BE",
     "nl~appletv",
     "nl~applewatch",
     "nl~ipad",
@@ -257,7 +248,6 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Gujarati: [
     "gu",
-    "gu_Latn",
   ],
   Hebrew: [
     "he",
@@ -305,7 +295,6 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Kannada: [
     "kn",
-    "kn_Latn",
   ],
   Kazakh: [
     "kk",
@@ -334,11 +323,9 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Malayalam: [
     "ml",
-    "ml_Latn",
   ],
   Marathi: [
     "mr",
-    "mr_Latn",
   ],
   Malay: [
     "ms",
@@ -372,7 +359,6 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Punjabi: [
     "pa",
-    "pa_Latn",
   ],
   Polish: [
     "pl",
@@ -391,6 +377,7 @@ export const languageMapping: { [key: string]: string[] } = {
     "pt_BR-iphoneos",
     "pt_BR-macos",
     "pt_BR-tvos",
+    "pt_BR~appletv",
     "pt_BR~ipad",
     "pt_BR~iphone",
     "pt_PT",
@@ -458,11 +445,9 @@ export const languageMapping: { [key: string]: string[] } = {
   ],
   Tamil: [
     "ta",
-    "ta_Latn",
   ],
   Telugu: [
     "te",
-    "te_Latn",
   ],
   Thai: [
     "th",
