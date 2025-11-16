@@ -75,7 +75,7 @@ const Platform: Record<string, any> = {
       version: "15",
       path: "/macos/15",
       bundle: await readBundle("macos", "15"),
-      count: "67,316,775",
+      count: "17,281,221",
     },
     14: {
       name: "macOS",
