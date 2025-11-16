@@ -7,6 +7,28 @@ https://applelocalization.com/
 
 ## Release Note
 
+### [iOS 18, iOS 26, macOS 26] - 2025-11-16
+
+#### Added
+
+- iOS 18.1, iOS 26.2, macOS 15.6, macOS 26.1
+
+#### Removed
+
+- macOS 15.2
+
+### [macOS 15] - 2025-01-14
+
+#### Added
+
+- macOS 15.2
+
+### [iOS 17] - 2024-10-24
+
+#### Added
+
+- iOS 17
+
 ### [macOS 14] - 2023-10-03
 
 #### Added
