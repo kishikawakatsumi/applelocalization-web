@@ -12,7 +12,7 @@
     "@fortawesome/pro-solid-svg-icons": "6.4.0",
     "bulma": "1.0.4",
     "plausible-tracker": "0.3.9",
-    "tabulator-tables": "6.3.1"
+    "tabulator-tables": "6.4.0"
   },
   "devDependencies": {
     "copy-webpack-plugin": "13.0.1",
