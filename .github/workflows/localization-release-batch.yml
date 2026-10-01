@@ -17,6 +17,11 @@ on:
         type: boolean
         required: true
         default: false
+      publish_candidates:
+        description: After collection, trigger independent SQL/image/candidate-push jobs for complete targets only
+        type: boolean
+        required: true
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -98,3 +103,16 @@ jobs:
             ${{ env.OUTPUT }}/sql-failure.json
           retention-days: 14
           if-no-files-found: warn
+  candidates:
+    needs: [plan, collect]
+    if: always() && needs.plan.result == 'success' && inputs.publish_candidates == true && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger independent candidate pipeline for this exact source run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ github.run_id }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run localization-candidate-pipeline.yml --repo "$REPOSITORY" --ref main -f source_run="$SOURCE_RUN" -f targets=all-ready -f publish=true

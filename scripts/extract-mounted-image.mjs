@@ -18,7 +18,11 @@ import { pipeline } from "node:stream/promises";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
-import { decodePlist, resourceParserPolicy, resourceRows } from "./extract-mounted-bundle.mjs";
+import {
+  decodePlist,
+  resourceParserPolicy,
+  resourceRows,
+} from "./extract-mounted-bundle.mjs";
 import { assignBundle, bundlePolicy } from "./bundle-assignment.mjs";
 import { readBundleMetadata } from "./bundle-metadata.mjs";
 
@@ -83,9 +87,15 @@ export async function extractMountedImage(
     progress = () => {},
     subtree = null,
     installerProjection = null,
+    otaProjection = null,
   },
 ) {
   if (!label) throw new Error("A unique image source label is required");
+  if (installerProjection !== null && otaProjection !== null) {
+    throw new Error("Ambiguous projection identity");
+  }
+  const ota = otaProjection !== null;
+  installerProjection ??= otaProjection;
   // Describes already verified input, not an alternate mount verification path.
   // The installer runner must verify the projection before calling this API.
   let projectionScope = null;
@@ -100,7 +110,7 @@ export async function extractMountedImage(
       )
     ) throw new Error("Invalid installer projection identity or scan options");
     projectionScope = {
-      kind: "installer-resource-projection",
+      kind: ota ? "ota-resource-projection" : "installer-resource-projection",
       version: installerProjection.version,
       build: installerProjection.build,
       archiveSha256: installerProjection.archiveSha256,

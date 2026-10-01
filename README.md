@@ -84,9 +84,19 @@ separate validation step. Artifacts retain intermediate/quarantine data and SQL 
 the registry retains pushed candidate images. No routine Mac download, IPSW/DMG retention,
 cross-repository Release publication, scheduled annual run, or automatic production deployment occurs.
 
-The pinned 2026-10-02 plan covers 12 requested series; five have IPSW inputs and seven still need
-alternative acquisition routes. The first macOS 27 OS job hit the standard runner disk reserve,
-so that incomplete target must not be presented as a verified candidate.
+The pinned 2026-10-02 plan covers 12 requested series: five IPSW targets and six full-OTA
+targets (macOS 12/13/14/15/26 and iOS 17) are configured. iOS 26 still needs its encrypted
+OTA acquisition route. Full-OTA archives and internal metadata are hash-pinned; only full
+payloads with the exact stable release build are accepted. macOS OTA builds are cross-checked
+against Apple's stable installer distribution definitions, even when OTA documentation IDs
+retain an RC suffix. Intel and arm64 SystemOS components remain separate schemas in one image.
+
+Set `publish_candidates=true` on the collection workflow to trigger the independent candidate
+pipeline after collection, with that exact run ID and `all-ready`. A failed sibling does not
+block complete targets; an incomplete target is never pushed. This opt-in changes no production
+tag or deployment. It avoids waiting for manual Web acceptance between extraction and candidate
+SQL/image generation. Ordinary OTA resources use a BOM-checked regular-file projection;
+cryptex patches use read-only image extraction. Auxiliary/recovery assets remain out of scope.
 
 Large IPSW members now use bounded HTTP range reads instead of retaining every
 downloaded block in the tool's memory cache. The reader requires coherent strong
