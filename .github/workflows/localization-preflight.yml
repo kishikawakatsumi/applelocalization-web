@@ -1,9 +1,6 @@
 name: Localization runner preflight
 
 on:
-  # Temporary bootstrap: remove after the first hosted validation, before merging.
-  push:
-    branches: [codex/localization-runner-preflight]
   workflow_dispatch:
     inputs:
       runner:
@@ -19,12 +16,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: localization-preflight-${{ inputs.runner || 'macos-15' }}
+  group: localization-preflight-${{ inputs.runner }}
   cancel-in-progress: false
 
 jobs:
   preflight:
-    runs-on: ${{ inputs.runner || 'macos-15' }}
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
@@ -46,7 +43,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: localization-preflight-${{ inputs.runner || 'macos-15' }}-${{ github.run_id }}-${{ github.run_attempt }}
+          name: localization-preflight-${{ inputs.runner }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/localization-preflight/report.json
           retention-days: 7
           if-no-files-found: warn

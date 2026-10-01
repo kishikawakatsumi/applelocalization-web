@@ -25,11 +25,10 @@ test('cleanup requires the exact read-only image and owned device association', 
   assert.throws(() => ownedImage([image], '/other.dmg', '/dev/disk7'));
   assert.throws(() => ownedImage([image], '/fixture/synthetic.dmg', '/dev/disk8'));
 });
-test('hosted preflight bootstrap is branch-scoped, bounded, secret-free and report-only', async () => {
+test('hosted preflight remains manual, bounded, secret-free and report-only', async () => {
   const workflow = await readFile('.github/workflows/localization-preflight.yml', 'utf8');
   assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /push:\n    branches: \[codex\/localization-runner-preflight\]/);
-  assert.doesNotMatch(workflow, /pull_request:|schedule:|secrets\.|self-hosted|allow-download|scripts\/acquire-ipsw|sudo/);
+  assert.doesNotMatch(workflow, /pull_request:|push:|schedule:|secrets\.|self-hosted|allow-download|scripts\/acquire-ipsw|sudo/);
   assert.match(workflow, /timeout-minutes: 15/);
   assert.match(workflow, /persist-credentials: false/);
   assert.match(workflow, /cancel-in-progress: false/);
