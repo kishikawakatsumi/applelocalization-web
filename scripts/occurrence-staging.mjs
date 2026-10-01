@@ -68,9 +68,15 @@ export function parseCopyLine(line) {
     });
   });
 }
-export function stagingApplicationArgs(name = process.env.LOCALIZATION_STAGING_APPLICATION_NAME) {
+export function stagingApplicationArgs(
+  name = process.env.LOCALIZATION_STAGING_APPLICATION_NAME,
+) {
   if (name === undefined) return [];
-  assert.match(name, /^[a-z][a-z0-9_]{0,62}$/, "Invalid staging application name");
+  assert.match(
+    name,
+    /^[a-z][a-z0-9_]{0,62}$/,
+    "Invalid staging application name",
+  );
   return ["-e", `PGAPPNAME=${name}`];
 }
 export function psqlProcess() {
@@ -173,19 +179,39 @@ export function occurrenceSQLLayout({ schema, durable = false, database }) {
   if (!durable) {
     validateSchema(schema);
     assert.ok(database === undefined || database === stagingDatabase);
-    return { header: stagingSQLHeader(schema), footer: stagingSQLFooter(schema), database: stagingDatabase };
+    return {
+      header: stagingSQLHeader(schema),
+      footer: stagingSQLFooter(schema),
+      database: stagingDatabase,
+    };
   }
   assert.equal(durable, true);
   assert.match(schema, /^localization_[a-z0-9_]{1,40}$/);
-  assert.match(database ?? '', /^[a-z][a-z0-9_]{0,62}$/);
-  assert.ok(!['postgres', 'template0', 'template1'].includes(database), 'Refuse system database');
-  const template = 'ipsw_trial_durable_template';
+  assert.match(database ?? "", /^[a-z][a-z0-9_]{0,62}$/);
+  assert.ok(
+    !["postgres", "template0", "template1"].includes(database),
+    "Refuse system database",
+  );
+  const template = "ipsw_trial_durable_template";
   const header = stagingSQLHeader(template).replaceAll(template, schema)
-    .replaceAll('CREATE UNLOGGED TABLE', 'CREATE TABLE')
-    .replace(`current_database() <> '${stagingDatabase}'`, `current_database() <> '${database}'`)
-    .replace('Wrong staging database', 'Wrong target database')
-    .replace(`CREATE SCHEMA ${schema};`, `CREATE SCHEMA ${schema};\nREVOKE ALL ON SCHEMA ${schema} FROM PUBLIC;`);
-  return { header, footer: stagingSQLFooter(template).replaceAll(template, schema).replace('Staging import committed', 'Durable occurrence import committed'), database };
+    .replaceAll("CREATE UNLOGGED TABLE", "CREATE TABLE")
+    .replace(
+      `current_database() <> '${stagingDatabase}'`,
+      `current_database() <> '${database}'`,
+    )
+    .replace("Wrong staging database", "Wrong target database")
+    .replace(
+      `CREATE SCHEMA ${schema};`,
+      `CREATE SCHEMA ${schema};\nREVOKE ALL ON SCHEMA ${schema} FROM PUBLIC;`,
+    );
+  return {
+    header,
+    footer: stagingSQLFooter(template).replaceAll(template, schema).replace(
+      "Staging import committed",
+      "Durable occurrence import committed",
+    ),
+    database,
+  };
 }
 
 export async function exportOccurrenceSQL(
@@ -222,7 +248,17 @@ export async function exportOccurrenceSQL(
   await space();
   await mkdir(destination);
   const sql = new JsonLineWriter(join(destination, "import.sql.gz"));
-  const statement = (text) => sql.line(text + "\n");
+  let maximumLineBytes = 0;
+  const statement = (text) => {
+    // COPY fields are LF-escaped. Fixed multiline DDL is also covered by this conservative bound.
+    const bytes = Buffer.byteLength(text, "utf8");
+    assert.ok(
+      bytes <= 256 * 1024 ** 2,
+      "SQL statement exceeds 256 MiB byte limit",
+    );
+    maximumLineBytes = Math.max(maximumLineBytes, bytes);
+    return sql.line(text + "\n");
+  };
   const copy = (values) => statement(values.map(copyField).join("\t"));
   const hashes = {}, contents = {};
   async function* verified(name) {
@@ -401,18 +437,25 @@ export async function exportOccurrenceSQL(
     await statement(layout.footer);
     const sqlSha256 = await sql.close();
     const result = {
-      status: durable ? "durable-occurrence-sql-prepared" : "staging-sql-prepared",
+      status: durable
+        ? "durable-occurrence-sql-prepared"
+        : "staging-sql-prepared",
       schema,
       database: layout.database,
-      ...(durable ? { storage: 'logged', published: false, apiCompatible: false } : { container: stagingContainer }),
+      ...(durable
+        ? { storage: "logged", published: false, apiCompatible: false }
+        : { container: stagingContainer }),
       packageManifest: manifest,
       sqlSha256,
+      maximumLineBytes,
       stats,
       resourceCount: resourceIds.size,
       tableCount: tableIds.size,
       languageCount: languageIds.size,
       limitations: [
-        durable ? "Logged occurrence storage candidate; actual target import, backups, roles and API release still require verification." : "Local staging only; unlogged tables are rebuildable and not crash-durable or replication-ready.",
+        durable
+          ? "Logged occurrence storage candidate; actual target import, backups, roles and API release still require verification."
+          : "Local staging only; unlogged tables are rebuildable and not crash-durable or replication-ready.",
         "No text deduplication or automatic source/target pairing. Search view does not change existing GET endpoints.",
         "Unsupported PostgreSQL text is retained as JSON-encoded text; those values are not silently substituted into full-text search.",
       ],

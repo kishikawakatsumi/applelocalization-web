@@ -100,6 +100,23 @@ export function producer(env = process.env) {
     runAttempt: env.GITHUB_RUN_ATTEMPT,
   };
 }
+export function selectBatchJobs(plan, targets = "all-ready") {
+  const matrix = validateBatchPlan(plan);
+  if (targets === "all-ready") return matrix;
+  const selected = targets.split(",");
+  assert.equal(new Set(selected).size, selected.length);
+  for (const id of selected) {
+    assert.ok(
+      plan.targets.some((t) => t.id === id && t.status === "ipsw-input-pinned"),
+      "Target acquisition route is not ready",
+    );
+  }
+  return {
+    include: matrix.include.filter((x) =>
+      selected.includes(plan.jobs.find((j) => j.key === x.key).target)
+    ),
+  };
+}
 export async function runBatchComponent(
   { mode, key, output, allowDownload = false },
 ) {
@@ -272,10 +289,13 @@ if (
       mode: { type: "string" },
       key: { type: "string" },
       output: { type: "string" },
+      targets: { type: "string", default: "all-ready" },
       "allow-download": { type: "boolean", default: false },
     },
   });
   if (v.mode === "matrix") {
-    console.log(JSON.stringify(validateBatchPlan(await json(planURL))));
+    console.log(
+      JSON.stringify(selectBatchJobs(await json(planURL), v.targets)),
+    );
   } else await runBatchComponent({ ...v, allowDownload: v["allow-download"] });
 }

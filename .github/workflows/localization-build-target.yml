@@ -1,0 +1,153 @@
+name: Localization single-version SQL image and push
+on:
+  workflow_call:
+    inputs:
+      source_run:
+        required: true
+        type: string
+      target:
+        required: true
+        type: string
+      intermediate_ids:
+        required: true
+        type: string
+      plan_id:
+        required: true
+        type: string
+      plan_sha256:
+        required: true
+        type: string
+      publish:
+        required: true
+        type: boolean
+permissions:
+  contents: read
+  actions: read
+env:
+  TARGET: ${{ inputs.target }}
+  PLAN_SHA256: ${{ inputs.plan_sha256 }}
+  NODE_OPTIONS: --max-old-space-size=4096
+jobs:
+  sql:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+      sha256: ${{ steps.sql.outputs.bundle_sha256 }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ inputs.plan_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/plan
+          digest-mismatch: error
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ inputs.intermediate_ids }}
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/intermediate
+          digest-mismatch: error
+      - name: Generate and fully audit independent component SQL in one version bundle
+        id: sql
+        run: node scripts/candidate-pipeline.mjs --mode sql --plan "$RUNNER_TEMP/plan/candidate-plan.json" --plan-sha256 "$PLAN_SHA256" --target "$TARGET" --input "$RUNNER_TEMP/intermediate" --output "$RUNNER_TEMP/prepared"
+      - id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: candidate-sql-${{ inputs.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/prepared/sql/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+  image:
+    needs: sql
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+      sha256: ${{ steps.build.outputs.distribution_sha256 }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ inputs.plan_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/plan
+          digest-mismatch: error
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ needs.sql.outputs.artifact_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/sql
+          digest-mismatch: error
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ inputs.intermediate_ids }}
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/intermediate
+          digest-mismatch: error
+      - name: Build then verify fresh DB, every row, quarantine, search and clean restart
+        id: build
+        env:
+          BUNDLE_SHA256: ${{ needs.sql.outputs.sha256 }}
+        run: node scripts/candidate-bundle-image.mjs --mode build --plan "$RUNNER_TEMP/plan/candidate-plan.json" --plan-sha256 "$PLAN_SHA256" --target "$TARGET" --input "$RUNNER_TEMP/intermediate" --sql "$RUNNER_TEMP/sql" --bundle-sha256 "$BUNDLE_SHA256" --output "$RUNNER_TEMP/built"
+      - id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: candidate-image-${{ inputs.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/built/distribution/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+  push:
+    needs: image
+    if: inputs.publish == true && github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ needs.image.outputs.artifact_id }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/distribution
+          digest-mismatch: error
+      - name: Verify exact successful image job output before registry login
+        env:
+          SHA256: ${{ needs.image.outputs.sha256 }}
+        run: node scripts/candidate-bundle-image.mjs --mode verify --input "$RUNNER_TEMP/distribution" --sha256 "$SHA256"
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Push unique candidate tag only (no production deployment)
+        env:
+          SHA256: ${{ needs.image.outputs.sha256 }}
+        run: node scripts/candidate-bundle-image.mjs --mode push --input "$RUNNER_TEMP/distribution" --sha256 "$SHA256" --allow-push --output "$RUNNER_TEMP/pushed.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: candidate-pushed-${{ inputs.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/pushed.json
+          retention-days: 90
+          if-no-files-found: error

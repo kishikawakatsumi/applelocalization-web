@@ -3,14 +3,24 @@ on:
   workflow_dispatch:
     inputs:
       allow_download:
-        description: Collect all pinned ready components and generate SQL; no Release, Docker Hub or database publication
+        description: Collect selected pinned components; no Release, Docker Hub or database publication
+        type: boolean
+        required: true
+        default: false
+      targets:
+        description: Comma-separated target IDs or all-ready; only pinned inputs can run
+        type: string
+        required: true
+        default: all-ready
+      generate_sql:
+        description: Also generate SQL on macOS (normally use the independent Linux candidate pipeline)
         type: boolean
         required: true
         default: false
 permissions:
   contents: read
 concurrency:
-  group: localization-release-batch-20261002
+  group: localization-release-batch-20261002-${{ inputs.targets }}
   cancel-in-progress: false
 jobs:
   plan:
@@ -28,7 +38,9 @@ jobs:
           package-manager-cache: false
       - run: node --test tests/*.test.mjs
       - id: plan
-        run: echo "matrix=$(node scripts/collect-release-batch.mjs --mode matrix)" >> "$GITHUB_OUTPUT"
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: echo "matrix=$(node scripts/collect-release-batch.mjs --mode matrix --targets "$TARGETS")" >> "$GITHUB_OUTPUT"
   collect:
     needs: plan
     runs-on: macos-15
@@ -65,8 +77,10 @@ jobs:
           retention-days: 14
           if-no-files-found: error
       - name: Generate logged SQL and verify every exported row (no database connection)
+        if: inputs.generate_sql == true
         run: node scripts/collect-release-batch.mjs --mode sql --key "$COMPONENT" --output "$OUTPUT"
       - name: Save verified SQL only
+        if: inputs.generate_sql == true
         uses: actions/upload-artifact@v7
         with:
           name: sql-${{ matrix.key }}-${{ github.run_id }}-${{ github.run_attempt }}
