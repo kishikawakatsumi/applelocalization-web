@@ -88,6 +88,12 @@ The pinned 2026-10-02 plan covers 12 requested series; five have IPSW inputs and
 alternative acquisition routes. The first macOS 27 OS job hit the standard runner disk reserve,
 so that incomplete target must not be presented as a verified candidate.
 
+Large IPSW members now use bounded HTTP range reads instead of retaining every
+downloaded block in the tool's memory cache. The reader requires coherent strong
+ETags and exact ranges, verifies ZIP CRC and SHA-256, and refuses unexpected members
+or byte-budget overruns. Existing free-disk reserves remain unchanged. This avoids
+an unbounded cache; successful macOS collection still requires an actual CI run.
+
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools
 - https://github.com/kishikawakatsumi/applelocalization-citools

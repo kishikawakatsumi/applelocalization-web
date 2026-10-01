@@ -208,17 +208,18 @@ export async function acquireComponent(
           await manifest(r);
           const directory = join(out, "payload");
           await mkdir(directory);
-          const pattern = "^" +
-            spec.imagePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "$";
-          await boundedCommand(spec.tool.path, [
-            "extract",
-            "--remote",
+          // The pinned ipsw range reader retains all fetched blocks. Stream
+          // large members without caching them; keep the existing disk guard.
+          const download = await boundedCommand("python3", [
+            join(scripts, "download-ipsw-member.py"),
+            "--url",
             spec.url,
-            "--pattern",
-            pattern,
+            "--member",
+            spec.imagePath,
             "--output",
             directory,
-            "--no-color",
+            "--maximum-bytes",
+            String(spec.maximumDownloadBytes),
           ], {
             directory,
             maximumBytes: spec.maximumDownloadBytes,
@@ -230,6 +231,15 @@ export async function acquireComponent(
             spec.imagePath,
             spec.maximumDownloadBytes,
           );
+          const downloaded = JSON.parse(download.stdout);
+          assert.equal(
+            downloaded.status,
+            "ipsw-member-downloaded-crc-verified",
+          );
+          assert.equal(downloaded.member, spec.imagePath);
+          assert.equal(downloaded.bytes, file.bytes);
+          assert.equal(downloaded.sha256, await fileHash(file.path));
+          await writeJson(join(out, "range-download.json"), downloaded);
           await writeJson(join(out, "file.json"), {
             ...file,
             sha256: await fileHash(file.path),
