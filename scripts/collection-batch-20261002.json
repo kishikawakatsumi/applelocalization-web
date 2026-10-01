@@ -1,0 +1,441 @@
+{
+  "formatVersion": 1,
+  "checkedAt": "2026-10-02",
+  "policy": "latest-official-stable-per-major",
+  "published": false,
+  "completeOS": false,
+  "tool": {
+    "url": "https://github.com/blacktop/ipsw/releases/download/v3.1.728/ipsw_3.1.728_macOS_arm64.tar.gz",
+    "archiveBytes": 26946550,
+    "archiveSha256": "aee66c946eb29f5f52e8fafd971eec3354d410585eb132cc8b677ac22143b287",
+    "binarySha256": "1854dcac3b6b8f225660bca3ad0db15a91361cb57eefcb3a853432f29f5fa36f"
+  },
+  "targets": [
+    {
+      "id": "ios27",
+      "platform": "iOS",
+      "version": "27.0.1",
+      "build": "24A446",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios26",
+      "platform": "iOS",
+      "version": "26.7.1",
+      "build": null,
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/100100",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    },
+    {
+      "id": "ios18",
+      "platform": "iOS",
+      "version": "18.7.10",
+      "build": "22H374",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios17",
+      "platform": "iOS",
+      "version": "17.7.2",
+      "build": null,
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/121754",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    },
+    {
+      "id": "ios16",
+      "platform": "iOS",
+      "version": "16.7.16",
+      "build": "20H392",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios15",
+      "platform": "iOS",
+      "version": "15.8.8",
+      "build": "19H422",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "macos27",
+      "platform": "macOS",
+      "version": "27.0.1",
+      "build": "26A434",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    },
+    {
+      "id": "macos26",
+      "platform": "macOS",
+      "version": "26.7.1",
+      "build": null,
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/109033",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    },
+    {
+      "id": "macos15",
+      "platform": "macOS",
+      "version": "15.8.1",
+      "build": "24H32",
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/109033",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    },
+    {
+      "id": "macos14",
+      "platform": "macOS",
+      "version": "14.8.9",
+      "build": null,
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/109033",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    },
+    {
+      "id": "macos13",
+      "platform": "macOS",
+      "version": "13.7.8",
+      "build": null,
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/109033",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    },
+    {
+      "id": "macos12",
+      "platform": "macOS",
+      "version": "12.7.6",
+      "build": null,
+      "status": "alternative-route-pending",
+      "evidenceUrl": "https://support.apple.com/en-us/109033",
+      "reason": "No matching latest IPSW input verified for this batch. Installer/OTA acquisition needs investigation; no older-version substitution."
+    }
+  ],
+  "jobs": [
+    {
+      "key": "ios27-os",
+      "target": "ios27",
+      "completeOS": false,
+      "schema": "localization_ios27_24a446_os",
+      "uncollectedManifestComponents": [
+        "Ap,ExclaveOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "27.0.1",
+        "build": "24A446",
+        "product": "iPhone17,3",
+        "board": "d47ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "043-69462-662.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/38dca0ee-bb5d-4132-ad13-62d57bcd6d32/iPhone17,3_27.0.1_24A446_Restore.ipsw",
+        "manifestSha256": "1d3df8a49cf134cbf3b9f46c67be5cfc000c6bc2fda014846784fa0a8993b461",
+        "maximumDownloadBytes": 10737418240,
+        "maximumImageBytes": 12884901888
+      }
+    },
+    {
+      "key": "ios27-appos",
+      "target": "ios27",
+      "completeOS": false,
+      "schema": "localization_ios27_24a446_appos",
+      "uncollectedManifestComponents": [
+        "Ap,ExclaveOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "27.0.1",
+        "build": "24A446",
+        "product": "iPhone17,3",
+        "board": "d47ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "043-69297-793.dmg",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/38dca0ee-bb5d-4132-ad13-62d57bcd6d32/iPhone17,3_27.0.1_24A446_Restore.ipsw",
+        "manifestSha256": "1d3df8a49cf134cbf3b9f46c67be5cfc000c6bc2fda014846784fa0a8993b461",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "ios27-systemos",
+      "target": "ios27",
+      "completeOS": false,
+      "schema": "localization_ios27_24a446_systemos",
+      "uncollectedManifestComponents": [
+        "Ap,ExclaveOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "27.0.1",
+        "build": "24A446",
+        "product": "iPhone17,3",
+        "board": "d47ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "043-70113-711.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/38dca0ee-bb5d-4132-ad13-62d57bcd6d32/iPhone17,3_27.0.1_24A446_Restore.ipsw",
+        "manifestSha256": "1d3df8a49cf134cbf3b9f46c67be5cfc000c6bc2fda014846784fa0a8993b461",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "ios18-os",
+      "target": "ios18",
+      "completeOS": false,
+      "schema": "localization_ios18_22h374_os",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "18.7.10",
+        "build": "22H374",
+        "product": "iPhone11,8",
+        "board": "n841ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "094-31934-038.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026WinterFCS/fullrestores/140-97953/5F3051CD-5405-4FEF-889E-C3B78E0F376F/iPhone11,8_18.7.10_22H374_Restore.ipsw",
+        "manifestSha256": "a324b0bbe0f119c26612697a62a0d39a39f28ee4b0bc1730cac049981c2b2b8c",
+        "maximumDownloadBytes": 10737418240,
+        "maximumImageBytes": 12884901888
+      }
+    },
+    {
+      "key": "ios18-appos",
+      "target": "ios18",
+      "completeOS": false,
+      "schema": "localization_ios18_22h374_appos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "18.7.10",
+        "build": "22H374",
+        "product": "iPhone11,8",
+        "board": "n841ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "094-32850-038.dmg",
+        "url": "https://updates.cdn-apple.com/2026WinterFCS/fullrestores/140-97953/5F3051CD-5405-4FEF-889E-C3B78E0F376F/iPhone11,8_18.7.10_22H374_Restore.ipsw",
+        "manifestSha256": "a324b0bbe0f119c26612697a62a0d39a39f28ee4b0bc1730cac049981c2b2b8c",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "ios18-systemos",
+      "target": "ios18",
+      "completeOS": false,
+      "schema": "localization_ios18_22h374_systemos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "18.7.10",
+        "build": "22H374",
+        "product": "iPhone11,8",
+        "board": "n841ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "094-32062-038.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026WinterFCS/fullrestores/140-97953/5F3051CD-5405-4FEF-889E-C3B78E0F376F/iPhone11,8_18.7.10_22H374_Restore.ipsw",
+        "manifestSha256": "a324b0bbe0f119c26612697a62a0d39a39f28ee4b0bc1730cac049981c2b2b8c",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "ios16-os",
+      "target": "ios16",
+      "completeOS": false,
+      "schema": "localization_ios16_20h392_os",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "16.7.16",
+        "build": "20H392",
+        "product": "iPhone10,6",
+        "board": "d221ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "087-86698-044.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77006/1158E502-D76D-4226-AA06-ED5E30CD1111/iPhone10,3,iPhone10,6_16.7.16_20H392_Restore.ipsw",
+        "manifestSha256": "2d1452103a2f5ad71cb78d94454977fc70632472201980a468c247fba14b10b7",
+        "maximumDownloadBytes": 6442450944,
+        "maximumImageBytes": 6442450944
+      }
+    },
+    {
+      "key": "ios16-appos",
+      "target": "ios16",
+      "completeOS": false,
+      "schema": "localization_ios16_20h392_appos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "16.7.16",
+        "build": "20H392",
+        "product": "iPhone10,6",
+        "board": "d221ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "087-86715-047.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77006/1158E502-D76D-4226-AA06-ED5E30CD1111/iPhone10,3,iPhone10,6_16.7.16_20H392_Restore.ipsw",
+        "manifestSha256": "2d1452103a2f5ad71cb78d94454977fc70632472201980a468c247fba14b10b7",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "ios16-systemos",
+      "target": "ios16",
+      "completeOS": false,
+      "schema": "localization_ios16_20h392_systemos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "16.7.16",
+        "build": "20H392",
+        "product": "iPhone10,6",
+        "board": "d221ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "087-86593-047.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77006/1158E502-D76D-4226-AA06-ED5E30CD1111/iPhone10,3,iPhone10,6_16.7.16_20H392_Restore.ipsw",
+        "manifestSha256": "2d1452103a2f5ad71cb78d94454977fc70632472201980a468c247fba14b10b7",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "ios15-os",
+      "target": "ios15",
+      "completeOS": false,
+      "schema": "localization_ios15_19h422_os",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "15.8.8",
+        "build": "19H422",
+        "product": "iPhone9,3",
+        "board": "d101ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "098-68844-067.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77496/774C7319-F63C-4C05-9C6C-49F5F0966540/iPhone_4.7_P3_15.8.8_19H422_Restore.ipsw",
+        "manifestSha256": "1eb426fd4da23fc8d133a06c15f697924537d09b9dc192e49e23accf8dd9d015",
+        "maximumDownloadBytes": 6442450944,
+        "maximumImageBytes": 6442450944
+      }
+    },
+    {
+      "key": "macos27-os",
+      "target": "macos27",
+      "completeOS": false,
+      "schema": "localization_macos27_26a434_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "Cryptex1,RosettaOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "macOS",
+        "version": "27.0.1",
+        "build": "26A434",
+        "product": "VirtualMac2,1",
+        "board": "vma2macosap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "043-70867-640.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/59241290-5d51-4ca8-9df4-31624b9a4eac/UniversalMac_27.0.1_26A434_Restore.ipsw",
+        "manifestSha256": "2585e3bd35a2491773bdf8c40803e0b10aa6ed222a27c790b34d25b5fa6842af",
+        "maximumDownloadBytes": 12884901888,
+        "maximumImageBytes": 17179869184
+      }
+    },
+    {
+      "key": "macos27-appos",
+      "target": "macos27",
+      "completeOS": false,
+      "schema": "localization_macos27_26a434_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "Cryptex1,RosettaOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "macOS",
+        "version": "27.0.1",
+        "build": "26A434",
+        "product": "VirtualMac2,1",
+        "board": "vma2macosap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "043-70637-690.dmg",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/59241290-5d51-4ca8-9df4-31624b9a4eac/UniversalMac_27.0.1_26A434_Restore.ipsw",
+        "manifestSha256": "2585e3bd35a2491773bdf8c40803e0b10aa6ed222a27c790b34d25b5fa6842af",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "macos27-systemos",
+      "target": "macos27",
+      "completeOS": false,
+      "schema": "localization_macos27_26a434_systemos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "Cryptex1,RosettaOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "macOS",
+        "version": "27.0.1",
+        "build": "26A434",
+        "product": "VirtualMac2,1",
+        "board": "vma2macosap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "043-70701-651.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/59241290-5d51-4ca8-9df4-31624b9a4eac/UniversalMac_27.0.1_26A434_Restore.ipsw",
+        "manifestSha256": "2585e3bd35a2491773bdf8c40803e0b10aa6ed222a27c790b34d25b5fa6842af",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    }
+  ]
+}

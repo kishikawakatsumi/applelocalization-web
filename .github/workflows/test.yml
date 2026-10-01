@@ -11,6 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Collector and release guard regression tests
+        run: node --test tests/*.test.mjs
       - name: Build
         run: |
           set -ex

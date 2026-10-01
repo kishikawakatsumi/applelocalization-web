@@ -1,0 +1,85 @@
+name: Localization latest release collection batch
+on:
+  workflow_dispatch:
+    inputs:
+      allow_download:
+        description: Collect all pinned ready components and generate SQL; no Release, Docker Hub or database publication
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: localization-release-batch-20261002
+  cancel-in-progress: false
+jobs:
+  plan:
+    if: inputs.allow_download == true && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: node --test tests/*.test.mjs
+      - id: plan
+        run: echo "matrix=$(node scripts/collect-release-batch.mjs --mode matrix)" >> "$GITHUB_OUTPUT"
+  collect:
+    needs: plan
+    runs-on: macos-15
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      COMPONENT: ${{ matrix.key }}
+      OUTPUT: ${{ runner.temp }}/localization-${{ matrix.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Extract and audit all collected languages; keep quarantine originals
+        id: extract
+        run: node scripts/collect-release-batch.mjs --mode collect --key "$COMPONENT" --output "$OUTPUT" --allow-download
+      - name: Save intermediate before SQL generation
+        uses: actions/upload-artifact@v7
+        with:
+          name: intermediate-${{ matrix.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.OUTPUT }}/assets/artifact.json
+            ${{ env.OUTPUT }}/assets/localization-intermediate.tar
+            ${{ env.OUTPUT }}/collection.json
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+      - name: Generate logged SQL and verify every exported row (no database connection)
+        run: node scripts/collect-release-batch.mjs --mode sql --key "$COMPONENT" --output "$OUTPUT"
+      - name: Save verified SQL only
+        uses: actions/upload-artifact@v7
+        with:
+          name: sql-${{ matrix.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.OUTPUT }}/sql/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+      - name: Retain bounded failure metadata, never source images or keys
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: failure-${{ matrix.key }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.OUTPUT }}/collect-failure.json
+            ${{ env.OUTPUT }}/sql-failure.json
+          retention-days: 14
+          if-no-files-found: warn
