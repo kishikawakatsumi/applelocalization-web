@@ -1,0 +1,54 @@
+{
+  "formatVersion": 1,
+  "tool": {
+    "url": "https://github.com/blacktop/ipsw/releases/download/v3.1.728/ipsw_3.1.728_macOS_arm64.tar.gz",
+    "archiveBytes": 26946550,
+    "archiveSha256": "aee66c946eb29f5f52e8fafd971eec3354d410585eb132cc8b677ac22143b287",
+    "binarySha256": "1854dcac3b6b8f225660bca3ad0db15a91361cb57eefcb3a853432f29f5fa36f"
+  },
+  "input": {
+    "formatVersion": 1,
+    "os": "macOS",
+    "version": "26.1",
+    "build": "25B78",
+    "product": "VirtualMac2,1",
+    "board": "vma2macosap",
+    "variant": "Customer Erase Install (IPSW)",
+    "component": "Cryptex1,AppOS",
+    "imagePath": "043-56844-106.dmg",
+    "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/089-04148/791B6F00-A30B-4EB0-B2E3-257167F7715B/UniversalMac_26.1_25B78_Restore.ipsw",
+    "manifestSha256": "f8005211f3ecaa7a084efc72a767dcf4e37391e2d6c2a80cf57e1371bd91eba1",
+    "maximumDownloadBytes": 134217728,
+    "maximumImageBytes": 134217728
+  },
+  "expectedImage": {
+    "bytes": 52428800,
+    "sha256": "cd4aa02d7b491b21fcfb4867fe5699d984eeb03bb03ca157c6cc9ee046279592"
+  },
+  "baseline": {
+    "sourceId": "macOS-26.1-25B78-Cryptex1,AppOS-043-56844-106-cd4aa02d7b491b21fcfb4867fe5699d984eeb03bb03ca157c6cc9ee046279592",
+    "counts": {
+      "resources": 1934,
+      "primaryParsedFiles": 1934,
+      "supplementedFiles": 0,
+      "unresolvedFiles": 0,
+      "tables": 48,
+      "occurrences": 42933,
+      "primaryRows": 42933,
+      "supplementRows": 0,
+      "textRows": 42732,
+      "structuredRows": 201,
+      "quarantinedFiles": 0,
+      "issues": 0,
+      "symlinks": 0
+    },
+    "contentHashes": {
+      "resources": "7c2fed16a8e57b778bc493475d1ed8b239d08be4a5871ee043588f3816a0a3a9",
+      "tables": "a3cbeb014b1f7b427c046083475013fb85fd982cc3eec956dcc7a20822838e08",
+      "occurrences": "ca8496c95959321af8742c228f65917a477ecab5668d5175b57641b5c8111109",
+      "issues": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symlinks": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "catalogSha256": "3023abe1d1fafc1e9a8c1118f2e8655c92811816f1f8e0a45a7f91c98bee7058"
+  }
+}

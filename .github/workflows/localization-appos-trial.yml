@@ -1,0 +1,50 @@
+name: Localization pinned AppOS trial
+
+on:
+  # Temporary branch-only bootstrap; remove after this approved hosted trial.
+  push:
+    branches: [codex/localization-appos-trial]
+  workflow_dispatch:
+    inputs:
+      allow_download:
+        description: Fetch pinned macOS 26.1 AppOS and ipsw tool (report only)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localization-appos-trial
+  cancel-in-progress: false
+
+jobs:
+  appos:
+    if: github.event_name == 'push' || inputs.allow_download == true
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Regression tests (no real downloads)
+        run: |
+          node --test tests/*.test.mjs
+          python3 -B tests/audit_image_originals.py
+      - name: Pinned AppOS acquisition, extraction and baseline comparison
+        env:
+          TRIAL_OUTPUT: ${{ runner.temp }}/localization-appos-trial
+        run: node --max-old-space-size=4096 scripts/run-hosted-appos-trial.mjs --allow-download --output "$TRIAL_OUTPUT"
+      - name: Retain diagnostic report only (no Apple resources or images)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: localization-appos-trial-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/localization-appos-trial/report.json
+          retention-days: 7
+          if-no-files-found: warn
