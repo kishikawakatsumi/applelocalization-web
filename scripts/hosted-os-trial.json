@@ -55,7 +55,7 @@
     },
     "catalogSha256": "27da37dbcad68de2d02ca4ffabe386fbbb0c0f060face89fcaa746be0d83e6a6",
     "portableEvidence": {
-      "policy": "enoent-metadata-mount-prefix-v1",
+      "policy": "enoent-metadata-and-recovered-decode-v2",
       "hashes": {
         "resources": "3c4f927180fad121e0349b4a7328e3d72f656df8dcfc50c203177e7fa45b0a7a",
         "issues": "f550b13786872fac45997cc9b3196341977f91e1b2890f33a0c9a1b081729873"

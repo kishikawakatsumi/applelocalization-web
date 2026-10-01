@@ -10,7 +10,7 @@ import { acquireComponent, regularFiles, validateAcquisition } from './acquire-i
 import { checkSpace, fileHash, writeJson } from './collection-checkpoints.mjs';
 import { decodePlist } from './extract-mounted-bundle.mjs';
 import { runImageJob } from './run-image-job.mjs';
-import { portableEvidence, binaryEvidence } from './trial-portable-evidence.mjs';
+import { portableEvidence, binaryEvidence, portablePolicies } from './trial-portable-evidence.mjs';
 
 export const trialConfigUrl = new URL('./hosted-appos-trial.json', import.meta.url);
 const streams = ['resources', 'tables', 'occurrences', 'issues', 'symlinks'];
@@ -38,7 +38,7 @@ export function validateTrial(config, allowDownload, profile = 'appos') {
   for (const hash of [config.tool.archiveSha256, config.tool.binarySha256, config.expectedImage.sha256, config.baseline.catalogSha256, ...streams.map(s => config.baseline.contentHashes[s])]) assert.match(hash, /^[a-f0-9]{64}$/);
   validateAcquisition({ ...config.input, tool: { path: '/pinned/ipsw', sha256: config.tool.binarySha256 } });
   if (profile === 'os') {
-    assert.equal(config.baseline.portableEvidence.policy, 'enoent-metadata-mount-prefix-v1');
+    assert.ok(portablePolicies.includes(config.baseline.portableEvidence.policy));
     for (const name of ['resources', 'issues']) {
       assert.match(config.baseline.portableEvidence.hashes[name], /^[a-f0-9]{64}$/);
       assert.ok(Number.isSafeInteger(config.baseline.portableEvidence.replacements[name]) && config.baseline.portableEvidence.replacements[name] >= 0);
@@ -155,7 +155,11 @@ export async function runHostedImageTrial({ output, allowDownload = false, profi
     let portable;
     if (config.baseline.portableEvidence) {
       const scan = await readJson(join(job.collection.outputs.scan, 'data', 'report.json'));
-      portable = await portableEvidence(packageRoot, scan.source.root);
+      report.recoveredDecodeRetries = [];
+      portable = await portableEvidence(packageRoot, scan.source.root, {
+        policy: config.baseline.portableEvidence.policy,
+        onRecoveredRetry: r => report.recoveredDecodeRetries.push(r),
+      });
       report.portableEvidence = portable;
       report.binaryEvidence = binaryEvidence(packaged.binaryHashes);
     }

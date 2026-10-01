@@ -22,7 +22,8 @@ export async function buildIntermediateRelease({ output, allowDownload = false, 
   const provenance = { collectorRepository: process.env.GITHUB_REPOSITORY, collectorCommit: process.env.GITHUB_SHA,
     runId: process.env.GITHUB_RUN_ID, runAttempt: process.env.GITHUB_RUN_ATTEMPT,
     acquisition: config.input, expectedDownload: config.expectedDownload, expectedImage: config.expectedImage,
-    tool: config.tool, configSha256: await fileHash(configUrl), baselineComparison: trial.baselineComparison };
+    tool: config.tool, configSha256: await fileHash(configUrl), baselineComparison: trial.baselineComparison,
+    recoveredDecodeRetries: trial.recoveredDecodeRetries ?? [] };
   const intermediate = await exportIntermediateRelease({ input: join(work, 'transfer'), output: join(work, 'intermediate'), manifestSha256: source.manifestSha256, provenance });
   const assets = join(output, 'assets'); await mkdir(assets, { mode: 0o700 });
   const archive = join(assets, 'localization-intermediate.tar');
