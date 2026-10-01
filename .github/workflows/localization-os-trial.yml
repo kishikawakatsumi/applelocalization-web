@@ -1,9 +1,6 @@
 name: Localization pinned OS AEA trial
 
 on:
-  # Temporary branch-only bootstrap for this approved trial.
-  push:
-    branches: [codex/localization-os-trial]
   workflow_dispatch:
     inputs:
       allow_download:
@@ -21,7 +18,7 @@ concurrency:
 
 jobs:
   os:
-    if: github.event_name == 'push' || inputs.allow_download == true
+    if: inputs.allow_download == true
     runs-on: macos-15
     timeout-minutes: 45
     steps:

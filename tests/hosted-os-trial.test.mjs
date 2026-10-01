@@ -46,10 +46,10 @@ test('quarantine contents and portable evidence cannot be omitted from compariso
   report.binaryHashes.a = 'changed';
   assert.throws(() => compareBaseline(report, baseline, baseline.portableEvidence), /Quarantined/);
 });
-test('OS trial bootstrap is scoped and report-only', async () => {
+test('OS trial is manual opt-in and report-only', async () => {
   const workflow = await readFile('.github/workflows/localization-os-trial.yml', 'utf8');
-  assert.match(workflow, /push:\n    branches: \[codex\/localization-os-trial\]/);
+  assert.match(workflow, /if: inputs.allow_download == true/);
   for (const value of ['workflow_dispatch:', 'default: false', 'inputs.allow_download == true', 'runs-on: macos-15', 'timeout-minutes: 45', 'contents: read', 'persist-credentials: false', 'package-manager-cache: false', 'cancel-in-progress: false', '--profile os --allow-download', 'retention-days: 7']) assert.ok(workflow.includes(value));
   assert.match(workflow, /path: \$\{\{ runner.temp \}\}\/localization-os-trial\/report.json/);
-  assert.doesNotMatch(workflow, /secrets\.|sudo|pull_request:|schedule:|self-hosted|deploy|docker/);
+  assert.doesNotMatch(workflow, /secrets\.|sudo|push:|pull_request:|schedule:|self-hosted|deploy|docker/);
 });
