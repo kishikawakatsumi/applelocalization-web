@@ -1,4 +1,4 @@
-// Fixed AppOS/SystemOS trials only. No DB, publication or full IPSW download.
+// Fixed component trials only. No DB, publication or full IPSW download.
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
 import { lstat, mkdir, readFile, realpath, statfs } from 'node:fs/promises';
@@ -10,6 +10,7 @@ import { acquireComponent, regularFiles, validateAcquisition } from './acquire-i
 import { checkSpace, fileHash, writeJson } from './collection-checkpoints.mjs';
 import { decodePlist } from './extract-mounted-bundle.mjs';
 import { runImageJob } from './run-image-job.mjs';
+import { portableEvidence, binaryEvidence } from './trial-portable-evidence.mjs';
 
 export const trialConfigUrl = new URL('./hosted-appos-trial.json', import.meta.url);
 const streams = ['resources', 'tables', 'occurrences', 'issues', 'symlinks'];
@@ -18,13 +19,13 @@ const reserve = 10 * 1024 ** 3;
 
 export function validateTrial(config, allowDownload, profile = 'appos') {
   assert.equal(allowDownload, true, 'Real image trial requires --allow-download');
-  assert.ok(['appos', 'systemos'].includes(profile), 'Unknown fixed trial profile');
+  assert.ok(['appos', 'systemos', 'os'].includes(profile), 'Unknown fixed trial profile');
   assert.equal(config.formatVersion, 1);
-  const encrypted = profile === 'systemos';
-  assert.equal(config.input.component, encrypted ? 'Cryptex1,SystemOS' : 'Cryptex1,AppOS');
+  const encrypted = profile !== 'appos';
+  assert.equal(config.input.component, profile === 'os' ? 'OS' : encrypted ? 'Cryptex1,SystemOS' : 'Cryptex1,AppOS');
   assert.match(config.input.imagePath, encrypted ? /^[A-Za-z0-9_-]+\.dmg\.aea$/ : /^[A-Za-z0-9_-]+\.dmg$/);
   for (const key of ['maximumDownloadBytes', 'maximumImageBytes']) {
-    const maximum = encrypted ? (key === 'maximumDownloadBytes' ? 3 : 6) * 1024 ** 3 : 128 * 1024 ** 2;
+    const maximum = profile === 'os' ? (key === 'maximumDownloadBytes' ? 9 : 10) * 1024 ** 3 : encrypted ? (key === 'maximumDownloadBytes' ? 3 : 6) * 1024 ** 3 : 128 * 1024 ** 2;
     assert.ok(Number.isSafeInteger(config.input[key]) && config.input[key] > 0 && config.input[key] <= maximum);
   }
   if (encrypted) {
@@ -36,16 +37,30 @@ export function validateTrial(config, allowDownload, profile = 'appos') {
   assert.ok(Number.isSafeInteger(config.expectedImage.bytes) && config.expectedImage.bytes > 0 && config.expectedImage.bytes <= config.input.maximumImageBytes);
   for (const hash of [config.tool.archiveSha256, config.tool.binarySha256, config.expectedImage.sha256, config.baseline.catalogSha256, ...streams.map(s => config.baseline.contentHashes[s])]) assert.match(hash, /^[a-f0-9]{64}$/);
   validateAcquisition({ ...config.input, tool: { path: '/pinned/ipsw', sha256: config.tool.binarySha256 } });
+  if (profile === 'os') {
+    assert.equal(config.baseline.portableEvidence.policy, 'enoent-metadata-mount-prefix-v1');
+    for (const name of ['resources', 'issues']) {
+      assert.match(config.baseline.portableEvidence.hashes[name], /^[a-f0-9]{64}$/);
+      assert.ok(Number.isSafeInteger(config.baseline.portableEvidence.replacements[name]) && config.baseline.portableEvidence.replacements[name] >= 0);
+    }
+    assert.match(config.baseline.binaryEvidence.sha256, /^[a-f0-9]{64}$/);
+    assert.equal(config.baseline.binaryEvidence.files, config.baseline.counts.quarantinedFiles);
+  }
 }
 
-export function compareBaseline(report, baseline) {
+export function compareBaseline(report, baseline, portable) {
   assert.equal(report.status, 'prepared-not-imported');
   assert.equal(report.sourceId, baseline.sourceId, 'Source identity differs');
   assert.deepEqual(report.counts, baseline.counts, 'Occurrence/resource counts differ');
-  for (const name of streams) assert.equal(report.contentHashes[name], baseline.contentHashes[name], `${name} logical content differs`);
+  if (baseline.portableEvidence) assert.deepEqual(portable, baseline.portableEvidence, 'Portable metadata diagnostics differ');
+  for (const name of streams) {
+    if (baseline.portableEvidence && ['resources', 'issues'].includes(name)) continue;
+    assert.equal(report.contentHashes[name], baseline.contentHashes[name], `${name} logical content differs`);
+  }
+  if (baseline.binaryEvidence) assert.deepEqual(binaryEvidence(report.binaryHashes), baseline.binaryEvidence, 'Quarantined originals differ');
   assert.equal(report.catalogSha256, baseline.catalogSha256, 'Language/bundle catalog differs');
   // sources embeds host/run-specific metadata; compressed bytes and timestamps need not match.
-  return { status: 'baseline-logical-content-verified', streams, catalog: true, counts: true, sourcesExcluded: 'Contains host/run-specific extraction metadata' };
+  return { status: 'baseline-logical-content-verified', streams, catalog: true, counts: true, ...(portable ? { portableEvidence: portable } : {}), sourcesExcluded: 'Contains host/run-specific extraction metadata' };
 }
 
 export async function verifyTrialPayload(file, expected) {
@@ -56,11 +71,11 @@ export async function verifyTrialPayload(file, expected) {
 
 export async function runHostedImageTrial({ output, allowDownload = false, profile = 'appos' }) {
   assert.equal(allowDownload, true, 'Real image trial requires --allow-download');
-  assert.ok(['appos', 'systemos'].includes(profile), 'Unknown fixed trial profile');
+  assert.ok(['appos', 'systemos', 'os'].includes(profile), 'Unknown fixed trial profile');
   const configUrl = new URL(`./hosted-${profile}-trial.json`, import.meta.url);
   const config = await readJson(configUrl);
   validateTrial(config, allowDownload, profile);
-  const encrypted = profile === 'systemos';
+  const encrypted = profile !== 'appos';
   assert.equal(process.platform, 'darwin'); assert.equal(arch(), 'arm64');
   await mkdir(resolve(output)); // Exclusive, no overwrite or automatic cleanup.
   output = await realpath(output);
@@ -96,7 +111,8 @@ export async function runHostedImageTrial({ output, allowDownload = false, profi
   let failure;
   try {
     await sample('start');
-    await checkSpace(output, reserve + 512 * 1024 ** 2 + config.input.maximumDownloadBytes + (encrypted ? config.input.maximumImageBytes : 0));
+    report.requiredInitialFreeBytes = reserve + 512 * 1024 ** 2 + config.input.maximumDownloadBytes + (encrypted ? config.input.maximumImageBytes : 0) + (profile === 'os' ? 3 * 1024 ** 3 : 0);
+    await checkSpace(output, report.requiredInitialFreeBytes);
     report.macOS = (await run('/usr/bin/sw_vers', [])).trim();
     report.python = (await run('python3', ['--version'])).trim();
     timer = setInterval(() => { monitoring = monitoring.then(() => sample(activeStage, false)).catch(e => { monitorError ??= e; }); }, 1000);
@@ -136,7 +152,14 @@ export async function runHostedImageTrial({ output, allowDownload = false, profi
       bytes: (await regularFiles(packageRoot)).reduce((sum, f) => sum + f.bytes, 0) };
     report.audit = await readJson(join(job.collection.outputs['package-audit'], 'report.json'));
     assert.equal(report.audit.status, 'package-content-verified');
-    report.baselineComparison = compareBaseline(packaged, config.baseline);
+    let portable;
+    if (config.baseline.portableEvidence) {
+      const scan = await readJson(join(job.collection.outputs.scan, 'data', 'report.json'));
+      portable = await portableEvidence(packageRoot, scan.source.root);
+      report.portableEvidence = portable;
+      report.binaryEvidence = binaryEvidence(packaged.binaryHashes);
+    }
+    report.baselineComparison = compareBaseline(packaged, config.baseline, portable);
     report.versionEvidence = (await readJson(join(jobRoot, 'collection', 'collection.json'))).identity.versionEvidence;
     await sample('verified');
     report.status = `hosted-${profile}-package-and-baseline-verified`;

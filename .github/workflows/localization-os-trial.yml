@@ -1,0 +1,50 @@
+name: Localization pinned OS AEA trial
+
+on:
+  # Temporary branch-only bootstrap for this approved trial.
+  push:
+    branches: [codex/localization-os-trial]
+  workflow_dispatch:
+    inputs:
+      allow_download:
+        description: Fetch pinned iOS 26.1 OS (AEA up to 9 GiB, DMG up to 10 GiB)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localization-os-trial
+  cancel-in-progress: false
+
+jobs:
+  os:
+    if: github.event_name == 'push' || inputs.allow_download == true
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Regression tests (no real downloads)
+        run: |
+          node --test tests/*.test.mjs
+          python3 -B tests/audit_image_originals.py
+      - name: Pinned OS acquisition, AEA decryption and all-language comparison
+        env:
+          TRIAL_OUTPUT: ${{ runner.temp }}/localization-os-trial
+        run: node --max-old-space-size=4096 scripts/run-hosted-image-trial.mjs --profile os --allow-download --output "$TRIAL_OUTPUT"
+      - name: Retain diagnostic report only (no images, resources or keys)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: localization-os-trial-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/localization-os-trial/report.json
+          retention-days: 7
+          if-no-files-found: warn
