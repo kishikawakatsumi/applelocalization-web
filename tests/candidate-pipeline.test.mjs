@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { gzipSync } from "node:zlib";
 import {
   batch,
+  candidateArtifactRoots,
   pipelineProducer,
   repository,
   selectCandidateTargets,
@@ -59,6 +60,36 @@ function fixture() {
   }));
   return { run, jobs, artifacts };
 }
+test("download layout follows single-ID flattening and keeps multi-ID components separate", async () => {
+  const root = await mkdtemp(join(tmpdir(), "candidate-download-"));
+  const single =
+    selectCandidateTargets({ ...fixture(), targets: "ios15" }).ready[0];
+  const multi =
+    selectCandidateTargets({ ...fixture(), targets: "ios27" }).ready[0];
+  const flat = join(root, "flat"), named = join(root, "named");
+  await mkdir(join(flat, "assets"), { recursive: true });
+  await writeFile(join(flat, "collection.json"), "{}");
+  assert.deepEqual(await candidateArtifactRoots(single, flat), [flat]);
+  await mkdir(named);
+  for (const c of multi.components) await mkdir(join(named, c.artifact.name));
+  assert.deepEqual(
+    await candidateArtifactRoots(multi, named),
+    multi.components.map((c) => join(named, c.artifact.name)),
+  );
+  await assert.rejects(
+    candidateArtifactRoots(multi, flat),
+    /Unexpected intermediate artifact layout/,
+  );
+  await assert.rejects(
+    candidateArtifactRoots(single, named),
+    /Unexpected intermediate artifact layout/,
+  );
+  await writeFile(join(flat, "unexpected.json"), "{}");
+  await assert.rejects(
+    candidateArtifactRoots(single, flat),
+    /Unexpected intermediate artifact layout/,
+  );
+});
 test("candidate plans all complete OS versions, never combines different runs or silently publishes partial targets", () => {
   const f = fixture(), plan = selectCandidateTargets(f);
   assert.equal(plan.ready.length, 5);

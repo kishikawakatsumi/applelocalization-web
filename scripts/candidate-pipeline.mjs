@@ -195,10 +195,27 @@ export async function loadPlan(path, sha256, target) {
   );
   return { plan, selected };
 }
+// download-artifact v8 flattens a single ID, even with merge-multiple:false.
+// Multiple IDs retain their artifact-name directories. Never guess a fallback
+// when one member of a multi-component download is missing.
+export async function candidateArtifactRoots(selected, input) {
+  const components = selected.components;
+  assert.ok(components.length > 0);
+  const single = components.length === 1;
+  assert.deepEqual(
+    (await readdir(input)).sort(),
+    single
+      ? ["assets", "collection.json"]
+      : components.map((c) => c.artifact.name).sort(),
+    "Unexpected intermediate artifact layout",
+  );
+  return components.map((c) => single ? input : join(input, c.artifact.name));
+}
 export async function unpackCandidate({ plan, selected, input, output }) {
+  const roots = await candidateArtifactRoots(selected, input);
   await mkdir(output);
-  for (const c of selected.components) {
-    const root = join(input, c.artifact.name),
+  for (const [index, c] of selected.components.entries()) {
+    const root = roots[index],
       receipt = await json(join(root, "collection.json"));
     assert.deepEqual((await readdir(root)).sort(), [
       "assets",
