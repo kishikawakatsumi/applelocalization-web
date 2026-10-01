@@ -40,8 +40,9 @@ jobs:
     env:
       NODE_OPTIONS: --max-old-space-size=4096
       COMPONENT: ${{ matrix.key }}
-      OUTPUT: ${{ runner.temp }}/localization-${{ matrix.key }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
+      - name: Set component output directory on assigned runner
+        run: echo "OUTPUT=$RUNNER_TEMP/localization-$COMPONENT-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
