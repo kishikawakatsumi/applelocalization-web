@@ -116,6 +116,13 @@ test("workflow uploads intermediate before SQL, never publishes or uploads sourc
   assert.match(workflow, /fail-fast: false/);
   assert.match(workflow, /retention-days: 14/);
   assert.match(workflow, /contents: read/);
+  // runner context is unavailable in job-level env; initialize via a step instead.
+  assert.doesNotMatch(workflow, /\$\{\{ runner\.temp \}\}/);
+  assert.match(workflow, /OUTPUT=\$RUNNER_TEMP\/localization-/);
+  assert.ok(
+    workflow.indexOf("name: Set component output") <
+      workflow.indexOf("name: Extract and audit"),
+  );
   assert.doesNotMatch(
     workflow,
     /secrets\.|contents: write|docker push|gh release|psql|\/work\/|\.dmg\b/,
