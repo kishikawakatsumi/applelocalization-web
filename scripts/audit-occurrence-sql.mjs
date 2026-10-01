@@ -1,38 +1,14 @@
 // Offline COPY roundtrip audit. Never executes SQL or connects to a database.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { constants, createReadStream } from 'node:fs';
-import { lstat, realpath } from 'node:fs/promises';
+import { realpath } from 'node:fs/promises';
 import { join } from 'node:path';
-import { pipeline } from 'node:stream/promises';
-import { createGunzip } from 'node:zlib';
+import { readSQLLines, sqlLineLimit } from './sql-lines.mjs';
 import { safeRead } from './inspect-unlocalized-resources.mjs';
 import { fileHash, sha256 } from './collection-checkpoints.mjs';
 import { effectiveResource, validateOccurrencePackage, verifyOwnershipCount } from './occurrence-package.mjs';
 import { tableContext } from './prepare-localization-package.mjs';
 import { copyField, parseCopyLine, occurrenceSQLLayout, stagingDatabase, stagingContainer } from './occurrence-staging.mjs';
-
-async function* sqlLines(path) {
-  assert.ok((await lstat(path)).isFile(), 'SQL must be a regular file');
-  const raw = createReadStream(path, { flags: constants.O_RDONLY | constants.O_NOFOLLOW });
-  const unzip = createGunzip(), done = pipeline(raw, unzip);
-  done.catch(() => {}); unzip.setEncoding('utf8');
-  let pending = '';
-  try {
-    for await (const chunk of unzip) {
-      pending += chunk;
-      let start = 0, end;
-      while ((end = pending.indexOf('\n', start)) !== -1) {
-        assert.ok(end - start <= 64 * 1024 ** 2, 'SQL line exceeds 64 MiB');
-        yield pending.slice(start, end); start = end + 1;
-      }
-      pending = pending.slice(start);
-      assert.ok(pending.length <= 64 * 1024 ** 2, 'SQL line exceeds 64 MiB');
-    }
-    assert.equal(pending, '', 'SQL must end with LF');
-    await done;
-  } finally { raw.destroy(); unzip.destroy(); await done.catch(() => {}); }
-}
 
 export async function auditOccurrenceSQL({ input, sql, packageManifest, durable = false, database, progress = () => {} }) {
   assert.match(packageManifest, /^[a-f0-9]{64}$/);
@@ -50,7 +26,7 @@ export async function auditOccurrenceSQL({ input, sql, packageManifest, durable 
   assert.equal(exported.packageManifest, packageManifest);
   const schema = exported.schema, layout = occurrenceSQLLayout({ schema, durable, database }), path = join(directory, 'import.sql.gz');
   assert.equal(await fileHash(path), exported.sqlSha256, 'SQL checksum mismatch');
-  const lines = sqlLines(path)[Symbol.asyncIterator]();
+  const lines = readSQLLines(path, sqlLineLimit(exported))[Symbol.asyncIterator]();
   const next = async () => { const line = await lines.next(); assert.ok(!line.done, 'Truncated SQL'); return line.value; };
   const expect = async text => { for (const line of text.split('\n')) assert.equal(await next(), line, 'Unexpected SQL statement'); };
   async function* rows(table, width) {

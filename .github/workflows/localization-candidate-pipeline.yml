@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       source_run:
-        description: Exact collection batch run ID (successful component jobs and unexpired artifacts required)
+        description: Exact batch run ID (successful extraction/upload steps and unexpired artifacts required)
         required: true
         type: string
       targets:

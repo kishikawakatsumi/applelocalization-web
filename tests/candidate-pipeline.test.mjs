@@ -39,6 +39,10 @@ function fixture() {
     name: `collect (${c.key})`,
     status: "completed",
     conclusion: "success",
+    steps: [
+      "Extract and audit all collected languages; keep quarantine originals",
+      "Save intermediate before SQL generation",
+    ].map((name) => ({ name, status: "completed", conclusion: "success" })),
   }));
   const artifacts = batch.jobs.map((c, i) => ({
     id: i + 10,
@@ -64,8 +68,8 @@ test("candidate plans all complete OS versions, never combines different runs or
       .length,
     1,
   );
-  f.jobs.find((j) => j.name === "collect (ios27-systemos)").conclusion =
-    "failure";
+  f.jobs.find((j) => j.name === "collect (ios27-systemos)").steps[0]
+    .conclusion = "failure";
   const partial = selectCandidateTargets(f);
   assert.equal(partial.ready.length, 4);
   assert.ok(partial.pending.some((p) => p.id === "ios27"));
@@ -77,6 +81,17 @@ test("candidate plans all complete OS versions, never combines different runs or
     () => selectCandidateTargets({ ...f, targets: "ios26" }),
     /alternative acquisition/,
   );
+});
+test("successful intermediate upload survives a later optional SQL failure", () => {
+  const f = fixture();
+  f.jobs.find((j) => j.name === "collect (ios27-os)").conclusion = "failure";
+  assert.equal(
+    selectCandidateTargets({ ...f, targets: "ios27" }).ready.length,
+    1,
+  );
+  f.jobs.find((j) => j.name === "collect (ios27-os)").steps[1].conclusion =
+    "failure";
+  assert.throws(() => selectCandidateTargets({ ...f, targets: "ios27" }));
 });
 test("artifact trust rejects forks, arbitrary producers, rerun mixing, damaged metadata and expired data", () => {
   for (

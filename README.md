@@ -66,7 +66,8 @@ Then run `Localization per-version candidate pipeline` with the exact `source_ru
 `targets=ios18` (or `all-ready`), and optionally `publish=true`.
 SQL, image verification, and Docker Hub push are separate jobs; versions run in parallel.
 `all-ready` explicitly reports unavailable targets and processes only versions whose required
-component jobs succeeded. It does not mean that all 12 requested series were acquired.
+extraction and intermediate-upload steps succeeded (a later optional SQL failure is retriable).
+It does not mean that all 12 requested series were acquired.
 
 The image contains every selected component in a separate schema within `localization_staging`.
 Its first boot imports verified compressed SQL and builds indexes into a **new empty volume**;

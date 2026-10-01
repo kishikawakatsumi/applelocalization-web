@@ -54,7 +54,7 @@ export function selectCandidateTargets(
   assert.ok(Number.isSafeInteger(run.id) && run.id > 0);
   assert.ok(Number.isSafeInteger(run.run_attempt) && run.run_attempt > 0);
   assert.ok(["in_progress", "completed"].includes(run.status));
-  // A failed/unfinished sibling does not invalidate a completed component; every selected job must succeed.
+  // Successful extraction/upload remains reusable if optional SQL or a sibling job fails later.
   const requested = targets === "all-ready"
     ? batch.targets.map((t) => t.id)
     : targets.split(",");
@@ -74,9 +74,16 @@ export function selectCandidateTargets(
       const matching = jobs.filter((j) =>
         j.name === `collect (${component.key})`
       );
+      const stages = [
+        "Extract and audit all collected languages; keep quarantine originals",
+        "Save intermediate before SQL generation",
+      ];
       if (
-        matching.length !== 1 || matching[0].status !== "completed" ||
-        matching[0].conclusion !== "success"
+        matching.length !== 1 || !stages.every((name) => {
+          const steps = matching[0].steps?.filter((s) => s.name === name) ?? [];
+          return steps.length === 1 && steps[0].status === "completed" &&
+            steps[0].conclusion === "success";
+        })
       ) {
         reason = `component not successful: ${component.key}`;
         break;
