@@ -39,10 +39,10 @@ test('SystemOS baseline retains structured values and symlink evidence', () => {
   report.counts.structuredRows--;
   assert.throws(() => compareBaseline(report, config.baseline));
 });
-test('SystemOS bootstrap is branch-scoped and report-only', async () => {
+test('SystemOS is manual opt-in and report-only', async () => {
   const workflow = await readFile('.github/workflows/localization-systemos-trial.yml', 'utf8');
-  assert.match(workflow, /push:\n    branches: \[codex\/localization-systemos-trial\]/);
+  assert.match(workflow, /if: inputs.allow_download == true/);
   for (const value of ['workflow_dispatch:', 'default: false', 'inputs.allow_download == true', 'runs-on: macos-15', 'timeout-minutes: 30', 'contents: read', 'persist-credentials: false', 'package-manager-cache: false', 'cancel-in-progress: false', '--profile systemos --allow-download', 'retention-days: 7']) assert.ok(workflow.includes(value), value);
   assert.match(workflow, /path: \$\{\{ runner.temp \}\}\/localization-systemos-trial\/report.json/);
-  assert.doesNotMatch(workflow, /secrets\.|sudo|pull_request:|schedule:|self-hosted|deploy|docker/);
+  assert.doesNotMatch(workflow, /secrets\.|sudo|push:|pull_request:|schedule:|self-hosted|deploy|docker/);
 });

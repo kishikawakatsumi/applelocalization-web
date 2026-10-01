@@ -1,9 +1,6 @@
 name: Localization pinned SystemOS AEA trial
 
 on:
-  # Temporary bootstrap for the approved trial; remove after validation.
-  push:
-    branches: [codex/localization-systemos-trial]
   workflow_dispatch:
     inputs:
       allow_download:
@@ -21,7 +18,7 @@ concurrency:
 
 jobs:
   systemos:
-    if: github.event_name == 'push' || inputs.allow_download == true
+    if: inputs.allow_download == true
     runs-on: macos-15
     timeout-minutes: 30
     steps:
