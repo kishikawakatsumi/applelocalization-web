@@ -1,0 +1,52 @@
+name: Localization runner preflight
+
+on:
+  # Temporary bootstrap: remove after the first hosted validation, before merging.
+  push:
+    branches: [codex/localization-runner-preflight]
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: GitHub-hosted macOS label (synthetic data only)
+        type: choice
+        required: true
+        default: macos-15
+        options:
+          - macos-15
+          - macos-15-intel
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localization-preflight-${{ inputs.runner || 'macos-15' }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ${{ inputs.runner || 'macos-15' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Collection safety regression tests (synthetic data only)
+        run: |
+          node --test tests/runner-preflight.test.mjs tests/acquire-ipsw-component.test.mjs tests/collection-checkpoints.test.mjs tests/extract-filename-localizations.test.mjs tests/extract-mounted-bundle.test.mjs tests/extract-mounted-image.test.mjs tests/inspect-unlocalized-resources.test.mjs tests/prepare-localization-package.test.mjs tests/package-ownership.test.mjs tests/select-image-volume.test.mjs tests/bundle-assignment.test.mjs
+          python3 -B tests/audit_image_originals.py
+      - name: Synthetic capacity, read-only mount and extraction check
+        env:
+          PREFLIGHT_OUTPUT: ${{ runner.temp }}/localization-preflight
+        run: node scripts/preflight-localization-runner.mjs --output "$PREFLIGHT_OUTPUT"
+      - name: Retain small diagnostic report only
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: localization-preflight-${{ inputs.runner || 'macos-15' }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/localization-preflight/report.json
+          retention-days: 7
+          if-no-files-found: warn
