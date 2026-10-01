@@ -1,9 +1,6 @@
 name: Localization pinned AppOS trial
 
 on:
-  # Temporary branch-only bootstrap; remove after this approved hosted trial.
-  push:
-    branches: [codex/localization-appos-trial]
   workflow_dispatch:
     inputs:
       allow_download:
@@ -21,7 +18,7 @@ concurrency:
 
 jobs:
   appos:
-    if: github.event_name == 'push' || inputs.allow_download == true
+    if: inputs.allow_download == true
     runs-on: macos-15
     timeout-minutes: 30
     steps:

@@ -30,12 +30,11 @@ test('baseline requires every occurrence, context, catalog and exact logical con
     r => r.contentHashes.symlinks = 'changed', r => r.catalogSha256 = 'changed',
   ]) { const value = structuredClone(report); change(value); assert.throws(() => compareBaseline(value, config.baseline)); }
 });
-test('hosted trial bootstrap is scoped and retains only a small report', async () => {
+test('hosted trial is opt-in manual-only and retains only a small report', async () => {
   const workflow = await readFile('.github/workflows/localization-appos-trial.yml', 'utf8');
-  assert.match(workflow, /push:\n    branches: \[codex\/localization-appos-trial\]/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /default: false/);
-  assert.match(workflow, /inputs.allow_download == true/);
+  assert.match(workflow, /if: inputs.allow_download == true/);
   assert.match(workflow, /runs-on: macos-15/);
   assert.match(workflow, /timeout-minutes: 30/);
   assert.match(workflow, /contents: read/);
@@ -44,5 +43,5 @@ test('hosted trial bootstrap is scoped and retains only a small report', async (
   assert.match(workflow, /cancel-in-progress: false/);
   assert.match(workflow, /path: \$\{\{ runner.temp \}\}\/localization-appos-trial\/report.json/);
   assert.match(workflow, /retention-days: 7/);
-  assert.doesNotMatch(workflow, /secrets\.|sudo|pull_request:|schedule:|self-hosted|deploy|docker/);
+  assert.doesNotMatch(workflow, /secrets\.|sudo|push:|pull_request:|schedule:|self-hosted|deploy|docker/);
 });
