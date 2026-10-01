@@ -25,25 +25,31 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def validate_url(url):
+def validate_url(url, suffix=".ipsw"):
+    require(suffix in (".ipsw", ".zip"), "Unsupported remote archive type")
     p = urllib.parse.urlsplit(url)
     require(p.scheme == "https" and p.netloc == "updates.cdn-apple.com"
-            and not p.query and not p.fragment and p.path.endswith(".ipsw"),
+            and not p.query and not p.fragment and p.path.endswith(suffix),
             "Expected credential-free Apple HTTPS IPSW URL")
 
 
 class AppleRedirect(urllib.request.HTTPRedirectHandler):
+    def __init__(self, suffix=".ipsw"):
+        super().__init__()
+        self.suffix = suffix
+
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        validate_url(newurl)
+        validate_url(newurl, self.suffix)
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 class RangeFile(io.RawIOBase):
-    def __init__(self, url, opener=None):
+    def __init__(self, url, opener=None, suffix=".ipsw"):
         super().__init__()
-        validate_url(url)
+        validate_url(url, suffix)
+        self.suffix = suffix
         self.url = url
-        self.opener = opener or urllib.request.build_opener(AppleRedirect())
+        self.opener = opener or urllib.request.build_opener(AppleRedirect(suffix))
         self.position = 0
         self.length = None
         self.validator = None
@@ -59,7 +65,7 @@ class RangeFile(io.RawIOBase):
             headers["If-Match"] = self.validator
         request = urllib.request.Request(self.url, headers=headers)
         with self.opener.open(request, timeout=60) as response:
-            validate_url(response.geturl())
+            validate_url(response.geturl(), self.suffix)
             require(response.status == 206, "Server did not honor byte range")
             require(response.headers.get("Content-Encoding", "identity") == "identity",
                     "Unexpected content encoding")

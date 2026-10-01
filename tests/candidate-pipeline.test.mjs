@@ -92,8 +92,8 @@ test("download layout follows single-ID flattening and keeps multi-ID components
 });
 test("candidate plans all complete OS versions, never combines different runs or silently publishes partial targets", () => {
   const f = fixture(), plan = selectCandidateTargets(f);
-  assert.equal(plan.ready.length, 5);
-  assert.equal(plan.pending.length, 7);
+  assert.equal(plan.ready.length, 11);
+  assert.equal(plan.pending.length, 1);
   assert.equal(
     selectCandidateTargets({ ...f, targets: "ios15" }).ready[0].components
       .length,
@@ -102,7 +102,7 @@ test("candidate plans all complete OS versions, never combines different runs or
   f.jobs.find((j) => j.name === "collect (ios27-systemos)").steps[0]
     .conclusion = "failure";
   const partial = selectCandidateTargets(f);
-  assert.equal(partial.ready.length, 4);
+  assert.equal(partial.ready.length, 10);
   assert.ok(partial.pending.some((p) => p.id === "ios27"));
   assert.throws(
     () => selectCandidateTargets({ ...f, targets: "ios27" }),
@@ -265,6 +265,15 @@ test("bundle context rejects missing component, mismatched schema and corrupted 
   f = await sqlFixture();
   f.bundle.components[0].schema = "public";
   await assert.rejects(prepareBundleContext(f));
+});
+test("OTA bundle keeps OS, AppOS and both SystemOS architectures without merging contexts", async () => {
+  const f = await sqlFixture("macos15");
+  assert.equal(f.bundle.components.length, 4);
+  await prepareBundleContext(f);
+  const mapping = await readFile(join(f.output, "payload/sources.tsv"), "utf8");
+  assert.equal(mapping.trim().split("\n").length, 4);
+  assert.match(mapping, /localization_macos15_24h32_systemos_arm64e/);
+  assert.match(mapping, /localization_macos15_24h32_systemos_x86_64/);
 });
 test("source-specific probes check all profiles without assuming pilot vocabulary or translations", async () => {
   const c = {

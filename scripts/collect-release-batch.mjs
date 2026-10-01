@@ -11,6 +11,10 @@ import {
   validateAcquisition,
 } from "./acquire-ipsw-component.mjs";
 import { runImageJob } from "./run-image-job.mjs";
+import {
+  collectOTAComponent,
+  validateOTAInput,
+} from "./collect-ota-component.mjs";
 import { exportTransfer } from "./package-transfer.mjs";
 import { exportIntermediateRelease } from "./intermediate-release.mjs";
 import { writeIntermediateAssets } from "./intermediate-assets.mjs";
@@ -35,20 +39,30 @@ export function validateBatchPlan(plan) {
       target.platform.toLowerCase() + target.version.split(".")[0],
     );
     assert.ok(
-      ["ipsw-input-pinned", "alternative-route-pending"].includes(
-        target.status,
-      ),
+      ["ipsw-input-pinned", "ota-input-pinned", "alternative-route-pending"]
+        .includes(
+          target.status,
+        ),
     );
     assert.equal(
       plan.jobs.some((x) => x.target === target.id),
-      target.status === "ipsw-input-pinned",
+      target.status !== "alternative-route-pending",
     );
   }
   for (const job of plan.jobs) {
-    assert.match(job.key, /^(ios|macos)[0-9]+-(os|appos|systemos)$/);
+    assert.match(
+      job.key,
+      /^(ios|macos)[0-9]+-(os|appos|systemos(?:-arm64e|-x86_64)?)$/,
+    );
     const target = plan.targets.find((x) => x.id === job.target);
     assert.ok(target);
-    assert.equal(target.status, "ipsw-input-pinned");
+    assert.ok(
+      ["ipsw-input-pinned", "ota-input-pinned"].includes(target.status),
+    );
+    assert.equal(
+      target.status,
+      job.input.kind === "ota-full" ? "ota-input-pinned" : "ipsw-input-pinned",
+    );
     assert.equal(job.input.version, target.version);
     assert.equal(job.input.build, target.build);
     assert.equal(job.input.os, target.platform);
@@ -57,18 +71,28 @@ export function validateBatchPlan(plan) {
       OS: "os",
       "Cryptex1,AppOS": "appos",
       "Cryptex1,SystemOS": "systemos",
+      "regular-payload": "os",
+      "cryptex-app": "appos",
+      "cryptex-system-arm64e": "systemos-arm64e",
+      "cryptex-system-x86_64": "systemos-x86_64",
     }[job.input.component];
     assert.ok(suffix);
     assert.equal(job.key, `${target.id}-${suffix}`);
     assert.equal(
       job.schema,
-      `localization_${target.id}_${target.build.toLowerCase()}_${suffix}`,
+      `localization_${target.id}_${target.build.toLowerCase()}_${
+        suffix.replaceAll("-", "_")
+      }`,
     );
-    validateAcquisition({
-      ...job.input,
-      tool: { path: "/ipsw", sha256: plan.tool.binarySha256 },
-    });
-    assert.ok(job.input.maximumDownloadBytes <= 12 * 1024 ** 3);
+    if (job.input.kind === "ota-full") validateOTAInput(job.input);
+    else {validateAcquisition({
+        ...job.input,
+        tool: { path: "/ipsw", sha256: plan.tool.binarySha256 },
+      });}
+    assert.ok(
+      job.input.maximumDownloadBytes <=
+        (job.input.kind === "ota-full" ? 20 : 12) * 1024 ** 3,
+    );
     assert.ok(job.input.maximumImageBytes <= 16 * 1024 ** 3);
     assert.match(job.schema, /^localization_[a-z0-9_]{1,49}$/);
   }
@@ -110,7 +134,9 @@ export function selectBatchJobs(plan, targets = "all-ready") {
   assert.equal(new Set(selected).size, selected.length);
   for (const id of selected) {
     assert.ok(
-      plan.targets.some((t) => t.id === id && t.status === "ipsw-input-pinned"),
+      plan.targets.some((t) =>
+        t.id === id && t.status !== "alternative-route-pending"
+      ),
       "Target acquisition route is not ready",
     );
   }
@@ -140,7 +166,9 @@ export async function runBatchComponent(
     if (mode === "collect") {
       const free = await statfs(output),
         required = (12.5 * 1024 ** 3) + job.input.maximumDownloadBytes +
-          (job.input.imagePath.endsWith(".aea")
+          (job.input.kind === "ota-full"
+            ? job.input.memberBytes
+            : job.input.imagePath.endsWith(".aea")
             ? job.input.maximumImageBytes
             : 0);
       console.log(
@@ -184,13 +212,20 @@ export async function runBatchComponent(
         tool: { path: tool, sha256: plan.tool.binarySha256 },
       });
       const jobRoot = join(output, "work");
-      const collected = await runImageJob({
-        kind: "ipsw",
-        spec,
-        output: jobRoot,
-        allowDownload: true,
-        progress: (event) => console.log(JSON.stringify(event)),
-      });
+      const collected = job.input.kind === "ota-full"
+        ? await collectOTAComponent({
+          spec: job.input,
+          output: jobRoot,
+          tool,
+          progress: (event) => console.log(JSON.stringify(event)),
+        })
+        : await runImageJob({
+          kind: "ipsw",
+          spec,
+          output: jobRoot,
+          allowDownload: true,
+          progress: (event) => console.log(JSON.stringify(event)),
+        });
       assert.equal(collected.status, "image-job-package-verified-not-imported");
       const transfer = join(output, "transfer"),
         exported = await exportTransfer({
