@@ -1,0 +1,50 @@
+name: Localization pinned SystemOS AEA trial
+
+on:
+  # Temporary bootstrap for the approved trial; remove after validation.
+  push:
+    branches: [codex/localization-systemos-trial]
+  workflow_dispatch:
+    inputs:
+      allow_download:
+        description: Fetch pinned iOS 26.1 SystemOS (AEA up to 3 GiB, DMG up to 6 GiB)
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localization-systemos-trial
+  cancel-in-progress: false
+
+jobs:
+  systemos:
+    if: github.event_name == 'push' || inputs.allow_download == true
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Regression tests (no real downloads)
+        run: |
+          node --test tests/*.test.mjs
+          python3 -B tests/audit_image_originals.py
+      - name: Pinned SystemOS acquisition, AEA decryption and baseline comparison
+        env:
+          TRIAL_OUTPUT: ${{ runner.temp }}/localization-systemos-trial
+        run: node --max-old-space-size=4096 scripts/run-hosted-image-trial.mjs --profile systemos --allow-download --output "$TRIAL_OUTPUT"
+      - name: Retain diagnostic report only (no images, resources or decryption keys)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: localization-systemos-trial-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/localization-systemos-trial/report.json
+          retention-days: 7
+          if-no-files-found: warn

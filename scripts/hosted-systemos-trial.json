@@ -1,0 +1,58 @@
+{
+  "formatVersion": 1,
+  "tool": {
+    "url": "https://github.com/blacktop/ipsw/releases/download/v3.1.728/ipsw_3.1.728_macOS_arm64.tar.gz",
+    "archiveBytes": 26946550,
+    "archiveSha256": "aee66c946eb29f5f52e8fafd971eec3354d410585eb132cc8b677ac22143b287",
+    "binarySha256": "1854dcac3b6b8f225660bca3ad0db15a91361cb57eefcb3a853432f29f5fa36f"
+  },
+  "input": {
+    "formatVersion": 1,
+    "os": "iOS",
+    "version": "26.1",
+    "build": "23B85",
+    "product": "iPhone17,3",
+    "board": "d47ap",
+    "variant": "Customer Erase Install (IPSW)",
+    "component": "Cryptex1,SystemOS",
+    "imagePath": "043-54303-126.dmg.aea",
+    "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/089-13864/668EFC0E-5911-454C-96C6-E1063CB80042/iPhone17,3_26.1_23B85_Restore.ipsw",
+    "manifestSha256": "00316e31d8439a6ef89b74932ca1521b760b6e0761ab06bc679ef23c903c5c87",
+    "maximumDownloadBytes": 3221225472,
+    "maximumImageBytes": 6442450944
+  },
+  "expectedDownload": {
+    "bytes": 1912602624,
+    "sha256": "c942d57b4ff5c11008a5e4cee6bbfec89089161c3de10352a0fa1ba739e5650c"
+  },
+  "expectedImage": {
+    "bytes": 4951375872,
+    "sha256": "2bc28dbe8305a392ffd75e5fdfb5a904ce389c14296742b94dd00cced28f38dd"
+  },
+  "baseline": {
+    "sourceId": "iOS-26.1-23B85-Cryptex1,SystemOS-043-54303-126-2bc28dbe8305a392ffd75e5fdfb5a904ce389c14296742b94dd00cced28f38dd",
+    "counts": {
+      "resources": 1618,
+      "primaryParsedFiles": 1618,
+      "supplementedFiles": 0,
+      "unresolvedFiles": 0,
+      "tables": 31,
+      "occurrences": 248855,
+      "primaryRows": 248855,
+      "supplementRows": 0,
+      "textRows": 240249,
+      "structuredRows": 8606,
+      "quarantinedFiles": 0,
+      "issues": 0,
+      "symlinks": 2
+    },
+    "contentHashes": {
+      "resources": "e975ffc122cad6c75c56c84332291e95884da7af217845b849fd4e7a71b998fd",
+      "tables": "e489bbcc28f4303b45443838608e7652b3aa2f52bba2c981e70d820a47577e58",
+      "occurrences": "00bbd7b988fd1d51121c7138db8e2443bf43eac494b50a44814ec892e683b258",
+      "issues": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "symlinks": "bd72e825383be05d836b1346b0db7e049355ba9246ab4800d6f0a08a223cbd09"
+    },
+    "catalogSha256": "e9565ee746be1614f9f0b6f35d355e9ce329c57f3dfd81c4b7cc6913939af562"
+  }
+}
