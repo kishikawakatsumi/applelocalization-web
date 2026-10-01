@@ -1,0 +1,11 @@
+{
+  "formatVersion": 1,
+  "recipient": "age1qkmy5eejc3ytzn4dcnd60cgpdveqqnkv4ja5h8u38r4x2rp6t3ws5cgee7",
+  "tool": {
+    "url": "https://github.com/FiloSottile/age/releases/download/v1.3.2/age-v1.3.2-darwin-arm64.tar.gz",
+    "archiveBytes": 18106798,
+    "archiveSha256": "e2020b073c44f692685a24d6abc378817eb81ffaaf49fd0531ef8565f767f2f5",
+    "binarySha256": "4012dfc2725883beafb710894af4f599b7a94f8c8e0f51f02cc96ab8df33915e",
+    "keygenSha256": "c16e229245123d0ad27442317461d63915416cad0294395cd19ca93feb3211ea"
+  }
+}

@@ -1,0 +1,55 @@
+name: Localization encrypted package transfer trial
+
+on:
+  workflow_dispatch:
+    inputs:
+      allow_download:
+        description: Extract pinned AppOS and retain only encrypted package for the configured recipient
+        type: boolean
+        required: true
+        default: false
+  # Temporary bootstrap for this dedicated branch; removed after the trial.
+  push:
+    branches: [codex/localization-package-transfer]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: localization-transfer-trial
+  cancel-in-progress: false
+
+jobs:
+  transfer:
+    if: inputs.allow_download == true || github.event_name == 'push'
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Regression tests
+        run: node --test tests/*.test.mjs
+      - name: Extract, audit and encrypt to recipient public key
+        env:
+          TRANSFER_OUTPUT: ${{ runner.temp }}/localization-transfer-trial
+        run: node scripts/run-hosted-transfer-trial.mjs --allow-download --output "$TRANSFER_OUTPUT"
+      - name: Retain ciphertext only (no plaintext package, images or keys)
+        uses: actions/upload-artifact@v7
+        with:
+          name: localization-sealed-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/localization-transfer-trial/sealed/
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+      - name: Retain sender hash and diagnostic metadata
+        uses: actions/upload-artifact@v7
+        with:
+          name: localization-transfer-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/localization-transfer-trial/report.json
+          retention-days: 7
+          if-no-files-found: error
