@@ -42,7 +42,7 @@ export function validateTransferFiles(files) {
 
 // Receiver validates that the byte-identical package is the one sealed by the audit.
 // This verifies an existing audit receipt, not a fresh original-image/content audit.
-async function verifyEvidence(root, files) {
+export async function verifyEvidence(root, files) {
   const packageReceipt = await json(root, 'evidence/package.complete.json');
   const auditReceipt = await json(root, 'evidence/package-audit.complete.json');
   assert.equal(packageReceipt.stage, 'package'); assert.equal(auditReceipt.stage, 'package-audit');
