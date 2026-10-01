@@ -9,11 +9,21 @@ import { collectionStages } from '../scripts/collect-image-localizations.mjs';
 import { fileHash, runCheckpoints, withCollectionLock } from '../scripts/collection-checkpoints.mjs';
 import { exportTransfer, receiveTransfer } from '../scripts/package-transfer.mjs';
 import { sealTransfer, unsealTransfer, verifySealed, validateTransport } from '../scripts/sealed-package-transfer.mjs';
+import { runHostedTransferTrial } from '../scripts/run-hosted-transfer-trial.mjs';
 
 const paths = ['manifest.json', 'package/report.json', 'package/catalog.json', ...['sources', 'resources', 'tables', 'occurrences', 'issues', 'symlinks'].map(n => `package/${n}.jsonl.gz`), 'evidence/package.complete.json', 'evidence/package-audit.complete.json', 'evidence/audit.json'];
 function index() {
   return { formatVersion: 1, kind: 'age-localization-transfer', recipient: 'age1' + 'a'.repeat(58), manifestSha256: 'a'.repeat(64), entries: paths.map((path, i) => ({ path, blob: String(i).padStart(6, '0') + '.age', bytes: 300, plainBytes: 1, sha256: 'b'.repeat(64) })) };
 }
+test('hosted transfer stays opt-in and uploads only exact ciphertext/report paths', async () => {
+  await assert.rejects(runHostedTransferTrial({ output: '/must-not-be-created' }), /Requires --allow-download/);
+  const workflow = await readFile(new URL('../.github/workflows/localization-transfer-trial.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /workflow_dispatch:/); assert.doesNotMatch(workflow, /^  (push|pull_request|schedule):/m);
+  assert.match(workflow, /if: inputs.allow_download == true/);
+  assert.doesNotMatch(workflow, /secrets\.|include-hidden-files|self-hosted/);
+  const uploads = [...workflow.matchAll(/path: (.+)/g)].map(m => m[1]);
+  assert.deepEqual(uploads, ['${{ runner.temp }}/localization-transfer-trial/sealed/', '${{ runner.temp }}/localization-transfer-trial/report.json']);
+});
 test('encrypted index rejects traversal, duplicate paths/blobs, keys, images, prototype keys and size overruns', () => {
   assert.equal(validateTransport(index()).bytes, 3600);
   for (const path of ['../escape', '/tmp/escape', 'package/../escape', '__proto__', 'constructor', 'image.dmg', 'identity.txt']) {
