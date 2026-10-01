@@ -6,7 +6,10 @@ import { join, resolve } from "node:path";
 import { parseArgs, promisify } from "node:util";
 import { pathToFileURL } from "node:url";
 import { fileHash, writeJson } from "./collection-checkpoints.mjs";
-import { validateAcquisition } from "./acquire-ipsw-component.mjs";
+import {
+  regularFiles,
+  validateAcquisition,
+} from "./acquire-ipsw-component.mjs";
 import { runImageJob } from "./run-image-job.mjs";
 import { exportTransfer } from "./package-transfer.mjs";
 import { exportIntermediateRelease } from "./intermediate-release.mjs";
@@ -270,11 +273,21 @@ export async function runBatchComponent(
     console.log(JSON.stringify(receipt, null, 2));
     return receipt;
   } catch (error) {
+    const space = await statfs(output).catch(() => null);
+    const acquisitionFiles = await regularFiles(
+      join(output, "work", "acquisition"),
+    ).catch(() => []);
     await writeJson(join(output, `${mode}-failure.json`), {
       status: "failed-not-published",
       key,
       mode,
       error: String(error).slice(0, 5000),
+      availableBytes: space ? space.bavail * space.bsize : null,
+      acquisitionBytes: acquisitionFiles.reduce((n, f) => n + f.bytes, 0),
+      acquisitionFiles: acquisitionFiles.slice(0, 64).map((f) => ({
+        path: f.path.slice(output.length + 1),
+        bytes: f.bytes,
+      })),
       published: false,
     });
     throw error;

@@ -8,6 +8,7 @@ import { gunzipSync, gzipSync } from "node:zlib";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import { decodePlist } from "./extract-mounted-bundle.mjs";
+import { readJsonLines } from "./localization-jsonl.mjs";
 import {
   assessResource,
   bundleMetadata,
@@ -69,9 +70,28 @@ async function buildSupplement(
     hash(indexBytes),
     "Inspection refers to a different scan index",
   );
-  const index = jsonLines(unzip(indexBytes));
-  const byId = new Map(index.map((file) => [file.resourceId, file]));
-  assert.equal(byId.size, index.length, "Duplicate resource ID in scan");
+  const byId = new Map(), seen = new Set(), indexHashes = {};
+  for await (
+    const file of readJsonLines(scanRoot, "files.jsonl.gz", indexHashes)
+  ) {
+    assert.ok(!seen.has(file.resourceId), "Duplicate resource ID in scan");
+    seen.add(file.resourceId);
+    if (
+      file.status === "failed" &&
+      file.error ===
+        "Expected exactly one nonempty .lproj directory; refusing to guess language"
+    ) byId.set(file.resourceId, file);
+  }
+  assert.equal(
+    indexHashes["files.jsonl.gz"],
+    hash(indexBytes),
+    "Scan index changed while streaming",
+  );
+  assert.equal(
+    seen.size,
+    scanReport.counts.resourceFiles,
+    "Index resource count differs from scan",
+  );
   const inspected = jsonLines(inspectionBytes);
   assert.equal(
     new Set(inspected.map((file) => file.resourceId)).size,
@@ -80,11 +100,7 @@ async function buildSupplement(
   );
   assert.equal(inspected.length, investigation.counts.files);
   // Verify the entire inspection's coverage; never silently ignore omitted candidates.
-  const unresolved = index.filter((file) =>
-    file.status === "failed" &&
-    file.error ===
-      "Expected exactly one nonempty .lproj directory; refusing to guess language"
-  );
+  const unresolved = [...byId.values()];
   assert.deepEqual(
     inspected.map((file) => file.resourceId).sort(),
     unresolved.map((file) => file.resourceId).sort(),
