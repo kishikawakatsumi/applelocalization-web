@@ -56,6 +56,37 @@ https://applelocalization.com/
 
 ## Related Repository
 
+### Candidate data pipeline (manual, no production deployment)
+
+Run `Localization latest release collection batch` on main with `allow_download=true`
+and `targets=ios18` (or a comma-separated list / `all-ready`). SQL generation on the
+macOS collector is optional; the independent Linux pipeline consumes its intermediate artifacts.
+
+Then run `Localization per-version candidate pipeline` with the exact `source_run`,
+`targets=ios18` (or `all-ready`), and optionally `publish=true`.
+SQL, image verification, and Docker Hub push are separate jobs; versions run in parallel.
+`all-ready` explicitly reports unavailable targets and processes only versions whose required
+component jobs succeeded. It does not mean that all 12 requested series were acquired.
+
+The image contains every selected component in a separate schema within `localization_staging`.
+Its first boot imports verified compressed SQL and builds indexes into a **new empty volume**;
+wait for the container to become healthy. Existing/different/incomplete database volumes are refused.
+The image job checks every restored row and quarantined original, source-specific search probes,
+and a clean restart. The push job uses the existing `DOCKERHUB_USERNAME` and `DOCKERHUB_PASSWORD`
+secrets only after rechecking the successful image artifact. Tags are unique:
+`kishikawakatsumi/applelocalization-data:candidate-<target>-<version>-<build>-r<run>-a<attempt>`.
+Neither `latest`, the production database, nor the deployed Web service is changed.
+
+These occurrence schemas are **not drop-in replacements for the legacy Web API tables**;
+DB verification is not a claim of full Web/API compatibility. Application integration remains a
+separate validation step. Artifacts retain intermediate/quarantine data and SQL for 14 days;
+the registry retains pushed candidate images. No routine Mac download, IPSW/DMG retention,
+cross-repository Release publication, scheduled annual run, or automatic production deployment occurs.
+
+The pinned 2026-10-02 plan covers 12 requested series; five have IPSW inputs and seven still need
+alternative acquisition routes. The first macOS 27 OS job hit the standard runner disk reserve,
+so that incomplete target must not be presented as a verified candidate.
+
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools
 - https://github.com/kishikawakatsumi/applelocalization-citools

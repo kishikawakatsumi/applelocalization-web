@@ -1,0 +1,69 @@
+name: Localization per-version candidate pipeline
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Exact collection batch run ID (successful component jobs and unexpired artifacts required)
+        required: true
+        type: string
+      targets:
+        description: Comma-separated target IDs, or all-ready (pending targets are explicitly reported)
+        required: true
+        type: string
+        default: all-ready
+      publish:
+        description: Push new candidate tags to Docker Hub after complete DB verification; never deploy or overwrite latest
+        required: true
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: candidate-pipeline-${{ inputs.source_run }}-${{ inputs.targets }}
+  cancel-in-progress: false
+jobs:
+  plan:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      sha256: ${{ steps.plan.outputs.sha256 }}
+      artifact_id: ${{ steps.upload.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: node --test tests/*.test.mjs
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN: ${{ inputs.source_run }}
+          TARGETS: ${{ inputs.targets }}
+        run: node scripts/candidate-pipeline.mjs --mode plan --source-run "$SOURCE_RUN" --targets "$TARGETS" --output "$RUNNER_TEMP/candidate-plan.json"
+      - id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: candidate-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/candidate-plan.json
+          retention-days: 14
+          if-no-files-found: error
+  target:
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    uses: ./.github/workflows/localization-build-target.yml
+    with:
+      source_run: ${{ inputs.source_run }}
+      target: ${{ matrix.target }}
+      intermediate_ids: ${{ matrix.artifact_ids }}
+      plan_id: ${{ needs.plan.outputs.artifact_id }}
+      plan_sha256: ${{ needs.plan.outputs.sha256 }}
+      publish: ${{ inputs.publish }}
+    secrets: inherit
