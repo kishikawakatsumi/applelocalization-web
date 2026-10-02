@@ -1,0 +1,39 @@
+name: Localization encrypted OTA layout
+on:
+  workflow_dispatch:
+    inputs:
+      allow_download:
+        type: boolean
+        required: true
+        default: false
+        description: Download and decrypt pinned iOS 26 full OTA on CI; retain metadata only
+permissions:
+  contents: read
+concurrency:
+  group: localization-encrypted-ota-ios26
+  cancel-in-progress: false
+jobs:
+  inspect:
+    if: inputs.allow_download == true && github.ref == 'refs/heads/main'
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Test acquisition guards
+        run: node --test tests/encrypted-ota.test.mjs
+      - name: Download decrypt and inspect only metadata
+        run: node scripts/acquire-encrypted-ota.mjs --output "$RUNNER_TEMP/ios26-ota-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --allow-download
+      - name: Save bounded layout metadata only
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: encrypted-ota-layout-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/ios26-ota-${{ github.run_id }}-${{ github.run_attempt }}/layout.json
+          retention-days: 30
+          if-no-files-found: warn
