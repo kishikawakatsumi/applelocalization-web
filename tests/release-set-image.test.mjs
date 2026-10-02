@@ -170,7 +170,7 @@ test("only same-run complete restored candidate can pass the pre-push gate", () 
   }
   assert.throws(() => releaseTag({ runId: "latest", attempt: "1" }));
 });
-test("workflow downloads only pinned SQL, fails on digest mismatch and pushes only after restore", async () => {
+test("workflow downloads pinned SQL and explicitly publishes only an assembled restore-pending candidate", async () => {
   const yaml = await readFile(
     new URL(
       "../.github/workflows/localization-unified-candidate.yml",
@@ -185,8 +185,13 @@ test("workflow downloads only pinned SQL, fails on digest mismatch and pushes on
     );
     assert.ok(yaml.includes(`/sql/${pin.target}`));
   }
-  assert.ok(yaml.indexOf("--mode build") < yaml.indexOf("docker/login-action"));
-  assert.ok(yaml.includes("verified_sha256"));
+  assert.ok(
+    yaml.indexOf("--mode assemble") < yaml.indexOf("docker/login-action"),
+  );
+  assert.ok(yaml.includes("assembled_sha256"));
+  assert.ok(yaml.includes("--allow-unrestored-candidate"));
+  assert.ok(!yaml.includes("--mode build"));
+  assert.ok(!yaml.includes("verify-release-set-local.mjs"));
   assert.ok(!yaml.includes("localization-release-batch"));
   assert.ok(!yaml.includes("self-hosted"));
 });

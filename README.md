@@ -144,21 +144,50 @@ workflow and refuses expired, replaced or rerun-mixed artifacts. Downloads happe
 only on the hosted runner, with digest mismatch treated as an error. Expired inputs
 must be regenerated and explicitly re-pinned, never silently replaced with latest.
 
-The unified build restores all 36 component schemas into one fresh, isolated
-PostgreSQL volume, checks occurrence/language/quarantine counts and search indexes,
-and repeats search checks after a clean restart. It reuses the successful per-version
-full-row audits; it does not re-download originals or claim a new full-row audit or
-Web compatibility check. Capacity diagnostics protect a 10 GiB free-space reserve
-on both the work and Docker filesystems. Insufficient disk space or restore failure
-prevents publication; a hosted runner's ability to hold the complete DB is measured,
-not assumed. The owned test volume remains until runner disposal; no existing volume
-is modified or removed. Restores may take up to 120 minutes.
+The standard hosted runner builds the unified image but **does not restore the whole
+database**. Run 37006178004 reached the 10 GiB free-disk reserve during `macos26-os`,
+after restoring all iOS series and macOS 27. Assembly itself succeeded. The workflow
+therefore uses `--mode assemble`, retaining the same SQL/hash/lineage checks and the
+prior successful per-version full-row audits. It does not re-download originals.
 
-`publish` defaults to false. With explicit opt-in, only a successful unified restore
-can push `candidate-all12-r<RUN>-a<ATTEMPT>` to the existing Docker Hub repository.
-The exact tested local image ID is pushed; an existing/unknown tag is refused.
-Only small receipts/catalog/capacity diagnostics are uploaded as artifacts, not
-another SQL/image copy. No production tag, database or deployment is changed.
+`publish` defaults to false. Explicit opt-in pushes only a fresh
+`candidate-all12-r<RUN>-a<ATTEMPT>` tag, with status
+`unified-candidate-pushed-restore-pending` and `unifiedRestoreVerified: false`.
+`assembled.json` and `pushed.json` bind the image ID, registry digest, catalog and
+producer. An existing/unknown tag is refused. Only small receipts/catalog/capacity
+diagnostics are uploaded, not another SQL/image copy. No production tag, database
+or deployment is changed. A successful Push is **not** a successful unified restore.
+
+#### Final local verification
+
+Use Node.js 24 and a running local Linux Docker engine. On macOS, ensure Docker's
+VM has at least 6 GiB RAM and at least **200 GiB available disk space**, in addition
+to 200 GiB free on the Mac filesystem. This is a conservative preflight budget, not
+a measured final DB size. The image is `linux/amd64`; Apple Silicon needs Docker's
+amd64 emulation. SSH login PATH may need `/usr/local/bin` and the Node version manager.
+Do not delete existing images/volumes to make space automatically.
+
+Download the small `unified-candidate-receipts-<run>-<attempt>` artifact from the
+successful trusted workflow. Pin the SHA-256 of `unified/pushed.json`, then run:
+
+```sh
+node scripts/verify-release-set-local.mjs \
+  --receipt /path/to/receipts/unified/pushed.json \
+  --receipt-sha256 <trusted-pushed-json-sha256> \
+  --assembled /path/to/receipts/unified/assembled.json \
+  --output /path/to/new-validation-directory \
+  --allow-pull --allow-local-restore
+```
+
+Only the pinned image is downloaded, not IPSW/OTA or another SQL archive. Metadata
+and every packaged file checksum are checked before creating a fresh dedicated DB
+volume. No ports are published, no external network is attached, and no existing
+container/volume is changed. The verifier checks all 36 schemas, row/language/quarantine
+counts, fulltext search and clean restart. It retains a 10 GiB reserve on both host
+and Docker disks and allows four hours for initialization. Failure stops only its
+own container and retains the volume and bounded diagnostics; it never removes data.
+Success writes local `verified.json` and leaves the container stopped with its volume
+intact. Web/API compatibility and production deployment remain separate tasks.
 
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools

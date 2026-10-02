@@ -18,7 +18,7 @@ import {
   releaseCatalog,
   releaseTargets,
 } from "./compose-release-set.mjs";
-import { fileHash, writeJson } from "./collection-checkpoints.mjs";
+import { fileHash, sha256, writeJson } from "./collection-checkpoints.mjs";
 import { localDockerOnly } from "./load-occurrence-staging.mjs";
 import { psqlLines } from "./occurrence-staging.mjs";
 
@@ -202,7 +202,9 @@ export async function releaseInputs(plan, input) {
   releaseCatalog(bundles); // Requires every version and component, never an implicit subset.
   return { inputs, bundles };
 }
-export async function buildRelease({ plan, planSha256, input, output }) {
+export async function buildRelease(
+  { plan, planSha256, input, output, restore = true },
+) {
   const producer = pipelineProducer();
   assert.equal(process.platform, "linux");
   assert.equal(process.arch, "x64");
@@ -334,6 +336,39 @@ export async function buildRelease({ plan, planSha256, input, output }) {
     ]);
     [built] = JSON.parse(await docker("image", "inspect", localTag));
     assert.match(built.Id, /^sha256:[a-f0-9]{64}$/);
+    if (!restore) {
+      // Publication of this candidate is explicitly NOT evidence of unified startup.
+      const receipt = {
+        status: "unified-candidate-assembled-restore-pending",
+        producer,
+        tag,
+        localTag,
+        image: built.Id,
+        identity: composed.identity,
+        baseImage,
+        planSha256,
+        catalog: composed.catalog,
+        catalogSha256: await fileHash(
+          join(composed.context, "payload/release-set.json"),
+        ),
+        components: bundles.flatMap((b) => b.components).length,
+        imageBytes: built.Size,
+        priorPerVersionFullAuditReused: true,
+        unifiedRestoreVerified: false,
+        cleanRestartVerified: false,
+        countsAndSearchVerified: false,
+        apiCompatible: false,
+        productionReady: false,
+        productionDeployed: false,
+      };
+      validateAssembled(receipt, producer);
+      await writeJson(join(output, "assembled.json"), receipt);
+      await appendFile(
+        process.env.GITHUB_OUTPUT,
+        `assembled_sha256=${await fileHash(join(output, "assembled.json"))}\n`,
+      );
+      return;
+    }
     await docker(
       "volume",
       "create",
@@ -473,13 +508,59 @@ export function validateVerified(d, producer) {
     const key of ["apiCompatible", "productionReady", "productionDeployed"]
   ) assert.equal(d[key], false);
 }
-export async function pushRelease({ input, sha256, output, allowPush }) {
+export function validateAssembled(d, producer) {
+  assert.equal(d.status, "unified-candidate-assembled-restore-pending");
+  assert.deepEqual(d.producer, producer);
+  assert.equal(d.tag, releaseTag(producer));
+  assert.equal(d.localTag, `applelocalization-data-candidate:${d.tag}`);
+  assert.equal(d.baseImage, baseImage);
+  assert.match(d.image, /^sha256:[a-f0-9]{64}$/);
+  assert.match(d.catalogSha256, /^[a-f0-9]{64}$/);
+  assert.equal(
+    d.catalogSha256,
+    sha256(JSON.stringify(d.catalog, null, 2) + "\n"),
+  );
+  assert.equal(d.identity, sha256(JSON.stringify(d.catalog)));
+  assert.equal(d.components, batch.jobs.length);
+  assert.equal(d.catalog.database, "localization_staging");
+  assert.equal(d.catalog.searchScope, "one-platform-major-version");
+  assert.equal(d.catalog.allPlannedTargets, true);
+  assert.deepEqual(d.catalog.missingTargets, []);
+  assert.deepEqual(d.catalog.datasets.map((x) => x.id), releaseTargets());
+  for (const dataset of d.catalog.datasets) {
+    const target = batch.targets.find((x) => x.id === dataset.id);
+    for (const key of ["platform", "version", "build"]) {
+      assert.equal(dataset[key], target[key]);
+    }
+    assert.deepEqual(
+      dataset.components.map(({ key, schema }) => ({ key, schema })),
+      batch.jobs.filter((c) => c.target === target.id).map((
+        { key, schema },
+      ) => ({ key, schema })),
+    );
+  }
+  assert.equal(d.priorPerVersionFullAuditReused, true);
+  for (
+    const key of [
+      "unifiedRestoreVerified",
+      "cleanRestartVerified",
+      "countsAndSearchVerified",
+      "apiCompatible",
+      "productionReady",
+      "productionDeployed",
+    ]
+  ) assert.equal(d[key], false);
+}
+export async function pushRelease(
+  { input, sha256, output, allowPush, allowUnrestoredCandidate = false },
+) {
   assert.equal(allowPush, true);
   localDockerOnly();
   assert.match(sha256 ?? "", /^[a-f0-9]{64}$/);
   assert.equal(await fileHash(input), sha256);
   const d = await json(input);
-  validateVerified(d, pipelineProducer());
+  if (allowUnrestoredCandidate) validateAssembled(d, pipelineProducer());
+  else validateVerified(d, pipelineProducer());
   const [built] = JSON.parse(await docker("image", "inspect", d.localTag));
   assert.equal(built.Id, d.image);
   assert.equal(built.Config.Labels["org.applelocalization.bundle"], d.identity);
@@ -502,12 +583,21 @@ export async function pushRelease({ input, sha256, output, allowPush }) {
   );
   assert.ok(digest);
   await writeJson(output, {
-    status: "unified-candidate-pushed-not-deployed",
+    status: allowUnrestoredCandidate
+      ? "unified-candidate-pushed-restore-pending"
+      : "unified-candidate-pushed-not-deployed",
     image: destination,
+    imageId: d.image,
     digest,
     producer: d.producer,
     identity: d.identity,
-    verifiedSha256: sha256,
+    ...(allowUnrestoredCandidate
+      ? {
+        catalogSha256: d.catalogSha256,
+        unifiedRestoreVerified: false,
+        assembledSha256: sha256,
+      }
+      : { unifiedRestoreVerified: true, verifiedSha256: sha256 }),
     productionDeployed: false,
     apiCompatible: false,
   });
@@ -524,13 +614,22 @@ if (
         ) => [k, { type: "string" }]),
       ),
       "allow-push": { type: "boolean", default: false },
+      "allow-unrestored-candidate": { type: "boolean", default: false },
     },
   });
   if (v.mode === "plan") await planRelease(v.output);
-  else if (v.mode === "build") {
-    await buildRelease({ ...v, planSha256: v["plan-sha256"] });
+  else if (v.mode === "build" || v.mode === "assemble") {
+    await buildRelease({
+      ...v,
+      planSha256: v["plan-sha256"],
+      restore: v.mode === "build",
+    });
   } else {
     assert.equal(v.mode, "push");
-    await pushRelease({ ...v, allowPush: v["allow-push"] });
+    await pushRelease({
+      ...v,
+      allowPush: v["allow-push"],
+      allowUnrestoredCandidate: v["allow-unrestored-candidate"],
+    });
   }
 }
