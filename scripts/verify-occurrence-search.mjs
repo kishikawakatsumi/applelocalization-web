@@ -37,14 +37,17 @@ export function searchQueries(schema, ids, term, indexName, durable = false) {
   };
 }
 
+// Resource-heavy queries are serialized across invocations via a fixed advisory lock key,
+// throttling concurrent/repeated script runs instead of letting them pile up unbounded work_mem/CPU.
+const concurrencyLockKey = 847301987;
 async function runQuery(sql, settings = '', lines = psqlLines) {
   const results = [];
-  for await (const line of lines(`BEGIN READ ONLY; SET LOCAL statement_timeout='120s'; SET LOCAL work_mem='32MB'; ${settings} SELECT coalesce(json_agg(q),'[]'::json) FROM (${sql}) q; COMMIT;`)) results.push(line);
+  for await (const line of lines(`BEGIN READ ONLY; SET LOCAL statement_timeout='120s'; SET LOCAL work_mem='32MB'; SELECT pg_advisory_xact_lock(${concurrencyLockKey}); ${settings} SELECT coalesce(json_agg(q),'[]'::json) FROM (${sql}) q; COMMIT;`)) results.push(line);
   return JSON.parse(results.join('\n'));
 }
 async function runExplain(sql, settings = '', query = psqlLines) {
   const lines = [];
-  for await (const line of query(`BEGIN READ ONLY; SET LOCAL statement_timeout='120s'; ${settings} EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) ${sql}; COMMIT;`)) lines.push(line);
+  for await (const line of query(`BEGIN READ ONLY; SET LOCAL statement_timeout='120s'; SELECT pg_advisory_xact_lock(${concurrencyLockKey}); ${settings} EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) ${sql}; COMMIT;`)) lines.push(line);
   return JSON.parse(lines.join('\n'))[0];
 }
 const forcedIndex = 'SET LOCAL enable_seqscan=off;';
