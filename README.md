@@ -104,6 +104,33 @@ ETags and exact ranges, verifies ZIP CRC and SHA-256, and refuses unexpected mem
 or byte-budget overruns. Existing free-disk reserves remain unchanged. This avoids
 an unbounded cache; successful macOS collection still requires an actual CI run.
 
+#### One-database release-set assembly (not deployed)
+
+Per-version candidate images are build/verification units, not a requirement to run
+one PostgreSQL server per OS version. `scripts/compose-release-set.mjs` assembles
+their existing SQL bundles into one Docker build context for one database, preserving
+all component schemas and byte-identical SQL. It does not extract data, re-run full
+raw-data audits, connect to a database, build/push an image, or deploy anything.
+
+Pass `--inputs <pins.json> --output <fresh-directory>`. The input JSON is an array of
+`{ "target": "ios15", "sql": "/ci/downloaded/sql-ios15", "bundleSha256": "<64 hex characters>" }`.
+Use only verified CI SQL artifacts; pins must come from their trusted producer.
+The default `--targets all` requires **all 12 planned series** and all required
+components at their pinned versions/builds. An explicit `--targets ios15,macos15`
+can prepare a partial integration context; omitted series are listed and it is
+never labelled complete or production-ready. The encrypted iOS 26 route must be
+implemented before the full release set can be assembled.
+
+`context/payload/release-set.json` maps each public ID (for example `ios27` or
+`macos27`) to only that OS/version's component schemas. `resolveReleaseScope`
+requires an explicit ID and refuses unknown IDs, all-version searches and fallback.
+It is a scope resolver for the forthcoming Web integration, not a live API yet.
+The catalog is checksummed with the payload; a different release set requires a
+fresh database volume. The existing initializer imports every component into the
+same `localization_staging` database. Unified-image startup and Web/API integration
+remain to be connected and exercised; per-version verification is not a claim that
+the assembled multi-version image has already been restored.
+
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools
 - https://github.com/kishikawakatsumi/applelocalization-citools
