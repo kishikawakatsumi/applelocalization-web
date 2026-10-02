@@ -132,9 +132,33 @@ requires an explicit ID and refuses unknown IDs, all-version searches and fallba
 It is a scope resolver for the forthcoming Web integration, not a live API yet.
 The catalog is checksummed with the payload; a different release set requires a
 fresh database volume. The existing initializer imports every component into the
-same `localization_staging` database. Unified-image startup and Web/API integration
-remain to be connected and exercised; per-version verification is not a claim that
-the assembled multi-version image has already been restored.
+same `localization_staging` database. Web/API integration remains separate;
+per-version verification alone is not a claim that the assembled multi-version
+image has already been restored.
+
+`localization-unified-candidate.yml` is the manually dispatched CI-only integration
+workflow. `scripts/release-set-inputs-20261002.json` fixes all 12 successful producer
+runs, attempts, commits, SQL artifact IDs, digests and sizes (about 4 GiB total).
+The intake gate requires successful SQL/image/push jobs from the expected main-branch
+workflow and refuses expired, replaced or rerun-mixed artifacts. Downloads happen
+only on the hosted runner, with digest mismatch treated as an error. Expired inputs
+must be regenerated and explicitly re-pinned, never silently replaced with latest.
+
+The unified build restores all 36 component schemas into one fresh, isolated
+PostgreSQL volume, checks occurrence/language/quarantine counts and search indexes,
+and repeats search checks after a clean restart. It reuses the successful per-version
+full-row audits; it does not re-download originals or claim a new full-row audit or
+Web compatibility check. Capacity diagnostics protect a 10 GiB free-space reserve
+on both the work and Docker filesystems. Insufficient disk space or restore failure
+prevents publication; a hosted runner's ability to hold the complete DB is measured,
+not assumed. The owned test volume remains until runner disposal; no existing volume
+is modified or removed. Restores may take up to 120 minutes.
+
+`publish` defaults to false. With explicit opt-in, only a successful unified restore
+can push `candidate-all12-r<RUN>-a<ATTEMPT>` to the existing Docker Hub repository.
+The exact tested local image ID is pushed; an existing/unknown tag is refused.
+Only small receipts/catalog/capacity diagnostics are uploaded as artifacts, not
+another SQL/image copy. No production tag, database or deployment is changed.
 
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools

@@ -205,6 +205,16 @@ export async function composeReleaseContext(
     }
   }
   const release = { ...catalog, inputs: pins };
+  // A full 12-series restore takes longer than one version; health must allow it.
+  const dockerfile = await readFile(join(context, "Dockerfile"), "utf8");
+  assert.ok(dockerfile.includes("--timeout=10s --start-period=45m"));
+  await writeFile(
+    join(context, "Dockerfile"),
+    dockerfile.replace(
+      "--timeout=10s --start-period=45m",
+      "--timeout=60s --start-period=120m",
+    ),
+  );
   await writeJson(join(payload, "release-set.json"), release);
   const identity = sha256(JSON.stringify(release));
   await writeFile(join(payload, "identity"), identity + "\n", { flag: "wx" });
