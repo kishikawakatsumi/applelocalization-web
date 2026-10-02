@@ -43,6 +43,7 @@ export function validateEncryptedOTA(s) {
 
 export function selectOTAKey(entries, spec) {
   // Assertions must never include a key value or the complete metadata object.
+  assert.ok(Array.isArray(entries), "Invalid key metadata container");
   const matches = entries.filter((e) => e.url === spec.url);
   assert.ok(matches.length === 1, "Expected one key entry for pinned OTA URL");
   const e = matches[0];
@@ -154,7 +155,13 @@ export async function acquireEncryptedOTA(
     assert.ok((await lstat(database)).isFile());
     await chmod(database, 0o600);
     assert.ok((await lstat(database)).size < 4 * 1024 ** 2);
-    const key = selectOTAKey(JSON.parse(await readFile(database)), spec);
+    let entries;
+    try {
+      entries = JSON.parse(await readFile(database));
+    } catch {
+      throw new Error("Invalid key metadata JSON; contents suppressed");
+    }
+    const key = selectOTAKey(entries, spec);
     await writeFile(keyPath, key, { flag: "wx", mode: 0o600 });
     key.fill(0);
     progress({ stage: "encrypted-ota-decrypt", status: "running" });
@@ -245,6 +252,16 @@ async function inspectOnCI(output) {
     tool: join(toolDir, "ipsw"),
     toolSha256: pin.binarySha256,
   });
+  const summary = await execute("python3", [
+    "-B",
+    join(scripts, "inspect-ota-layout.py"),
+    "--archive",
+    acquired.path,
+    "--spec",
+    join(scripts, "ios26-encrypted-ota.json"),
+    "--summary",
+  ], { timeout: 180000, maxBuffer: 1024 ** 2 });
+  await writeJson(join(output, "diagnostics.json"), JSON.parse(summary.stdout));
   const normalized = await normalizeDecryptedOTA(
     acquired,
     join(output, "normalized"),

@@ -143,7 +143,7 @@ test("CI retains only bounded metadata, never raw OTA or keys", async () => {
     "utf8",
   );
   assert.match(workflow, /allow_download == true/);
-  assert.match(workflow, /path: .*\/layout.json/);
+  assert.match(workflow, /path: \|[\s\S]*?\/layout.json/);
   assert.doesNotMatch(workflow, /secrets\.|docker\/login|\.aea|ota_fcs_keys/);
 });
 
@@ -175,7 +175,7 @@ with tempfile.TemporaryDirectory() as d:
         JSON.stringify(script)
       }).with_name('normalize-ota-archive.py')
  ns=importlib.util.spec_from_file_location('normal',normal_path);normal=importlib.util.module_from_spec(ns);ns.loader.exec_module(normal)
- normal.RESERVE=0
+ normal.RESERVE=0;normal.MAX_BYTES=16*1024**2
  n1=normal.normalize(a,p/'one');n2=normal.normalize(a,p/'two')
  assert n1['sha256']==n2['sha256'] and n1['sourceFormat']=='apple-archive'
  import zipfile
@@ -183,6 +183,19 @@ with tempfile.TemporaryDirectory() as d:
   assert set(z.namelist())=={'Info.plist','AssetData/Info.plist','AssetData/payloadv2/payload.000'}
   for name in z.namelist(): assert z.read(name)==(tree/name).read_bytes()
  assert m.inspect(n1['path'],{'version':'26.7.1','build':'23H30'})['format']=='zip'
+ import struct
+ def record(op,body):
+  fields=b'TYP1M'+b'YOP1'+op+b'DATB'+struct.pack('<I',len(body))
+  return b'AA01'+struct.pack('<H',len(fields)+6)+fields+body
+ compressed=p/'compressed.aa'
+ subprocess.run(['/usr/bin/aa','archive','-d',str(tree),'-o',str(compressed),'-a','lzma'],check=True)
+ for name,body in [('raw',a.read_bytes()),('compressed',compressed.read_bytes())]:
+  wrapped=p/(name+'.yop');wrapped.write_bytes(record(b'M',b'')+record(b'E',body))
+  n=normal.normalize(wrapped,p/('wrap-'+name))
+  assert n['sha256']==n1['sha256']
+ bad=p/'unsupported.yop';bad.write_bytes(record(b'P',a.read_bytes()))
+ try:normal.normalize(bad,p/'refuse-op');raise AssertionError('patch operation accepted')
+ except ValueError:pass
  (tree/'link').symlink_to('Info.plist')
  subprocess.run(['/usr/bin/aa','archive','-d',str(tree),'-o',str(p/'link.aa'),'-a','raw'],check=True)
  try:normal.normalize(p/'link.aa',p/'refuse');raise AssertionError('link accepted')

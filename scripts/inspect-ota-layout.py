@@ -7,11 +7,12 @@ import stat
 import re
 import subprocess
 import tempfile
+from collections import Counter
 import zipfile
 from pathlib import Path
 
 
-def aa_entries(archive):
+def aa_records(archive):
     # A full OTA outer archive has few entries; do not allow unbounded tool output.
     with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
         p = subprocess.Popen(["/usr/bin/aa", "list", "-i", str(archive), "-list-format", "json"], stdout=out, stderr=err)
@@ -26,6 +27,11 @@ def aa_entries(archive):
                 p.kill(); p.wait()
     if not isinstance(entries, list):
         raise ValueError("Invalid Apple Archive listing")
+    return entries
+
+
+def aa_entries(archive):
+    entries = aa_records(archive)
     files, seen = {}, set()
     for e in entries:
         if e["TYP"] == "M":
@@ -127,5 +133,14 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--archive", required=True)
     p.add_argument("--spec", required=True)
+    p.add_argument("--summary", action="store_true")
     a = p.parse_args()
-    print(json.dumps(inspect(a.archive, json.loads(Path(a.spec).read_text()))))
+    if a.summary:
+        entries = aa_records(a.archive)
+        print(json.dumps({"status": "outer-aa-record-summary", "records": len(entries),
+                          "types": dict(Counter(e.get("TYP", "unknown") for e in entries)),
+                          "operations": dict(Counter(e.get("YOP", "none") for e in entries)),
+                          "dataBytes": sum(e.get("DAT", 0) for e in entries if type(e.get("DAT", 0)) is int),
+                          "fieldNames": sorted(set(k for e in entries for k in e))}))
+    else:
+        print(json.dumps(inspect(a.archive, json.loads(Path(a.spec).read_text()))))
