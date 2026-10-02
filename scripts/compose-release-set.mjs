@@ -198,6 +198,7 @@ export async function composeReleaseContext(
           "initialize.sh",
           "healthcheck.sh",
           "localization-entrypoint.sh",
+          "postgres-init-entrypoint.sh",
         ]
       ) {
         await copyFile(join(prepared, file), join(context, file));

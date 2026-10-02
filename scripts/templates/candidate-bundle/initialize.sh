@@ -7,6 +7,9 @@ test ! -e "$PGDATA/.localization-ready"
 export PGHOST=/var/run/postgresql
 unset PGHOSTADDR PGSERVICE PGSERVICEFILE PGOPTIONS
 localization_psql=(psql -X --no-password --username postgres --dbname "$DATASET_DATABASE" -v ON_ERROR_STOP=1)
+# Fail before any component COPY/index build if the temporary-server guard was lost.
+test "$("${localization_psql[@]}" -Atqc 'SHOW autovacuum')" = off
+echo 'Localization bundle: temporary-server autovacuum is off.'
 "${localization_psql[@]}" -c 'CREATE EXTENSION IF NOT EXISTS pgroonga;'
 while IFS=$'\t' read -r component schema manifest; do
   echo "Localization component: $component start"

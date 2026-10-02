@@ -10,6 +10,7 @@ if [ -n "${POSTGRES_PASSWORD_FILE:-}" ]; then
 else
   export PGPASSWORD="${POSTGRES_PASSWORD:-}"
 fi
+test "$(psql -X --no-password --username postgres --dbname "$DATASET_DATABASE" -Atqc 'SHOW autovacuum')" = on
 while IFS=$'\t' read -r component schema manifest; do
   test "$(psql -X --no-password --username postgres --dbname "$DATASET_DATABASE" -Atqc "SELECT manifest_sha256 FROM ${schema}.package WHERE id=1")" = "$manifest"
 done < /opt/localization/sources.tsv

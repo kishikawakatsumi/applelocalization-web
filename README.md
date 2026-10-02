@@ -189,6 +189,17 @@ own container and retains the volume and bounded diagnostics; it never removes d
 Success writes local `verified.json` and leaves the container stopped with its volume
 intact. Web/API compatibility and production deployment remain separate tasks.
 
+Candidate initialization disables autovacuum **only on the socket-only temporary
+server**. PGroonga 4.0.4 can otherwise remove another component's uncommitted index
+during VACUUM. No SQL payload or persistent PostgreSQL setting is changed. The
+normal server and clean restart must have autovacuum on; health checks and the
+local verifier enforce this. Failed initialization still refuses to reuse its
+partial volume. Tiny, isolated Docker regression (retains stopped test volumes):
+
+```sh
+ALLOW_INITIALIZATION_TEST=1 node tests/candidate-initialization.integration.mjs
+```
+
 - https://github.com/kishikawakatsumi/applelocalization-data
 - https://github.com/kishikawakatsumi/applelocalization-tools
 - https://github.com/kishikawakatsumi/applelocalization-citools

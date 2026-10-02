@@ -323,6 +323,7 @@ export async function verifyLocalRelease(
     ]);
     created = true;
     await ready();
+    assert.deepEqual(await query("SHOW autovacuum;"), ["on"]);
     const components = bundles.flatMap((b) => b.components), searches = [];
     assert.deepEqual(
       await query(
@@ -356,6 +357,7 @@ export async function verifyLocalRelease(
     assert.equal((await inspect()).State.ExitCode, 0);
     await run(["start", name]);
     await ready();
+    assert.deepEqual(await query("SHOW autovacuum;"), ["on"]);
     for (const [i, c] of components.entries()) {
       await capacity();
       assert.deepEqual(
@@ -384,6 +386,7 @@ export async function verifyLocalRelease(
       components: components.length,
       countsAndSearchVerified: true,
       cleanRestartVerified: true,
+      normalAutovacuumVerified: true,
       unifiedRestoreVerified: true,
       priorPerVersionFullAuditReused: true,
       allRowsReaudited: false,

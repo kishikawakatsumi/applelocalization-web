@@ -141,7 +141,14 @@ export async function prepareBundleContext({ sql, bundle, output }) {
   await writeFile(join(payload, "SHA256SUMS"), hashes.join("\n") + "\n", {
     flag: "wx",
   });
-  for (const file of ["Dockerfile", "initialize.sh", "healthcheck.sh"]) {
+  for (
+    const file of [
+      "Dockerfile",
+      "initialize.sh",
+      "healthcheck.sh",
+      "postgres-init-entrypoint.sh",
+    ]
+  ) {
     await copyFile(
       fileURLToPath(
         new URL(`./templates/candidate-bundle/${file}`, import.meta.url),

@@ -174,6 +174,10 @@ test("assembler reuses byte-identical SQL in one DB context and checksums the ve
     await readFile(join(result.context, "Dockerfile"), "utf8"),
     /ENV POSTGRES_DB=localization_staging/,
   );
+  assert.match(
+    await readFile(join(result.context, "postgres-init-entrypoint.sh"), "utf8"),
+    /-c autovacuum=off/,
+  );
   await assert.rejects(composeReleaseContext(f), /EEXIST/);
 });
 test("assembler refuses altered SQL, bad bundle pins and implicit partial all-version release", async () => {
