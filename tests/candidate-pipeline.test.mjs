@@ -247,6 +247,16 @@ test("bundle context keeps every component in separate schemas and copies only v
   }
   const init = await readFile(join(f.output, "initialize.sh"), "utf8");
   assert.match(init, /set -Eeuo pipefail/);
+  assert.ok(init.indexOf("SHOW autovacuum") < init.indexOf("CREATE EXTENSION"));
+  assert.match(init, /SHOW autovacuum'\)\" = off/);
+  assert.match(
+    await readFile(join(f.output, "healthcheck.sh"), "utf8"),
+    /SHOW autovacuum'\)\" = on/,
+  );
+  assert.match(
+    await readFile(join(f.output, "postgres-init-entrypoint.sh"), "utf8"),
+    /-c autovacuum=off/,
+  );
   assert.ok(init.indexOf("done <") < init.indexOf("localization-ready.tmp"));
   assert.match(
     await readFile(join(f.output, "localization-entrypoint.sh"), "utf8"),

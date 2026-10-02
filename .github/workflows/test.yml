@@ -17,6 +17,10 @@ jobs:
           package-manager-cache: false
       - name: Collector and release guard regression tests
         run: node --test tests/*.test.mjs
+      - name: Candidate initialization and maintenance regression
+        env:
+          ALLOW_INITIALIZATION_TEST: "1"
+        run: node tests/candidate-initialization.integration.mjs
       - name: Build
         run: |
           set -ex

@@ -29,6 +29,10 @@ jobs:
           package-manager-cache: false
       - name: Test release intake and composition guards
         run: node --test tests/release-set.test.mjs tests/release-set-image.test.mjs tests/release-set-local.test.mjs
+      - name: Verify temporary-only maintenance guard and failed-restore refusal on tiny data
+        env:
+          ALLOW_INITIALIZATION_TEST: "1"
+        run: node tests/candidate-initialization.integration.mjs
       - name: Verify immutable SQL artifact pins and successful per-version image audits
         id: plan
         env:
