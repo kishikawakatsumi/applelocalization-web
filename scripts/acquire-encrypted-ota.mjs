@@ -282,6 +282,7 @@ async function inspectOnCI(output) {
     normalizedSha256: normalized.sha256,
     normalizedBytes: normalized.bytes,
     sourceFormat: normalized.sourceFormat,
+    metadataFixups: normalized.metadataFixups,
   };
   await writeJson(join(output, "layout.json"), report);
   console.log(JSON.stringify({ status: report.status, format: report.format }));

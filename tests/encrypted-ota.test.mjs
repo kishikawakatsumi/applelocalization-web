@@ -193,6 +193,16 @@ with tempfile.TemporaryDirectory() as d:
   wrapped=p/(name+'.yop');wrapped.write_bytes(record(b'M',b'')+record(b'E',body))
   n=normal.normalize(wrapped,p/('wrap-'+name))
   assert n['sha256']==n1['sha256']
+ path=b'Info.plist'
+ attrs=b'TYP1F'+b'PATP'+struct.pack('<H',len(path))+path+b'MOD4'+struct.pack('<I',420)+b'SIZ4'+struct.pack('<I',(tree/'Info.plist').stat().st_size)
+ fixup=b'AA01'+struct.pack('<H',len(attrs)+6)+attrs
+ wrapped=p/'fixup.yop';wrapped.write_bytes(record(b'M',b'')+record(b'E',a.read_bytes())+record(b'O',fixup))
+ n=normal.normalize(wrapped,p/'with-fixup')
+ assert n['sha256']==n1['sha256'] and n['metadataFixups'][0]['records']==1
+ for e in [{'TYP':'F','PAT':'Info.plist','DAT':1},{'TYP':'F','PAT':'../escape'},
+           {'TYP':'F','PAT':'Info.plist','XAT':10},{'TYP':'L','PAT':'Info.plist','LNK':'elsewhere'}]:
+  try:normal.verify_fixups([{'sha256':'test','entries':[e]}],{'Info.plist':{'bytes':1}});raise AssertionError('unsafe fixup accepted')
+  except ValueError:pass
  bad=p/'unsupported.yop';bad.write_bytes(record(b'P',a.read_bytes()))
  try:normal.normalize(bad,p/'refuse-op');raise AssertionError('patch operation accepted')
  except ValueError:pass
