@@ -82,7 +82,7 @@ def convert_segment(src, length, output):
                 p.kill(); p.wait()
 
 
-def materialize(archive, tree, work, files, fixups, depth=0):
+def materialize(archive, work, files, fixups, zipped, depth=0):
     if depth > 4:
         raise ValueError("Nested YOP limit exceeded")
     records = layout.aa_records(archive)
@@ -106,7 +106,7 @@ def materialize(archive, tree, work, files, fixups, depth=0):
                         if h["YOP"] == "O":
                             fixups.append({"sha256": sha(flat), "entries": layout.aa_records(flat)})
                         else:
-                            materialize(flat, tree, work, files, fixups, depth + 1)
+                            materialize(flat, work, files, fixups, zipped, depth + 1)
             if src.read(1):
                 raise ValueError("Unlisted trailing YOP record")
         return
@@ -117,9 +117,36 @@ def materialize(archive, tree, work, files, fixups, depth=0):
     total = sum(e["bytes"] for e in files.values())
     if len(files) > 100000 or total > MAX_BYTES:
         raise ValueError(f"Outer OTA member budget exceeded: files={len(files)}, bytes={total}")
-    subprocess.run(["/usr/bin/aa", "extract", "-i", str(archive), "-d", str(tree),
-                    "-include-type", "f", "-exclude-field", "all", "-include-field", "typ,pat,dat"],
-                   check=True, capture_output=True, timeout=1200)
+    needed = 2 * sum(e["bytes"] for e in entries.values()) + 128 * 1024**2
+    free = shutil.disk_usage(work).free
+    if free < RESERVE + needed:
+        raise ValueError(f"Insufficient per-segment space: available={free}, required={RESERVE + needed}")
+    with tempfile.TemporaryDirectory(prefix="outer-members-", dir=work) as tmp:
+        subprocess.run(["/usr/bin/aa", "extract", "-i", str(archive), "-d", tmp,
+                        "-include-type", "f", "-exclude-field", "all", "-include-field", "typ,pat,dat"],
+                       check=True, capture_output=True, timeout=1200)
+        actual = {}
+        for p in Path(tmp).rglob("*"):
+            if p.is_symlink() or not (p.is_file() or p.is_dir()):
+                raise ValueError("Unexpected nonregular extracted member")
+            if p.is_file():
+                actual[p.relative_to(tmp).as_posix()] = p
+        if set(actual) != set(entries):
+            raise ValueError("Apple Archive extraction member mismatch")
+        for name, path in actual.items():
+            if path.stat().st_size != entries[name]["bytes"]:
+                raise ValueError("Apple Archive extraction byte mismatch")
+        # Source chunk order and sorted members are deterministic. Release each
+        # temporary chunk after appending; never hold a full extracted outer tree.
+        for name in sorted(entries):
+            entry = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+            entry.create_system = 3
+            entry.external_attr = 0o100644 << 16
+            with actual[name].open("rb") as src, zipped.open(entry, "w", force_zip64=True) as dst:
+                while chunk := src.read(4 * 1024**2):
+                    if shutil.disk_usage(work).free < RESERVE:
+                        raise ValueError("Free disk reserve exhausted")
+                    dst.write(chunk)
 
 
 def verify_fixups(fixups, files):
@@ -163,38 +190,16 @@ def normalize(archive, output):
         if f.read(4) != b"AA01":
             raise ValueError("Expected uncompressed AA01 outer OTA")
     output.mkdir()
-    if shutil.disk_usage(output).free < RESERVE + 2 * MAX_BYTES + 128 * 1024**2:
+    if shutil.disk_usage(output).free < RESERVE + 128 * 1024**2:
         raise ValueError("Insufficient space to normalize OTA with 10 GiB reserve")
     target = output / "full-ota.zip"
-    with tempfile.TemporaryDirectory(prefix="outer-members-", dir=output) as tmp:
-        files, fixups = {}, []
-        materialize(archive, Path(tmp), output, files, fixups)
+    files, fixups = {}, []
+    with zipfile.ZipFile(target, "x", compression=zipfile.ZIP_STORED, allowZip64=True) as z:
+        materialize(archive, output, files, fixups, z)
         fixup_report = verify_fixups(fixups, files)
         total = sum(e["bytes"] for e in files.values())
         if not files:
             raise ValueError("Outer OTA has no regular members")
-        actual = {}
-        for p in Path(tmp).rglob("*"):
-            if p.is_symlink() or not (p.is_file() or p.is_dir()):
-                raise ValueError("Unexpected nonregular extracted member")
-            if p.is_file():
-                actual[p.relative_to(tmp).as_posix()] = p
-        if set(actual) != set(files):
-            raise ValueError("Apple Archive extraction member mismatch")
-        for name, path in actual.items():
-            if path.stat().st_size != files[name]["bytes"]:
-                raise ValueError("Apple Archive extraction byte mismatch")
-        # No timestamps, ownership or host metadata enter the derived ZIP identity.
-        with zipfile.ZipFile(target, "x", compression=zipfile.ZIP_STORED, allowZip64=True) as z:
-            for name in sorted(files):
-                entry = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
-                entry.create_system = 3
-                entry.external_attr = 0o100644 << 16
-                with actual[name].open("rb") as src, z.open(entry, "w", force_zip64=True) as dst:
-                    while chunk := src.read(4 * 1024**2):
-                        if shutil.disk_usage(output).free < RESERVE:
-                            raise ValueError("Free disk reserve exhausted")
-                        dst.write(chunk)
     return {"status": "outer-ota-rewrapped", "format": "zip", "sourceFormat": "apple-archive",
             "sourceSha256": sha(archive), "path": str(target), "bytes": target.stat().st_size,
             "sha256": sha(target), "members": len(files), "memberBytes": total,

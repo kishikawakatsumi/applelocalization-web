@@ -199,6 +199,19 @@ with tempfile.TemporaryDirectory() as d:
  wrapped=p/'fixup.yop';wrapped.write_bytes(record(b'M',b'')+record(b'E',a.read_bytes())+record(b'O',fixup))
  n=normal.normalize(wrapped,p/'with-fixup')
  assert n['sha256']==n1['sha256'] and n['metadataFixups'][0]['records']==1
+ assert [x.name for x in (p/'with-fixup').iterdir()]==['full-ota.zip']
+ from types import SimpleNamespace
+ original_usage=normal.shutil.disk_usage
+ normal.MAX_BYTES=12*1024**3;normal.RESERVE=10*1024**3
+ normal.shutil.disk_usage=lambda _:SimpleNamespace(free=normal.RESERVE+512*1024**2)
+ assert normal.normalize(wrapped,p/'bounded-disk')['sha256']==n1['sha256']
+ normal.shutil.disk_usage=lambda _:SimpleNamespace(free=normal.RESERVE-1)
+ try:normal.normalize(wrapped,p/'no-reserve');raise AssertionError('reserve lowered')
+ except ValueError:pass
+ normal.shutil.disk_usage=original_usage;normal.RESERVE=0;normal.MAX_BYTES=16*1024**2
+ dup=p/'duplicate.yop';dup.write_bytes(record(b'E',a.read_bytes())+record(b'E',a.read_bytes()))
+ try:normal.normalize(dup,p/'duplicate');raise AssertionError('duplicate overwritten')
+ except ValueError:pass
  for e in [{'TYP':'F','PAT':'Info.plist','DAT':1},{'TYP':'F','PAT':'../escape'},
            {'TYP':'F','PAT':'Info.plist','XAT':10},{'TYP':'L','PAT':'Info.plist','LNK':'elsewhere'}]:
   try:normal.verify_fixups([{'sha256':'test','entries':[e]}],{'Info.plist':{'bytes':1}});raise AssertionError('unsafe fixup accepted')
