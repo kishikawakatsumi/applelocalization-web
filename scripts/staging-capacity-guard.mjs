@@ -20,5 +20,6 @@ export function requireCapacity({ hostBytes, dockerBytes }, minimumBytes) {
 export function terminateStagingApplicationSQL(application) {
   assert.equal(typeof application, "string");
   stagingApplicationArgs(application);
-  return `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name='${application}' AND datname='localization_staging' AND usename='postgres' AND pid <> pg_backend_pid()`;
+  const escaped = application.replaceAll("'", "''");
+  return `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE application_name='${escaped}' AND datname='localization_staging' AND usename='postgres' AND pid <> pg_backend_pid()`;
 }
