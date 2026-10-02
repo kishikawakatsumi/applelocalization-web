@@ -84,10 +84,13 @@ test("missing versions, duplicate releases, mixed OS/builds and missing componen
     assert.throws(() => releaseCatalog(b, ids));
   }
   assert.throws(() => releaseCatalog([bundle("ios15")]));
-  assert.throws(
-    () => releaseCatalog([bundle("ios26")], ["ios26"]),
-    /not pinned/,
+  assert.equal(
+    releaseCatalog([bundle("ios26")], ["ios26"]).datasets[0].components.length,
+    3,
   );
+  const all = releaseCatalog(releaseTargets().map(bundle));
+  assert.equal(all.allPlannedTargets, true);
+  assert.deepEqual(all.missingTargets, []);
   assert.throws(() => releaseTargets("ios15,ios15"));
   assert.throws(() => releaseTargets("ios99"));
 });

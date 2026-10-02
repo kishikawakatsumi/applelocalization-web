@@ -12,16 +12,16 @@ const plan = JSON.parse(
     new URL("../scripts/collection-batch-20261002.json", import.meta.url),
   ),
 );
-test("batch accounts for 12 series, 5 IPSW and 6 full-OTA targets with 33 components", () => {
+test("batch accounts for all 12 series, 5 IPSW and 7 full-OTA targets with 36 components", () => {
   const matrix = validateBatchPlan(plan);
-  assert.equal(matrix.include.length, 33);
+  assert.equal(matrix.include.length, 36);
   assert.equal(
     plan.targets.filter((x) => x.status === "ipsw-input-pinned").length,
     5,
   );
   assert.equal(
     plan.targets.filter((x) => x.status === "alternative-route-pending").length,
-    1,
+    0,
   );
   assert.deepEqual(plan.targets.map((x) => x.id), [
     "ios27",
