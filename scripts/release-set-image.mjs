@@ -36,6 +36,50 @@ const run = async (program, args) =>
     timeout: 180000,
   })).stdout.trim();
 const docker = (...args) => run("docker", args);
+// Docker emits PostgreSQL errors on stderr, not stdout. Retain bounded technical
+// summaries from BOTH streams, never COPY rows, statements, details or context.
+export function summarizeRestoreLogs(stdout, stderr) {
+  const components = [], errors = [];
+  for (const line of `${stdout}\n${stderr}`.split("\n")) {
+    const component = line.match(
+      /^Localization component: ([a-z0-9-]+) (start|completed)$/,
+    );
+    if (component && batch.jobs.some((c) => c.key === component[1])) {
+      components.push({ key: component[1], status: component[2] });
+    } else if (
+      !/\b(?:STATEMENT|DETAIL|CONTEXT):/.test(line) &&
+      (/^(?:psql:(?:<stdin>:)?[0-9]+:|[0-9]{4}-[0-9T:. +A-Z-]+\[[0-9]+\])\s*(?:ERROR|FATAL|PANIC):/
+        .test(line) ||
+        /\bLOG:\s+(?:server process .* (?:terminated|killed)|terminating any other active server processes|all server processes terminated)/
+          .test(line))
+    ) {
+      errors.push(
+        line.replace(/'[^']*'|"[^"]*"/g, "<quoted value>").slice(0, 1024),
+      );
+    }
+  }
+  return { components: components.slice(-72), errors: errors.slice(-30) };
+}
+async function restoreLogs(name) {
+  let result;
+  try {
+    result = await execute("docker", ["logs", "--tail", "200", name], {
+      encoding: "utf8",
+      timeout: 30000,
+      maxBuffer: 1024 ** 2,
+    });
+  } catch (error) {
+    result = {
+      stdout: error.stdout ?? "",
+      stderr: error.stderr ?? "",
+      captureIncomplete: true,
+    };
+  }
+  return {
+    ...summarizeRestoreLogs(result.stdout, result.stderr),
+    captureIncomplete: result.captureIncomplete === true,
+  };
+}
 async function stream(program, args) {
   const child = spawn(program, args, { stdio: "inherit" });
   const code = await new Promise((ok, fail) => {
@@ -188,7 +232,7 @@ export async function buildRelease({ plan, planSha256, input, output }) {
   );
   const verification = join(output, "verification");
   await mkdir(verification);
-  const disk = [];
+  const disk = [], memory = [];
   const capacity = async (stage) => {
     // Docker's data root may be on another filesystem; protect both.
     const root = await docker("info", "--format", "{{.DockerRootDir}}");
@@ -225,6 +269,24 @@ export async function buildRelease({ plan, planSha256, input, output }) {
       await capacity("restore");
       const c = await inspect();
       assert.equal(c.State.Running, true, "Unified DB exited during restore");
+      if (i % 12 === 0) {
+        // Child processes may be OOM-killed while Docker's main PID survives.
+        const counters = await docker(
+          "exec",
+          name,
+          "sh",
+          "-c",
+          "cat /sys/fs/cgroup/memory.events /sys/fs/cgroup/memory.current /sys/fs/cgroup/memory.max",
+        ).catch(() => "unavailable");
+        memory.push({ sampledAt: new Date().toISOString(), counters });
+        console.log(
+          JSON.stringify({
+            status: "unified-db-restoring",
+            freeBytes: disk.at(-1).freeBytes,
+            memory: counters,
+          }),
+        );
+      }
       if (c.State.Health?.Status === "healthy") return;
       await delay(5000);
     }
@@ -381,12 +443,13 @@ export async function buildRelease({ plan, planSha256, input, output }) {
       const c = await inspect();
       if (c.State.Running) await docker("stop", "--time", "60", name);
       // Preserve the owned volume for inspection until the hosted runner is destroyed.
-      const logs = await docker("logs", "--tail", "100", name);
-      // No row text or source bytes in exported failure diagnostics.
+      const state = (await inspect()).State;
       await writeJson(join(output, "diagnostics.json"), {
-        state: (await inspect()).State.Status,
-        exitCode: (await inspect()).State.ExitCode,
-        logBytes: Buffer.byteLength(logs),
+        state: state.Status,
+        exitCode: state.ExitCode,
+        oomKilled: state.OOMKilled,
+        memory,
+        logs: await restoreLogs(name),
         componentsExpected: batch.jobs.length,
       });
     }
