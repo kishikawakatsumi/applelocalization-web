@@ -92,3 +92,37 @@ test("candidate chaining is opt-in and stays in the separate non-production work
   );
   assert.doesNotMatch(y, /secrets\.|docker push|gh release|contents: write/);
 });
+
+test("encrypted OTA collection binds both ciphertext and plaintext pins to the same release", async () => {
+  const encryptedSource = JSON.parse(
+    await readFile(
+      new URL("../scripts/ios26-encrypted-ota.json", import.meta.url),
+    ),
+  );
+  const s = {
+    ...batch.jobs.find((j) => j.key === "ios17-os").input,
+    encryptedSource,
+    os: encryptedSource.os,
+    version: encryptedSource.version,
+    otaVersion: encryptedSource.version,
+    build: encryptedSource.build,
+    url: encryptedSource.url,
+    archiveBytes: 9 * 1024 ** 3,
+    maximumDownloadBytes: encryptedSource.archiveBytes,
+    stableEvidence: {
+      url: encryptedSource.stableEvidence,
+      build: encryptedSource.build,
+    },
+  };
+  validateOTAInput(s);
+  for (
+    const change of [
+      { encryptedSource: { ...encryptedSource, build: "23A1" } },
+      { encryptedSource: { ...encryptedSource, archiveSha256: null } },
+      { maximumDownloadBytes: 1 },
+      { archiveBytes: 15 * 1024 ** 3 },
+      { archiveSha256: null },
+      { encryptedSource: undefined },
+    ]
+  ) assert.throws(() => validateOTAInput({ ...s, ...change }));
+});

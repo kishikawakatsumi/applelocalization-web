@@ -9,6 +9,11 @@ import { boundedCommand } from "./acquire-ipsw-component.mjs";
 import { collectionStages } from "./collect-image-localizations.mjs";
 import { decodePlist } from "./extract-mounted-bundle.mjs";
 import {
+  acquireEncryptedOTA,
+  normalizeDecryptedOTA,
+  validateEncryptedOTA,
+} from "./acquire-encrypted-ota.mjs";
+import {
   checkSpace,
   fileHash,
   runCheckpoints,
@@ -32,11 +37,23 @@ export function validateOTAInput(s) {
   const url = new URL(s.url);
   assert.equal(url.origin, "https://updates.cdn-apple.com");
   assert.ok(
-    url.pathname.endsWith(".zip") && !url.username && !url.password &&
+    url.pathname.endsWith(s.encryptedSource ? ".aea" : ".zip") &&
+      !url.username && !url.password &&
       !url.search && !url.hash,
   );
   assert.match(s.archiveSha256, /^[a-f0-9]{64}$/);
-  assert.equal(s.archiveBytes, s.maximumDownloadBytes);
+  if (s.encryptedSource) {
+    validateEncryptedOTA(s.encryptedSource);
+    for (const field of ["os", "version", "build", "url"]) {
+      assert.equal(
+        s[field],
+        s.encryptedSource[field],
+        "Encrypted source identity mismatch",
+      );
+    }
+    assert.equal(s.maximumDownloadBytes, s.encryptedSource.archiveBytes);
+    assert.ok(s.archiveBytes <= s.encryptedSource.maximumDecryptedBytes);
+  } else assert.equal(s.archiveBytes, s.maximumDownloadBytes);
   assert.ok(
     Number.isSafeInteger(s.archiveBytes) && s.archiveBytes > 0 &&
       s.archiveBytes <= 20 * 1024 ** 3,
@@ -72,7 +89,7 @@ export function validateOTAInput(s) {
 }
 
 export async function collectOTAComponent(
-  { spec, output, tool, progress = console.log },
+  { spec, output, tool, toolSha256, progress = console.log },
 ) {
   validateOTAInput(spec);
   assert.equal(process.platform, "darwin");
@@ -86,25 +103,48 @@ export async function collectOTAComponent(
   await writeJson(inputPath, spec);
   const payload = join(output, "payload");
   await mkdir(payload);
-  const archive = join(payload, "full-ota.zip");
+  let archive = join(payload, "full-ota.zip");
   progress({ stage: "ota-download", status: "running" });
-  await boundedCommand("/usr/bin/curl", [
-    "--fail",
-    "--silent",
-    "--show-error",
-    "--location",
-    "--proto",
-    "=https",
-    "--proto-redir",
-    "=https",
-    "--max-time",
-    "1700",
-    "--max-filesize",
-    String(spec.archiveBytes),
-    "--output",
-    archive,
-    spec.url,
-  ], { directory: payload, maximumBytes: spec.archiveBytes });
+  if (spec.encryptedSource) {
+    const acquired = await acquireEncryptedOTA({
+      spec: spec.encryptedSource,
+      output: join(output, "encrypted-source"),
+      tool,
+      toolSha256,
+      progress,
+    });
+    const normalized = await normalizeDecryptedOTA(
+      acquired,
+      join(output, "normalized"),
+    );
+    assert.equal(
+      normalized.bytes,
+      spec.archiveBytes,
+      "Normalized ZIP size changed",
+    );
+    assert.equal(
+      normalized.sha256,
+      spec.archiveSha256,
+      "Normalized ZIP hash changed",
+    );
+    archive = normalized.path;
+  } else {await boundedCommand("/usr/bin/curl", [
+      "--fail",
+      "--silent",
+      "--show-error",
+      "--location",
+      "--proto",
+      "=https",
+      "--proto-redir",
+      "=https",
+      "--max-time",
+      "1700",
+      "--max-filesize",
+      String(spec.archiveBytes),
+      "--output",
+      archive,
+      spec.url,
+    ], { directory: payload, maximumBytes: spec.archiveBytes });}
   assert.equal((await lstat(archive)).size, spec.archiveBytes);
   assert.equal(await fileHash(archive), spec.archiveSha256);
   const selected = join(output, "selected");

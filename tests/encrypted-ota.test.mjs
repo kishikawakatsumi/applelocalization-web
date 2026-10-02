@@ -146,3 +146,48 @@ test("CI retains only bounded metadata, never raw OTA or keys", async () => {
   assert.match(workflow, /path: .*\/layout.json/);
   assert.doesNotMatch(workflow, /secrets\.|docker\/login|\.aea|ota_fcs_keys/);
 });
+
+test(
+  "native AA01 outer OTA inspection reads metadata without materializing payload files",
+  { skip: process.platform !== "darwin" },
+  () => {
+    const script =
+      new URL("../scripts/inspect-ota-layout.py", import.meta.url).pathname;
+    execFileSync("python3", [
+      "-B",
+      "-c",
+      `
+import importlib.util,tempfile,plistlib,subprocess
+from pathlib import Path
+s=importlib.util.spec_from_file_location('layout',${JSON.stringify(script)})
+m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
+with tempfile.TemporaryDirectory() as d:
+ p=Path(d);tree=p/'tree';tree.mkdir();(tree/'AssetData').mkdir()
+ (tree/'Info.plist').write_bytes(plistlib.dumps({'MobileAssetProperties':{'OSVersion':'26.7.1','Build':'23H30','ArchiveDecryptionKey':'DO_NOT_EXPOSE'}}))
+ (tree/'AssetData/Info.plist').write_bytes(plistlib.dumps({'ProductVersion':'26.7.1','Build':'23H30'}))
+ (tree/'AssetData/payloadv2').mkdir();(tree/'AssetData/payloadv2/payload.000').write_bytes(b'not extracted')
+ a=p/'outer.aa'
+ subprocess.run(['/usr/bin/aa','archive','-d',str(tree),'-o',str(a),'-a','raw'],check=True)
+ r=m.inspect(a,{'version':'26.7.1','build':'23H30'})
+ assert r['format']=='apple-archive' and r['regularPayloadMembers']==1
+ assert 'DO_NOT_EXPOSE' not in str(r)
+ normal_path=Path(${
+        JSON.stringify(script)
+      }).with_name('normalize-ota-archive.py')
+ ns=importlib.util.spec_from_file_location('normal',normal_path);normal=importlib.util.module_from_spec(ns);ns.loader.exec_module(normal)
+ normal.RESERVE=0
+ n1=normal.normalize(a,p/'one');n2=normal.normalize(a,p/'two')
+ assert n1['sha256']==n2['sha256'] and n1['sourceFormat']=='apple-archive'
+ import zipfile
+ with zipfile.ZipFile(n1['path']) as z:
+  assert set(z.namelist())=={'Info.plist','AssetData/Info.plist','AssetData/payloadv2/payload.000'}
+  for name in z.namelist(): assert z.read(name)==(tree/name).read_bytes()
+ assert m.inspect(n1['path'],{'version':'26.7.1','build':'23H30'})['format']=='zip'
+ (tree/'link').symlink_to('Info.plist')
+ subprocess.run(['/usr/bin/aa','archive','-d',str(tree),'-o',str(p/'link.aa'),'-a','raw'],check=True)
+ try:normal.normalize(p/'link.aa',p/'refuse');raise AssertionError('link accepted')
+ except ValueError:pass
+`,
+    ]);
+  },
+);
