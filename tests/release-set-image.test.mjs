@@ -7,10 +7,36 @@ import { releaseTargets } from "../scripts/compose-release-set.mjs";
 import {
   inputPins,
   releaseTag,
+  summarizeRestoreLogs,
   validatePins,
   validateSource,
   validateVerified,
 } from "../scripts/release-set-image.mjs";
+
+test("restore diagnostics preserve PostgreSQL stderr errors but omit SQL/COPY data", () => {
+  const summary = summarizeRestoreLogs(
+    "Localization component: ios27-os start\nCOPY 123\nprivate raw row\n",
+    'psql:<stdin>:12345: ERROR:  could not extend file "base/123": No space left on device\n' +
+      "2026-10-02 11:26:50.001 UTC [33] ERROR:  out of shared memory\n" +
+      "2026-10-02 11:26:50.001 UTC [33] CONTEXT: COPY private raw row\n" +
+      "2026-10-02 11:26:50.001 UTC [33] STATEMENT: SELECT 'secret'\n" +
+      "2026-10-02 11:26:50.002 UTC [1] LOG:  server process (PID 33) was terminated by signal 9: Killed\n" +
+      "psql:42: ERROR: invalid value 'secret text'\n",
+  );
+  assert.deepEqual(summary.components, [{ key: "ios27-os", status: "start" }]);
+  assert.equal(summary.errors.length, 4);
+  assert.ok(summary.errors.some((e) => e.includes("out of shared memory")));
+  assert.ok(summary.errors.some((e) => e.includes("signal 9")));
+  assert.ok(!JSON.stringify(summary).includes("private raw row"));
+  assert.ok(!JSON.stringify(summary).includes("secret"));
+  assert.ok(!JSON.stringify(summary).includes("base/123"));
+  const bounded = summarizeRestoreLogs(
+    "",
+    ("psql:42: ERROR: " + "x".repeat(4096) + "\n").repeat(50),
+  );
+  assert.equal(bounded.errors.length, 30);
+  assert.ok(bounded.errors.every((e) => e.length <= 1024));
+});
 
 function sourceFixture() {
   const pin = structuredClone(inputPins[0]),
