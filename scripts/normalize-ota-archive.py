@@ -53,7 +53,7 @@ def yop_header(f):
             raise ValueError("Truncated YOP value")
         value = raw[offset:offset+size]; offset += size
         fields[name] = value.decode("ascii") if name in ("TYP", "YOP") else int.from_bytes(value, "little") if name in ("DAT", "SIZ", "IDX", "IDZ") else value
-    if fields.get("TYP") != "M" or fields.get("YOP") not in ("M", "E") or "DAT" not in fields:
+    if fields.get("TYP") != "M" or fields.get("YOP") not in ("M", "E", "O") or "DAT" not in fields:
         raise ValueError("Only full-OTA manifest/extract operations are supported")
     return fields
 
@@ -82,7 +82,7 @@ def convert_segment(src, length, output):
                 p.kill(); p.wait()
 
 
-def materialize(archive, tree, work, files, depth=0):
+def materialize(archive, tree, work, files, fixups, depth=0):
     if depth > 4:
         raise ValueError("Nested YOP limit exceeded")
     records = layout.aa_records(archive)
@@ -103,7 +103,10 @@ def materialize(archive, tree, work, files, depth=0):
                     with tempfile.TemporaryDirectory(prefix="yop-", dir=work) as d:
                         flat = Path(d) / "flat.aa"
                         convert_segment(src, h["DAT"], flat)
-                        materialize(flat, tree, work, files, depth + 1)
+                        if h["YOP"] == "O":
+                            fixups.append({"sha256": sha(flat), "entries": layout.aa_records(flat)})
+                        else:
+                            materialize(flat, tree, work, files, fixups, depth + 1)
             if src.read(1):
                 raise ValueError("Unlisted trailing YOP record")
         return
@@ -117,6 +120,31 @@ def materialize(archive, tree, work, files, depth=0):
     subprocess.run(["/usr/bin/aa", "extract", "-i", str(archive), "-d", str(tree),
                     "-include-type", "f", "-exclude-field", "all", "-include-field", "typ,pat,dat"],
                    check=True, capture_output=True, timeout=1200)
+
+
+def verify_fixups(fixups, files):
+    # O only augments attributes of already extracted objects. Never create files,
+    # change paths/links or accept data/xattrs through this metadata-only path.
+    allowed = {"TYP", "PAT", "UID", "GID", "MOD", "FLG", "MTM", "BTM", "CTM", "SIZ", "DAT", "IDX", "IDZ"}
+    directories = {"", ".", "./"}
+    for name in files:
+        directories.update(str(p) for p in Path(name).parents)
+    reports = []
+    for group in fixups:
+        for entry in group["entries"]:
+            if set(entry) - allowed or entry.get("TYP") not in ("F", "D") or entry.get("DAT", 0) != 0:
+                raise ValueError("Fixup contains data, unsupported attributes or object type; fields=" + ",".join(sorted(entry)))
+            name = entry["PAT"]
+            if name.startswith("./"):
+                name = name[2:]
+            if entry["TYP"] == "F":
+                if name not in files or ("SIZ" in entry and entry["SIZ"] != files[name]["bytes"]):
+                    raise ValueError("Fixup does not match an extracted file")
+            elif name not in directories:
+                raise ValueError("Fixup does not match an extracted directory")
+        reports.append({"sha256": group["sha256"], "records": len(group["entries"]),
+                        "fields": sorted(set(k for e in group["entries"] for k in e))})
+    return reports
 
 
 def sha(path):
@@ -139,8 +167,9 @@ def normalize(archive, output):
         raise ValueError("Insufficient space to normalize OTA with 10 GiB reserve")
     target = output / "full-ota.zip"
     with tempfile.TemporaryDirectory(prefix="outer-members-", dir=output) as tmp:
-        files = {}
-        materialize(archive, Path(tmp), output, files)
+        files, fixups = {}, []
+        materialize(archive, Path(tmp), output, files, fixups)
+        fixup_report = verify_fixups(fixups, files)
         total = sum(e["bytes"] for e in files.values())
         if not files:
             raise ValueError("Outer OTA has no regular members")
@@ -168,7 +197,8 @@ def normalize(archive, output):
                         dst.write(chunk)
     return {"status": "outer-ota-rewrapped", "format": "zip", "sourceFormat": "apple-archive",
             "sourceSha256": sha(archive), "path": str(target), "bytes": target.stat().st_size,
-            "sha256": sha(target), "members": len(files), "memberBytes": total}
+            "sha256": sha(target), "members": len(files), "memberBytes": total,
+            "metadataFixups": fixup_report}
 
 
 if __name__ == "__main__":
