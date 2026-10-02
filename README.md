@@ -84,9 +84,14 @@ separate validation step. Artifacts retain intermediate/quarantine data and SQL 
 the registry retains pushed candidate images. No routine Mac download, IPSW/DMG retention,
 cross-repository Release publication, scheduled annual run, or automatic production deployment occurs.
 
-The pinned 2026-10-02 plan covers 12 requested series: five IPSW targets and six full-OTA
-targets (macOS 12/13/14/15/26 and iOS 17) are configured. iOS 26 still needs its encrypted
-OTA acquisition route. Full-OTA archives and internal metadata are hash-pinned; only full
+The pinned 2026-10-02 plan covers all 12 requested series: five IPSW targets and seven full-OTA
+targets (macOS 12/13/14/15/26 and iOS 17/26), with 36 independent components. iOS 26.7.1
+uses an encrypted full OTA; CI run 36986903666 verified decryption, AA01/YOP normalization,
+internal release metadata and all three component paths. Acquisition, decrypted and derived
+ZIP hashes are pinned. Keys stay in private temporary CI files and are removed; raw archives
+are not uploaded. Native conversion processes one chunk at a time with the 10 GiB reserve
+unchanged. Metadata-only fixups cannot add files, data, links or unknown attributes.
+Full-OTA archives and internal metadata are hash-pinned; only full
 payloads with the exact stable release build are accepted. macOS OTA builds are cross-checked
 against Apple's stable installer distribution definitions, even when OTA documentation IDs
 retain an RC suffix. Intel and arm64 SystemOS components remain separate schemas in one image.
@@ -118,8 +123,8 @@ Use only verified CI SQL artifacts; pins must come from their trusted producer.
 The default `--targets all` requires **all 12 planned series** and all required
 components at their pinned versions/builds. An explicit `--targets ios15,macos15`
 can prepare a partial integration context; omitted series are listed and it is
-never labelled complete or production-ready. The encrypted iOS 26 route must be
-implemented before the full release set can be assembled.
+never labelled complete or production-ready. All acquisition inputs are now pinned;
+the full release set still requires successfully generated SQL for every target.
 
 `context/payload/release-set.json` maps each public ID (for example `ios27` or
 `macos27`) to only that OS/version's component schemas. `resolveReleaseScope`

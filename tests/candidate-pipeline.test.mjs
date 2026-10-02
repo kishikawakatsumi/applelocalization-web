@@ -92,8 +92,8 @@ test("download layout follows single-ID flattening and keeps multi-ID components
 });
 test("candidate plans all complete OS versions, never combines different runs or silently publishes partial targets", () => {
   const f = fixture(), plan = selectCandidateTargets(f);
-  assert.equal(plan.ready.length, 11);
-  assert.equal(plan.pending.length, 1);
+  assert.equal(plan.ready.length, 12);
+  assert.equal(plan.pending.length, 0);
   assert.equal(
     selectCandidateTargets({ ...f, targets: "ios15" }).ready[0].components
       .length,
@@ -102,15 +102,16 @@ test("candidate plans all complete OS versions, never combines different runs or
   f.jobs.find((j) => j.name === "collect (ios27-systemos)").steps[0]
     .conclusion = "failure";
   const partial = selectCandidateTargets(f);
-  assert.equal(partial.ready.length, 10);
+  assert.equal(partial.ready.length, 11);
   assert.ok(partial.pending.some((p) => p.id === "ios27"));
   assert.throws(
     () => selectCandidateTargets({ ...f, targets: "ios27" }),
     /component not successful/,
   );
-  assert.throws(
-    () => selectCandidateTargets({ ...f, targets: "ios26" }),
-    /alternative acquisition/,
+  assert.equal(
+    selectCandidateTargets({ ...f, targets: "ios26" }).ready[0].components
+      .length,
+    3,
   );
 });
 test("successful intermediate upload survives a later optional SQL failure", () => {
@@ -155,7 +156,7 @@ test("artifact trust rejects forks, arbitrary producers, rerun mixing, damaged m
 test("collection can be started independently for a pinned OS and unknown routes fail before download", () => {
   assert.equal(selectBatchJobs(batch, "ios27").include.length, 3);
   assert.equal(selectBatchJobs(batch, "ios15").include.length, 1);
-  assert.throws(() => selectBatchJobs(batch, "ios26"));
+  assert.equal(selectBatchJobs(batch, "ios26").include.length, 3);
   assert.throws(() => selectBatchJobs(batch, "ios27,ios27"));
 });
 test("push is explicit, main-only, version-specific, never latest", async () => {

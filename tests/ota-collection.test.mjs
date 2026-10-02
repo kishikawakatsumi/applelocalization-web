@@ -12,10 +12,10 @@ const batch = JSON.parse(
     new URL("../scripts/collection-batch-20261002.json", import.meta.url),
   ),
 );
-test("six full-OTA targets pin exact archives, metadata, stable builds and separate Intel/arm64 components", () => {
+test("seven full-OTA targets pin exact archives, metadata, stable builds and separate Intel/arm64 components", () => {
   validateBatchPlan(batch);
   const ota = batch.jobs.filter((j) => j.input.kind === "ota-full");
-  assert.equal(ota.length, 20);
+  assert.equal(ota.length, 23);
   ota.forEach((j) => validateOTAInput(j.input));
   assert.equal(
     selectBatchJobs(batch, "macos26,macos15,macos14,macos13,macos12,ios17")
@@ -23,6 +23,19 @@ test("six full-OTA targets pin exact archives, metadata, stable builds and separ
     20,
   );
   assert.equal(ota.filter((j) => j.target === "macos12").length, 1);
+  const ios26 = ota.filter((j) => j.target === "ios26");
+  assert.equal(ios26.length, 3);
+  for (const j of ios26) {
+    assert.equal(
+      j.input.encryptedSource.decryptedSha256,
+      "20e88047d768379fd5c189733d168f9944c3ed418d053670d9066c700ee72df2",
+    );
+    assert.equal(
+      j.input.archiveSha256,
+      "ec688c37bd57c3c7387095001002d8ce57262831bc996a58811a64f75bc4c585",
+    );
+    assert.equal(j.input.build, "23H30");
+  }
   assert.deepEqual(
     ota.filter((j) => j.target === "ios17").map((j) => j.input.component)
       .sort(),
