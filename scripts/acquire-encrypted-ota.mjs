@@ -32,6 +32,13 @@ export function validateEncryptedOTA(s) {
   for (const f of ["archiveBytes", "maximumDecryptedBytes"]) {
     assert.ok(Number.isSafeInteger(s[f]) && s[f] > 0 && s[f] <= 16 * 1024 ** 3);
   }
+  if (s.decryptedSha256 !== undefined || s.decryptedBytes !== undefined) {
+    assert.match(s.decryptedSha256 ?? "", /^[a-f0-9]{64}$/);
+    assert.ok(
+      Number.isSafeInteger(s.decryptedBytes) && s.decryptedBytes > 0 &&
+        s.decryptedBytes <= s.maximumDecryptedBytes,
+    );
+  }
 }
 
 export function selectOTAKey(entries, spec) {
@@ -62,7 +69,7 @@ export function selectOTAKey(entries, spec) {
 
 export async function decryptOTAFile({ input, output, key, maximumBytes }) {
   await mkdir(output);
-  const path = join(output, "full-ota.zip");
+  const path = join(output, "decrypted-ota.bin");
   try {
     await boundedCommand("/usr/bin/aea", [
       "decrypt",
@@ -157,6 +164,18 @@ export async function acquireEncryptedOTA(
       key: keyPath,
       maximumBytes: spec.maximumDecryptedBytes,
     });
+    if (spec.decryptedSha256) {
+      assert.equal(
+        result.sha256,
+        spec.decryptedSha256,
+        "Decrypted OTA hash mismatch",
+      );
+      assert.equal(
+        result.bytes,
+        spec.decryptedBytes,
+        "Decrypted OTA size mismatch",
+      );
+    }
     progress({
       stage: "encrypted-ota-decrypt",
       status: "completed",
@@ -226,11 +245,15 @@ async function inspectOnCI(output) {
     tool: join(toolDir, "ipsw"),
     toolSha256: pin.binarySha256,
   });
+  const normalized = await normalizeDecryptedOTA(
+    acquired,
+    join(output, "normalized"),
+  );
   const { stdout } = await execute("python3", [
     "-B",
     join(scripts, "inspect-ota-layout.py"),
     "--archive",
-    acquired.path,
+    normalized.path,
     "--spec",
     join(scripts, "ios26-encrypted-ota.json"),
   ], { timeout: 120000, maxBuffer: 1024 ** 2 });
@@ -239,10 +262,32 @@ async function inspectOnCI(output) {
     archiveSha256: spec.archiveSha256,
     decryptedSha256: acquired.sha256,
     decryptedBytes: acquired.bytes,
+    normalizedSha256: normalized.sha256,
+    normalizedBytes: normalized.bytes,
+    sourceFormat: normalized.sourceFormat,
   };
   await writeJson(join(output, "layout.json"), report);
   console.log(JSON.stringify({ status: report.status, format: report.format }));
   assert.equal(report.status, "full-ota-layout-inspected");
+}
+
+export async function normalizeDecryptedOTA(acquired, output) {
+  const { stdout } = await execute("python3", [
+    "-B",
+    join(scripts, "normalize-ota-archive.py"),
+    "--archive",
+    acquired.path,
+    "--output",
+    output,
+  ], { timeout: 1800000, maxBuffer: 1024 ** 2 });
+  const report = JSON.parse(stdout);
+  assert.equal(report.status, "outer-ota-rewrapped");
+  assert.equal(report.sourceSha256, acquired.sha256);
+  assert.equal(report.path, join(output, "full-ota.zip"));
+  await writeJson(join(output, "normalization.json"), report);
+  // Remove only the verified decrypted temporary AA; original and derived hashes are retained.
+  await unlink(acquired.path);
+  return report;
 }
 
 if (

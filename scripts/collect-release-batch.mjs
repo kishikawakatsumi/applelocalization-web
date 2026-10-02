@@ -167,7 +167,8 @@ export async function runBatchComponent(
       const free = await statfs(output),
         required = (12.5 * 1024 ** 3) + job.input.maximumDownloadBytes +
           (job.input.kind === "ota-full"
-            ? job.input.memberBytes
+            ? job.input.memberBytes +
+              (job.input.encryptedSource?.maximumDecryptedBytes ?? 0)
             : job.input.imagePath.endsWith(".aea")
             ? job.input.maximumImageBytes
             : 0);
@@ -217,6 +218,7 @@ export async function runBatchComponent(
           spec: job.input,
           output: jobRoot,
           tool,
+          toolSha256: plan.tool.binarySha256,
           progress: (event) => console.log(JSON.stringify(event)),
         })
         : await runImageJob({

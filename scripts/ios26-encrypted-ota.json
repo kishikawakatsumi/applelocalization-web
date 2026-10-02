@@ -9,5 +9,7 @@
   "archiveBytes": 8724152320,
   "archiveSha256": "c02eee7549fe9b148193bba9fb68ab1d53e830b3e77755b93f3a15bf2bed694b",
   "maximumDecryptedBytes": 12884901888,
+  "decryptedBytes": 8833545496,
+  "decryptedSha256": "20e88047d768379fd5c189733d168f9944c3ed418d053670d9066c700ee72df2",
   "stableEvidence": "https://support.apple.com/en-us/100100"
 }
