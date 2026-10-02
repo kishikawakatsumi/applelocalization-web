@@ -48,7 +48,7 @@ jobs:
         run: echo "matrix=$(node scripts/collect-release-batch.mjs --mode matrix --targets "$TARGETS")" >> "$GITHUB_OUTPUT"
   collect:
     needs: plan
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 120
     strategy:
       fail-fast: false
