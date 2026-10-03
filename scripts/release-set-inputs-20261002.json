@@ -1,146 +1,146 @@
 [
   {
     "target": "ios27",
-    "runId": 36926792552,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "45be2d24eaeeceda1aa8696fe325e295b84bc60c",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:e038a67e95c0e016850efbc18001c2ae40f5d3f91f6684d112ce2f68154479f0",
-      "id": 11194562910,
-      "name": "candidate-sql-ios27-36926792552-1",
-      "size_in_bytes": 620373283
+      "digest": "sha256:3a1fbdc2438eff16c310f3ed03ae9a3d6cd4bba189e019ad7332008beb79e6f5",
+      "id": 11282023266,
+      "name": "candidate-sql-ios27-37144764403-1",
+      "size_in_bytes": 620384638
     }
   },
   {
     "target": "ios26",
-    "runId": 36990264950,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "fe88b89630488c07926b42857773f43e7e02a61b",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:c4e7f57409ccff166b07751e563a9503fdf02a0eaab23a81f8d170a733f1bdd6",
-      "id": 11219123346,
-      "name": "candidate-sql-ios26-36990264950-1",
-      "size_in_bytes": 433535048
+      "digest": "sha256:ae3200f427823ea59ebf331cfc1e52e078d4cf1694c311e4fd1b1f395a487ed4",
+      "id": 11281313734,
+      "name": "candidate-sql-ios26-37144764403-1",
+      "size_in_bytes": 433550831
     }
   },
   {
     "target": "ios18",
-    "runId": 36926792552,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "45be2d24eaeeceda1aa8696fe325e295b84bc60c",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:fbc6a311ba4faa21f1abd35fef4c7056aba67dc7ed3d68156df967892f32da16",
-      "id": 11193929602,
-      "name": "candidate-sql-ios18-36926792552-1",
-      "size_in_bytes": 472898494
+      "digest": "sha256:5af0edd5bad73399ff7a3949b4c692815102570949c71de5e45679c5313273be",
+      "id": 11281419228,
+      "name": "candidate-sql-ios18-37144764403-1",
+      "size_in_bytes": 472883249
     }
   },
   {
     "target": "ios17",
-    "runId": 36949295886,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "f51037c6a13ca20a531bdb0496b33789db43f608",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:fe5f2fec412f392c8c188d191043fab8fa9226de545174b5f7798c69af1501ab",
-      "id": 11202599493,
-      "name": "candidate-sql-ios17-36949295886-1",
-      "size_in_bytes": 227066658
+      "digest": "sha256:15fe727ef5edd007bbcbc078f8e80b58ac4255b0dc47787bf0696b8aaa746d00",
+      "id": 11283080190,
+      "name": "candidate-sql-ios17-37144764403-1",
+      "size_in_bytes": 227061977
     }
   },
   {
     "target": "ios16",
-    "runId": 36926792552,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "45be2d24eaeeceda1aa8696fe325e295b84bc60c",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:2a1c1a67e9fc31f4dd3c55618ae33ed5c48ffed8a1446323ca17d26d06e19059",
-      "id": 11194765125,
-      "name": "candidate-sql-ios16-36926792552-1",
-      "size_in_bytes": 221630062
+      "digest": "sha256:9d926012bc8a4faaf3cce4b5445fef738427b48c4bc93fa229a2335ad86065a1",
+      "id": 11282815244,
+      "name": "candidate-sql-ios16-37144764403-1",
+      "size_in_bytes": 221645737
     }
   },
   {
     "target": "ios15",
-    "runId": 36931633907,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "33fee7020e7b846a794b7a6e1fd8bbe1e672f9f2",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:5557fbbf88a3c9c75a2a9b01be7449622336fbfea5da1079e1fd0ce6c4b82468",
-      "id": 11196511572,
-      "name": "candidate-sql-ios15-36931633907-1",
-      "size_in_bytes": 180877349
+      "digest": "sha256:cf5894cf16fad20d238143346ce87a86dcc575c4869cd651006e60249194a802",
+      "id": 11282326077,
+      "name": "candidate-sql-ios15-37144764403-1",
+      "size_in_bytes": 180898849
     }
   },
   {
     "target": "macos27",
-    "runId": 36938571139,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "c6a1bdca9a8652e49e57fc72931424a20c741ac3",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:df56b761be05b7484cc326ec831328d55757dae18187fb962c68b5a487eef5b4",
-      "id": 11199546164,
-      "name": "candidate-sql-macos27-36938571139-1",
-      "size_in_bytes": 473917670
+      "digest": "sha256:5bda10ab33bd9ab1a4a346bfad9f5d0f70f6031a200cce2b01fef08f91dc0726",
+      "id": 11282272174,
+      "name": "candidate-sql-macos27-37144764403-1",
+      "size_in_bytes": 473992590
     }
   },
   {
     "target": "macos26",
-    "runId": 36949295886,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "f51037c6a13ca20a531bdb0496b33789db43f608",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:f629b00f683c4774e4ffc5cb297c112e9376d3939d86ed5a526031d76e852722",
-      "id": 11203293734,
-      "name": "candidate-sql-macos26-36949295886-1",
-      "size_in_bytes": 420787828
+      "digest": "sha256:c947270e12986edf85deb1b4c11b5785ff5e190a7ca04318ef85ed14e01eca98",
+      "id": 11282442771,
+      "name": "candidate-sql-macos26-37144764403-1",
+      "size_in_bytes": 420853120
     }
   },
   {
     "target": "macos15",
-    "runId": 36949295886,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "f51037c6a13ca20a531bdb0496b33789db43f608",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:feb9d45cb52a63b648b2bd939da4fa1c6b77b264758e380dd3f49d7ced3e43a9",
-      "id": 11203372883,
-      "name": "candidate-sql-macos15-36949295886-1",
-      "size_in_bytes": 375048570
+      "digest": "sha256:c0486a75a7c3870071c2153fadbbf7f8cd6e15bd6438515121767e85d32069c2",
+      "id": 11283077249,
+      "name": "candidate-sql-macos15-37144764403-1",
+      "size_in_bytes": 375117745
     }
   },
   {
     "target": "macos14",
-    "runId": 36949295886,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "f51037c6a13ca20a531bdb0496b33789db43f608",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:223c521db60916c892b94ec09c075d58dbf015c70862291447949efff0ae3f95",
-      "id": 11203354913,
-      "name": "candidate-sql-macos14-36949295886-1",
-      "size_in_bytes": 306454325
+      "digest": "sha256:8c0a336538330f2283b9a04ffe963cf5e732ac806733ca720526cc528860f14a",
+      "id": 11282573083,
+      "name": "candidate-sql-macos14-37144764403-1",
+      "size_in_bytes": 306514742
     }
   },
   {
     "target": "macos13",
-    "runId": 36949295886,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "f51037c6a13ca20a531bdb0496b33789db43f608",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:df0a8e7f9dbf29861a7bb4eaf1f1e742d7fb39c329fce68e87d999ced67c7e42",
-      "id": 11204317291,
-      "name": "candidate-sql-macos13-36949295886-1",
-      "size_in_bytes": 279352499
+      "digest": "sha256:fdbef1c6d94eae83983f15027a1fdceb0c4a7b45f5ec775a201e3745dd98a9df",
+      "id": 11283087815,
+      "name": "candidate-sql-macos13-37144764403-1",
+      "size_in_bytes": 279408662
     }
   },
   {
     "target": "macos12",
-    "runId": 36949295886,
+    "runId": 37144764403,
     "attempt": 1,
-    "commit": "f51037c6a13ca20a531bdb0496b33789db43f608",
+    "commit": "c376f54a8f2eaf736bada44482747a4732b3f40e",
     "artifact": {
-      "digest": "sha256:c02a2af1e6aaada961ec8486648232731196215dac97936ca335d49a06c9aca3",
-      "id": 11204307845,
-      "name": "candidate-sql-macos12-36949295886-1",
-      "size_in_bytes": 272442458
+      "digest": "sha256:829d6088ae76353fb382f3fe14e3bbfd2c05c39fd4e59562fabd8246bc0cf362",
+      "id": 11282729983,
+      "name": "candidate-sql-macos12-37144764403-1",
+      "size_in_bytes": 272527572
     }
   }
 ]
