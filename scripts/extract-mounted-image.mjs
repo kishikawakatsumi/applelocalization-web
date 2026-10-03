@@ -23,7 +23,11 @@ import {
   resourceParserPolicy,
   resourceRows,
 } from "./extract-mounted-bundle.mjs";
-import { assignBundle, bundlePolicy } from "./bundle-assignment.mjs";
+import {
+  assignBundle,
+  bundlePolicies,
+  currentBundlePolicy,
+} from "./bundle-assignment.mjs";
 import { readBundleMetadata } from "./bundle-metadata.mjs";
 
 const formats = new Set([".strings", ".loctable", ".stringsdict"]);
@@ -88,8 +92,13 @@ export async function extractMountedImage(
     subtree = null,
     installerProjection = null,
     otaProjection = null,
+    bundlePolicyVersion = currentBundlePolicy.version,
   },
 ) {
+  const bundlePolicy = bundlePolicies[bundlePolicyVersion];
+  if (!Number.isInteger(bundlePolicyVersion) || !bundlePolicy) {
+    throw new Error("Unsupported bundle policy version");
+  }
   if (!label) throw new Error("A unique image source label is required");
   if (installerProjection !== null && otaProjection !== null) {
     throw new Error("Ambiguous projection identity");
@@ -340,6 +349,7 @@ export async function extractMountedImage(
       path,
       imagePath,
       inherited,
+      policy: bundlePolicy,
       device: sourceDevice,
       decode: decode === decodePlist ? readBundleMetadata : decode,
       onIssue: async (p, error) => {
@@ -459,6 +469,7 @@ if (
         output: { type: "string" },
         label: { type: "string" },
         subtree: { type: "string" },
+        "bundle-policy-version": { type: "string" },
       },
     });
     for (const key of ["root", "output", "label"]) {
@@ -466,6 +477,9 @@ if (
     }
     const report = await extractMountedImage({
       ...values,
+      ...(values["bundle-policy-version"] === undefined ? {} : {
+        bundlePolicyVersion: Number(values["bundle-policy-version"]),
+      }),
       progress: (counts) => console.log(JSON.stringify({ progress: counts })),
     });
     console.log(

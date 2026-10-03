@@ -68,6 +68,8 @@ export async function ownershipPackageFixture() {
     root,
     output: scan,
     label: "synthetic-installer-fixture",
+    // This fixture exercises migration of historical v4 ownership to v5.
+    bundlePolicyVersion: 4,
     decode,
     requireReadOnlyMount: false,
     minimumFreeBytes: 0,
