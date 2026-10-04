@@ -42,7 +42,7 @@ export function validateArtifact(a, run, expected) {
   positive(a.id); positive(a.size_in_bytes);
   assert.equal(a.expired, false, `Expired artifact: ${a.name}`);
   assert.equal(a.workflow_run?.id, run.id);
-  assert.match(a.name, /^[a-z0-9-]+$/);
+  assert.match(a.name, /^[a-z0-9][a-z0-9_-]*$/);
   assert.match(a.digest, /^sha256:[a-f0-9]{64}$/);
   assert.ok(a.size_in_bytes < 2 * 1024 ** 3, `Release asset needs splitting: ${a.name}`);
   if (expected) {
