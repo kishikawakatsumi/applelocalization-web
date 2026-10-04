@@ -3,6 +3,13 @@ import assert from "node:assert/strict";
 import {readFile,access,readdir} from "node:fs/promises";
 import {dirname,join,resolve} from "node:path";
 
+test("verified localization data is excluded from automated image replacement",async()=>{
+  const config=JSON.parse(await readFile(".github/renovate.json","utf8"));
+  const rules=config.packageRules.filter(rule=>rule.matchPackageNames?.includes("kishikawakatsumi/applelocalization-data"));
+  assert.ok(rules.length>0);
+  assert.equal(rules.at(-1).enabled,false);
+});
+
 test("default deployment is self-contained, digest-pinned, persistent and loopback-only",async()=>{
   const compose=await readFile("compose.yml","utf8");
   assert.match(compose,/applelocalization-data@sha256:[a-f0-9]{64}/);
