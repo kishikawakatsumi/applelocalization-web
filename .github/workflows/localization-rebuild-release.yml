@@ -1,0 +1,69 @@
+name: Rebuild database image from data Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Published data release tag in this repository
+        type: string
+        required: true
+        default: data-r37150025515-a1
+      manifest_sha256:
+        description: Expected data-manifest.json SHA-256 (without sha256 prefix)
+        type: string
+        required: true
+        default: 6e274dd4d95443f1dbb25d58b214ca4ecea5405ea758b789289d00ed87ed574e
+      publish:
+        description: Push a new candidate tag; never overwrite latest or deploy (full restore remains separate)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: localization-rebuild-release-${{ inputs.release_tag }}
+  cancel-in-progress: false
+jobs:
+  rebuild:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: node --test tests/rebuild-release-image.test.mjs tests/release-set.test.mjs tests/release-set-image.test.mjs
+      - name: Verify DB initialization and restart using tiny synthetic data
+        env:
+          ALLOW_INITIALIZATION_TEST: '1'
+        run: node tests/candidate-initialization.integration.mjs
+      - name: Download Release SQL, verify lineage and assemble image without Actions artifacts
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          MANIFEST_SHA256: ${{ inputs.manifest_sha256 }}
+        run: node scripts/rebuild-release-image.mjs --tag "$RELEASE_TAG" --manifest-sha256 "$MANIFEST_SHA256" --output "$RUNNER_TEMP/release-rebuild"
+      - uses: docker/login-action@v4
+        if: inputs.publish == true
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Push unique assembled candidate (no full restore or deployment)
+        if: inputs.publish == true
+        env:
+          ASSEMBLED_SHA256: ${{ steps.build.outputs.assembled_sha256 }}
+        run: node scripts/release-set-image.mjs --mode push --input "$RUNNER_TEMP/release-rebuild/assembled.json" --sha256 "$ASSEMBLED_SHA256" --allow-push --allow-unrestored-candidate --output "$RUNNER_TEMP/release-rebuild/pushed.json"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: release-rebuild-receipts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/release-rebuild/data-manifest.json
+            ${{ runner.temp }}/release-rebuild/release-input.json
+            ${{ runner.temp }}/release-rebuild/assembled.json
+            ${{ runner.temp }}/release-rebuild/pushed.json
+          retention-days: 90
+          if-no-files-found: warn
