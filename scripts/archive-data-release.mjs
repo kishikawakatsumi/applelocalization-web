@@ -85,6 +85,15 @@ export function verifyAssetSet(actual, expected) {
   assert.deepEqual(sort(actual), sort(expected), 'Release assets incomplete or changed; keep draft');
 }
 
+export function releaseCommit(releases, currentCommit) {
+  assert.ok(releases.length <= 1);
+  // The release tag identifies archival code, not an old, unreferenced workflow
+  // commit. Original data producers remain separately pinned in the manifest.
+  const commit = releases[0]?.target_commitish ?? currentCommit;
+  assert.match(commit, /^[a-f0-9]{40}$/);
+  return commit;
+}
+
 async function hashFile(file) {
   const hash = createHash('sha256');
   for await (const bytes of createReadStream(file)) hash.update(bytes);
@@ -168,8 +177,10 @@ export async function archive(unifiedId, publish) {
     const selected = [...artifacts.values()].sort((a, b) => a.name.localeCompare(b.name));
     assert.equal(new Set(selected.map(a => a.name)).size, selected.length);
     const tag = `data-r${unified.id}-a${unified.run_attempt}`;
+    let releases = (await pages('releases?per_page=100')).filter(r => r.tag_name === tag);
+    const archiveCommit = releaseCommit(releases, process.env.GITHUB_SHA);
     const manifest = {
-      formatVersion: 1, repository, tag, producer,
+      formatVersion: 1, repository, tag, archiveCommit, producer,
       image: { reference: pushed.digest, identity: pushed.identity, catalogSha256: pushed.catalogSha256 },
       datasets: catalog.datasets, artifacts: selected,
       retention: 'Exact Actions ZIPs, including intermediate quarantine originals, SQL and receipts. No new extraction or deployment.',
@@ -188,19 +199,17 @@ export async function archive(unifiedId, publish) {
     console.log(JSON.stringify({ tag, targets: catalog.datasets.length, components: components.length,
       assets: expected.length, bytes: selected.reduce((n, a) => n + a.size, 0), publish }));
     if (!publish) return manifest;
-    let releases = (await pages('releases?per_page=100')).filter(r => r.tag_name === tag);
-    assert.ok(releases.length <= 1);
     if (releases.length === 0) {
       // Never overwrite a pre-existing tag, even if it has no release.
       const refs = await api(`git/matching-refs/tags/${tag}`);
       assert.ok(!refs.some(r => r.ref === `refs/tags/${tag}`), 'Existing tag without release');
-      await gh('release', 'create', tag, '--repo', repository, '--target', unified.head_sha,
+      await gh('release', 'create', tag, '--repo', repository, '--target', archiveCommit,
         '--draft', '--prerelease', '--latest=false', '--title', tag, '--notes', notes);
       releases = (await pages('releases?per_page=100')).filter(r => r.tag_name === tag);
     }
     assert.equal(releases.length, 1);
     let release = releases[0];
-    assert.equal(release.target_commitish, unified.head_sha);
+    assert.equal(release.target_commitish, archiveCommit);
     assert.equal(release.prerelease, true);
     const uploaded = await pages(`releases/${release.id}/assets?per_page=100`);
     for (const a of uploaded) {
@@ -209,7 +218,7 @@ export async function archive(unifiedId, publish) {
     }
     if (!release.draft) {
       verifyAssetSet(uploaded, expected);
-      assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
+      assert.equal((await api(`commits/${tag}`)).sha, archiveCommit);
       console.log(`Already archived: ${release.html_url}`);
       return manifest;
     }
@@ -231,15 +240,15 @@ export async function archive(unifiedId, publish) {
     }
     verifyAssetSet(await pages(`releases/${release.id}/assets?per_page=100`), expected);
     // A fresh draft has no Git tag yet; GitHub creates it on publication.
-    // If a resumed draft already has a tag, it must still point to this producer.
+    // If a resumed draft already has a tag, it must still point to its archival code.
     const refs = await api(`git/matching-refs/tags/${tag}`);
     if (refs.some(r => r.ref === `refs/tags/${tag}`)) {
-      assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
+      assert.equal((await api(`commits/${tag}`)).sha, archiveCommit);
     }
     release = JSON.parse(await gh('api', '--method', 'PATCH', `repos/${repository}/releases/${release.id}`,
       '-F', 'draft=false', '-F', 'prerelease=true', '-f', 'make_latest=false'));
     assert.equal(release.draft, false);
-    assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
+    assert.equal((await api(`commits/${tag}`)).sha, archiveCommit);
     console.log(`Archived: ${release.html_url}`);
     if (process.env.GITHUB_STEP_SUMMARY) await writeFile(process.env.GITHUB_STEP_SUMMARY,
       `Saved ${expected.length} verified assets: [${tag}](${release.html_url})\n`, { flag: 'a' });
