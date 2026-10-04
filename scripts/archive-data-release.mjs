@@ -207,7 +207,12 @@ export async function archive(unifiedId, publish) {
       const e = expected.find(x => x.name === a.name);
       assert.ok(e, 'Unexpected existing release asset'); verifyAssetSet([a], [e]);
     }
-    if (!release.draft) { verifyAssetSet(uploaded, expected); return manifest; }
+    if (!release.draft) {
+      verifyAssetSet(uploaded, expected);
+      assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
+      console.log(`Already archived: ${release.html_url}`);
+      return manifest;
+    }
     for (const a of expected) {
       if (uploaded.some(x => x.name === a.name)) continue;
       const original = selected.find(x => `${x.name}.zip` === a.name);
@@ -225,11 +230,16 @@ export async function archive(unifiedId, publish) {
       console.log(`Verified ${a.name}`);
     }
     verifyAssetSet(await pages(`releases/${release.id}/assets?per_page=100`), expected);
-    // Refuse publication if the tag was redirected during a resumed upload.
-    assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
+    // A fresh draft has no Git tag yet; GitHub creates it on publication.
+    // If a resumed draft already has a tag, it must still point to this producer.
+    const refs = await api(`git/matching-refs/tags/${tag}`);
+    if (refs.some(r => r.ref === `refs/tags/${tag}`)) {
+      assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
+    }
     release = JSON.parse(await gh('api', '--method', 'PATCH', `repos/${repository}/releases/${release.id}`,
       '-F', 'draft=false', '-F', 'prerelease=true', '-f', 'make_latest=false'));
     assert.equal(release.draft, false);
+    assert.equal((await api(`commits/${tag}`)).sha, unified.head_sha);
     console.log(`Archived: ${release.html_url}`);
     if (process.env.GITHUB_STEP_SUMMARY) await writeFile(process.env.GITHUB_STEP_SUMMARY,
       `Saved ${expected.length} verified assets: [${tag}](${release.html_url})\n`, { flag: 'a' });
