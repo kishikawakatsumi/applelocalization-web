@@ -10,6 +10,16 @@ test("verified localization data is excluded from automated image replacement",a
   assert.equal(rules.at(-1).enabled,false);
 });
 
+test("workflows install dependencies before running the full Node suite",async()=>{
+  for(const file of await readdir(".github/workflows")){
+    const workflow=await readFile(join(".github/workflows",file),"utf8");
+    const suite=workflow.indexOf("node --test tests/*.test.mjs");
+    if(suite<0)continue;
+    const install=workflow.indexOf("run: npm ci");
+    assert.ok(install>=0&&install<suite,`${file} must install dependencies before full tests`);
+  }
+});
+
 test("default deployment is self-contained, digest-pinned, persistent and loopback-only",async()=>{
   const compose=await readFile("compose.yml","utf8");
   assert.match(compose,/applelocalization-data@sha256:[a-f0-9]{64}/);
