@@ -22,6 +22,12 @@ prereleases and are not selected as the application's latest release. This
 label separates data retention from a production deployment; it does not alter
 the source receipts' verification status.
 
+The Git tag points to the archival workflow's commit on `main`, allowing the
+standard Actions token to publish without additional workflow-write credentials.
+`archiveCommit` records that commit; `producer` and per-artifact `commit` fields
+record the separate, original extraction/SQL/image commits. A resumed release
+keeps its original archival commit even if `main` has advanced.
+
 ## Contents and recovery
 
 - `intermediate-*.zip`: the original intermediate package, quarantine originals,

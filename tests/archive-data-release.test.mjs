@@ -1,12 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { repository, validateRun, validateArtifact, validateLineage, verifyAssetSet } from '../scripts/archive-data-release.mjs';
+import { repository, validateRun, validateArtifact, validateLineage, verifyAssetSet, releaseCommit } from '../scripts/archive-data-release.mjs';
 
 const run = { id: 1, run_attempt: 1, head_sha: 'a'.repeat(40), repository: { full_name: repository },
   head_repository: { full_name: repository }, path: '.github/workflows/localization-unified-candidate.yml',
   head_branch: 'main', event: 'workflow_dispatch', status: 'completed', conclusion: 'success' };
 const artifact = { id: 2, name: 'intermediate-ios27-os-1-1', size_in_bytes: 100, expired: false,
   digest: 'sha256:' + 'b'.repeat(64), workflow_run: { id: 1 } };
+test('tag pins archival code and resumes with the original archival commit', () => {
+  assert.equal(releaseCommit([], 'c'.repeat(40)), 'c'.repeat(40));
+  assert.equal(releaseCommit([{ target_commitish: 'a'.repeat(40) }], 'c'.repeat(40)), 'a'.repeat(40));
+  assert.throws(() => releaseCommit([], 'main'));
+  assert.throws(() => releaseCommit([{ target_commitish: 'main' }], 'c'.repeat(40)));
+  assert.throws(() => releaseCommit([{}, {}], 'c'.repeat(40)));
+});
 test('only successful same-repository main workflow runs are archived', () => {
   assert.equal(validateRun(run, 'localization-unified-candidate', 1), run);
   for (const change of [{ conclusion: 'failure' }, { event: 'pull_request' }, { head_branch: 'test' },
