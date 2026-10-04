@@ -2,7 +2,7 @@
 # Separate project/volumes from the existing review and public service.
 name: applelocalization
 x-data: &data
-  image: kishikawakatsumi/applelocalization-data@sha256:080257e21ead6c99fa96b52e925a66fca0b2e6923bcd9833b09f61843f0fb49e
+  image: kishikawakatsumi/applelocalization-data@sha256:36a304c581201c7298ca92b89d9e3913e9cff712c3c6c186a1e9dbdcaf5a1ec0
   platform: linux/amd64
 x-web: &web
   image: applelocalization-web:local
