@@ -30,7 +30,7 @@ concurrency:
 jobs:
   plan:
     if: inputs.allow_download == true && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
@@ -106,7 +106,7 @@ jobs:
   candidates:
     needs: [plan, collect]
     if: always() && needs.plan.result == 'success' && inputs.publish_candidates == true && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     permissions:
       actions: write
     steps:
