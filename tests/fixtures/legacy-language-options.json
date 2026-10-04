@@ -1,0 +1,374 @@
+[
+  {
+    "name": "English",
+    "id": "checkbox-english",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": true
+  },
+  {
+    "name": "French",
+    "id": "checkbox-french",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": true
+  },
+  {
+    "name": "German",
+    "id": "checkbox-german",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": true
+  },
+  {
+    "name": "Italian",
+    "id": "checkbox-italian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": true
+  },
+  {
+    "name": "Japanese",
+    "id": "checkbox-japanese",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": true
+  },
+  {
+    "name": "Spanish",
+    "id": "checkbox-spanish",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": true
+  },
+  {
+    "name": "Albanian",
+    "id": "checkbox-albanian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Arabic",
+    "id": "checkbox-arabic",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Armenian",
+    "id": "checkbox-armenian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Azerbaijani",
+    "id": "checkbox-azerbaijani",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Bengali",
+    "id": "checkbox-bengali",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Bulgarian",
+    "id": "checkbox-bulgarian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Burmese",
+    "id": "checkbox-burmese",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Catalan",
+    "id": "checkbox-catalan",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Simplified Chinese",
+    "id": "checkbox-simplified_chinese",
+    "className": "column is-2 px-1 py-0 switch",
+    "checked": false
+  },
+  {
+    "name": "Traditional Chinese",
+    "id": "checkbox-traditional_chinese",
+    "className": "column is-2 px-1 py-0 switch",
+    "checked": false
+  },
+  {
+    "name": "Cantonese",
+    "id": "checkbox-cantonese",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Croatian",
+    "id": "checkbox-croatian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Czech",
+    "id": "checkbox-czech",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Danish",
+    "id": "checkbox-danish",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Dutch",
+    "id": "checkbox-dutch",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Georgian",
+    "id": "checkbox-georgian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Greek",
+    "id": "checkbox-greek",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Estonian",
+    "id": "checkbox-estonian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Filipino",
+    "id": "checkbox-filipino",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Finnish",
+    "id": "checkbox-finnish",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Gujarati",
+    "id": "checkbox-gujarati",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Hebrew",
+    "id": "checkbox-hebrew",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Hindi",
+    "id": "checkbox-hindi",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Hungarian",
+    "id": "checkbox-hungarian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Icelandic",
+    "id": "checkbox-icelandic",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Indonesian",
+    "id": "checkbox-indonesian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Kannada",
+    "id": "checkbox-kannada",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Kazakh",
+    "id": "checkbox-kazakh",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Central Khmer",
+    "id": "checkbox-central_khmer",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Korean",
+    "id": "checkbox-korean",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Lao",
+    "id": "checkbox-lao",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Latvian",
+    "id": "checkbox-latvian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Lithuanian",
+    "id": "checkbox-lithuanian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Malayalam",
+    "id": "checkbox-malayalam",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Marathi",
+    "id": "checkbox-marathi",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Malay",
+    "id": "checkbox-malay",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Mongolian",
+    "id": "checkbox-mongolian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Norwegian",
+    "id": "checkbox-norwegian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Norwegian Bokmål",
+    "id": "checkbox-norwegian_bokmål",
+    "className": "column is-2 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Oriya",
+    "id": "checkbox-oriya",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Punjabi",
+    "id": "checkbox-punjabi",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Polish",
+    "id": "checkbox-polish",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Portuguese",
+    "id": "checkbox-portuguese",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Romanian",
+    "id": "checkbox-romanian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Russian",
+    "id": "checkbox-russian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Slovak",
+    "id": "checkbox-slovak",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Slovenian",
+    "id": "checkbox-slovenian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Swedish",
+    "id": "checkbox-swedish",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Tamil",
+    "id": "checkbox-tamil",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Telugu",
+    "id": "checkbox-telugu",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Thai",
+    "id": "checkbox-thai",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Turkish",
+    "id": "checkbox-turkish",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Ukrainian",
+    "id": "checkbox-ukrainian",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Urdu",
+    "id": "checkbox-urdu",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Uzbek",
+    "id": "checkbox-uzbek",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  },
+  {
+    "name": "Vietnamese",
+    "id": "checkbox-vietnamese",
+    "className": "column is-1 px-1 py-0 pb-1 switch",
+    "checked": false
+  }
+]

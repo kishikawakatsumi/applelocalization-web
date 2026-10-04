@@ -19,6 +19,7 @@ import {
   verifyOwnershipCount,
 } from "./occurrence-package.mjs";
 import { tableContext } from "./prepare-localization-package.mjs";
+import { structuredSearchIndexSQL } from "./structured-search.mjs";
 
 export const stagingContainer = "applelocalization-staging-ios26-20260928";
 export const stagingDatabase = "localization_staging";
@@ -155,8 +156,9 @@ CREATE UNLOGGED TABLE ${schema}.symlink (id integer PRIMARY KEY, metadata_json t
 CREATE UNLOGGED TABLE ${schema}.quarantine (path text PRIMARY KEY, bytes bytea NOT NULL);`;
 }
 
-export function stagingSQLFooter(schema) {
+export function stagingSQLFooter(schema, searchIndexVersion = 2) {
   validateSchema(schema);
+  assert.ok([1, 2].includes(searchIndexVersion));
   return `\\echo Building constraints and search indexes
 ALTER TABLE ${schema}.occurrence ADD PRIMARY KEY (id), ADD UNIQUE (resource_id,resource_ordinal), ADD FOREIGN KEY (resource_id) REFERENCES ${schema}.resource(id), ADD FOREIGN KEY (language_id) REFERENCES ${schema}.language(id);
 CREATE INDEX ON ${schema}.occurrence (language_id,id);
@@ -164,7 +166,11 @@ CREATE INDEX ON ${schema}.occurrence USING hash (key_text);
 CREATE INDEX ON ${schema}.occurrence USING hash (target_text);
 CREATE INDEX ON ${schema}.occurrence USING pgroonga (key_text);
 CREATE INDEX ON ${schema}.occurrence USING pgroonga (target_text);
-CREATE INDEX ON ${schema}.resource (table_id);
+${
+    searchIndexVersion === 2
+      ? structuredSearchIndexSQL(schema) + "\n"
+      : ""
+  }CREATE INDEX ON ${schema}.resource (table_id);
 CREATE INDEX ON ${schema}.resource (bundle_id);
 ANALYZE ${schema}.occurrence;
 ANALYZE ${schema}.resource;
@@ -175,13 +181,15 @@ COMMIT;
 }
 
 // Durable exports and local rehearsal imports require explicit durable mode.
-export function occurrenceSQLLayout({ schema, durable = false, database }) {
+export function occurrenceSQLLayout(
+  { schema, durable = false, database, searchIndexVersion = 2 },
+) {
   if (!durable) {
     validateSchema(schema);
     assert.ok(database === undefined || database === stagingDatabase);
     return {
       header: stagingSQLHeader(schema),
-      footer: stagingSQLFooter(schema),
+      footer: stagingSQLFooter(schema, searchIndexVersion),
       database: stagingDatabase,
     };
   }
@@ -206,7 +214,10 @@ export function occurrenceSQLLayout({ schema, durable = false, database }) {
     );
   return {
     header,
-    footer: stagingSQLFooter(template).replaceAll(template, schema).replace(
+    footer: stagingSQLFooter(template, searchIndexVersion).replaceAll(
+      template,
+      schema,
+    ).replace(
       "Staging import committed",
       "Durable occurrence import committed",
     ),
@@ -447,6 +458,7 @@ export async function exportOccurrenceSQL(
         : { container: stagingContainer }),
       packageManifest: manifest,
       sqlSha256,
+      searchIndexVersion: 2,
       maximumLineBytes,
       stats,
       resourceCount: resourceIds.size,
@@ -457,7 +469,7 @@ export async function exportOccurrenceSQL(
           ? "Logged occurrence storage candidate; actual target import, backups, roles and API release still require verification."
           : "Local staging only; unlogged tables are rebuildable and not crash-durable or replication-ready.",
         "No text deduplication or automatic source/target pairing. Search view does not change existing GET endpoints.",
-        "Unsupported PostgreSQL text is retained as JSON-encoded text; those values are not silently substituted into full-text search.",
+        "JSON-encoded text and structured values retain original JSON; full-text search includes the serialized JSON, not decoded per-branch strings.",
       ],
     };
     await writeFile(

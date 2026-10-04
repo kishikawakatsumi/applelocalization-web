@@ -15,6 +15,11 @@ while IFS=$'\t' read -r component schema manifest; do
   echo "Localization component: $component start"
   gzip -dc "/opt/localization/$component/import.sql.gz" | "${localization_psql[@]}"
   test "$("${localization_psql[@]}" -Atqc "SELECT manifest_sha256 FROM ${schema}.package WHERE id=1")" = "$manifest"
+  # Also upgrades verified SQL produced before JSON fulltext was introduced.
+  # The patch is hashed with the payload and checks the same package manifest.
+  "${localization_psql[@]}" -f "/opt/localization/$component/structured-search.sql"
+  # Verified context sidecar; never changes the ten source tables.
+  "${localization_psql[@]}" -f "/opt/localization/$component/context-index.sql"
   test "$("${localization_psql[@]}" -Atqc "SELECT count(*),bool_and(c.relpersistence='p') FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='${schema}' AND c.relkind='r'")" = '10|t'
   echo "Localization component: $component completed"
 done < /opt/localization/sources.tsv

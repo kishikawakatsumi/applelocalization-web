@@ -1,0 +1,6 @@
+# One-time legacy Web migration only. Requires Docker Compose >= 2.24.4.
+# Use with the ORIGINAL docker-compose.yml and its original project name.
+services:
+  web:
+    ports: !override
+      - "127.0.0.1:8084:8080"

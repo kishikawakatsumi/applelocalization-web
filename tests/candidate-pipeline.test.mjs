@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { gzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
 import {
   batch,
   candidateArtifactRoots,
@@ -283,6 +284,44 @@ test("OTA bundle keeps OS, AppOS and both SystemOS architectures without merging
   await prepareBundleContext(f);
   const mapping = await readFile(join(f.output, "payload/sources.tsv"), "utf8");
   assert.equal(mapping.trim().split("\n").length, 4);
+  for (const c of f.bundle.components) {
+    const patch = await readFile(
+      join(f.output, "payload", c.key, "structured-search.sql"),
+      "utf8",
+    );
+    assert.ok(patch.includes(c.packageManifest));
+    assert.ok(
+      patch.includes(`ON ${c.schema}.occurrence USING pgroonga (target_json)`),
+    );
+    assert.ok(
+      (await readFile(join(f.output, "payload/SHA256SUMS"), "utf8")).includes(
+        `${c.key}/structured-search.sql`,
+      ),
+    );
+    const context = await readFile(
+      join(f.output, "payload", c.key, "context-index.sql"),
+      "utf8",
+    );
+    assert.ok(context.includes(c.packageManifest));
+    assert.ok(
+      context.includes(
+        `CREATE TABLE ${
+          c.schema.replace(/^localization_/, "context_")
+        }.member AS`,
+      ),
+    );
+    const checksums = await readFile(
+      join(f.output, "payload/SHA256SUMS"),
+      "utf8",
+    );
+    assert.ok(
+      checksums.includes(
+        `${
+          createHash("sha256").update(context).digest("hex")
+        }  ${c.key}/context-index.sql`,
+      ),
+    );
+  }
   assert.match(mapping, /localization_macos15_24h32_systemos_arm64e/);
   assert.match(mapping, /localization_macos15_24h32_systemos_x86_64/);
 });
@@ -303,6 +342,11 @@ test("source-specific probes check all profiles without assuming pilot vocabular
         indisvalid: true,
         indisready: true,
         first_column: "target_text",
+      }, {
+        relname: "json_idx",
+        indisvalid: true,
+        indisready: true,
+        first_column: "target_json",
       }]);
     } else if (sql.includes("l.expected_rows")) {
       yield JSON.stringify([{ id: 1, code: "en", sample_id: "1" }, {

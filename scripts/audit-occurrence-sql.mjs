@@ -24,7 +24,7 @@ export async function auditOccurrenceSQL({ input, sql, packageManifest, durable 
   if (durable) { assert.equal(exported.storage, 'logged'); assert.equal(exported.database, database); }
   else { assert.equal(exported.database, stagingDatabase); assert.equal(exported.container, stagingContainer); }
   assert.equal(exported.packageManifest, packageManifest);
-  const schema = exported.schema, layout = occurrenceSQLLayout({ schema, durable, database }), path = join(directory, 'import.sql.gz');
+  const schema = exported.schema, layout = occurrenceSQLLayout({ schema, durable, database, searchIndexVersion: exported.searchIndexVersion ?? 1 }), path = join(directory, 'import.sql.gz');
   assert.equal(await fileHash(path), exported.sqlSha256, 'SQL checksum mismatch');
   const lines = readSQLLines(path, sqlLineLimit(exported))[Symbol.asyncIterator]();
   const next = async () => { const line = await lines.next(); assert.ok(!line.done, 'Truncated SQL'); return line.value; };

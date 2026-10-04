@@ -9,6 +9,8 @@ import { gzipSync } from "node:zlib";
 import { createHash, randomBytes } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { baseImage } from "../scripts/candidate-bundle-image.mjs";
+import { structuredSearchMigration } from "../scripts/structured-search.mjs";
+import { contextIndexMigration } from "../scripts/context-index-sql.mjs";
 
 assert.equal(
   process.env.ALLOW_INITIALIZATION_TEST,
@@ -26,6 +28,8 @@ const docker = (args, input) =>
     stdio: ["pipe", "pipe", "pipe"],
   });
 const base = process.env.INITIALIZATION_BASE_IMAGE ?? baseImage;
+const platform = process.env.INITIALIZATION_TEST_PLATFORM ?? "linux/amd64";
+assert.ok(["linux/amd64", "linux/arm64"].includes(platform));
 assert.match(
   base,
   /^(sha256:[a-f0-9]{64}|groonga\/pgroonga@sha256:[a-f0-9]{64})$/,
@@ -51,7 +55,7 @@ for (const broken of [false, true]) {
   }
   await copyFile(
     new URL(
-      "../scripts/templates/durable-image/localization-entrypoint.sh",
+      "../scripts/templates/candidate-bundle/localization-entrypoint.sh",
       import.meta.url,
     ),
     join(context, "localization-entrypoint.sh"),
@@ -59,19 +63,33 @@ for (const broken of [false, true]) {
   const contents = {
     "identity": `${nonce}-${kind}\n`,
     "dataset.env": "DATASET_DATABASE=localization_staging\n",
-    "sources.tsv":
-      "first\tlocalization_first\tfixture\nsecond\tlocalization_second\tfixture\n",
+    "sources.tsv": `first\tlocalization_first\t${
+      "a".repeat(64)
+    }\nsecond\tlocalization_second\t${"a".repeat(64)}\n`,
   };
   for (const c of ["first", "second"]) {
     const schema = `localization_${c}`;
     await mkdir(join(payload, c));
+    contents[`${c}/structured-search.sql`] = structuredSearchMigration({
+      database: "localization_staging",
+      components: [{ schema, packageManifest: "a".repeat(64) }],
+    });
+    contents[`${c}/context-index.sql`] = contextIndexMigration({
+      database: "localization_staging",
+      components: [{ schema, packageManifest: "a".repeat(64) }],
+    });
     contents[`${c}/import.sql.gz`] = gzipSync(`BEGIN;
       CREATE SCHEMA ${schema}; SET search_path=${schema},public;
-      CREATE TABLE package(id int, manifest_sha256 text); INSERT INTO package VALUES(1,'fixture');
-      CREATE TABLE occurrence(body text); INSERT INTO occurrence SELECT 'hello '||i FROM generate_series(1,2000) i;
+      CREATE TABLE package(id int, manifest_sha256 text,report_json text,catalog_json text); INSERT INTO package VALUES(1,'${
+      "a".repeat(64)
+    }','{"sourceId":"fixture-${c}"}','{"sourceId":"fixture-${c}"}');
+      CREATE TABLE language(id smallint,expected_rows bigint); INSERT INTO language VALUES(1,2000);
+      CREATE TABLE resource(id int,table_id int); INSERT INTO resource VALUES(1,1);
+      CREATE TABLE occurrence(id bigint,resource_id int,language_id smallint,key_text text,key_json text,body text,target_json text);
+      INSERT INTO occurrence SELECT i,1,1,'key '||i,NULL,'hello '||i,'{"other":"構造化された翻訳"}' FROM generate_series(1,2000) i;
       ${
       Array.from(
-        { length: 8 },
+        { length: 6 },
         (_, i) => `CREATE TABLE auxiliary_${i}(id int);`,
       ).join("\n")
     }
@@ -93,7 +111,7 @@ for (const broken of [false, true]) {
   const tag = `applelocalization-data-candidate:init-test-${nonce}-${kind}`;
   docker([
     "build",
-    "--platform=linux/amd64",
+    `--platform=${platform}`,
     "--network=none",
     "--build-arg",
     `BASE_IMAGE=${base}`,
@@ -110,7 +128,7 @@ for (const broken of [false, true]) {
     "--name",
     name,
     "--network=none",
-    "--platform=linux/amd64",
+    `--platform=${platform}`,
     "--memory=1g",
     "--mount",
     `type=volume,source=${volume},target=/var/lib/postgresql/data`,
@@ -166,7 +184,17 @@ for (const broken of [false, true]) {
         "Partial restore must be refused on restart",
       );
     } else {
+      assert.equal(
+        sql("SELECT member_rows,contexts,status FROM context_second.metadata;"),
+        "2000|2000|verified",
+      );
       assert.equal(sql("SHOW autovacuum;"), "on");
+      assert.equal(
+        sql(
+          "SELECT count(*) FROM localization_second.occurrence WHERE target_json &@ '構造化された翻訳';",
+        ),
+        "2000",
+      );
       assert.equal(
         sql("SELECT count(*) FROM pg_file_settings WHERE name='autovacuum';"),
         "0",

@@ -37,13 +37,10 @@
   <div id="header" class="block pt-3">
     <div class="container">
       <div class="columns">
-        <div class="column pb-0">
+        <div class="column pb-0 search-heading">
           <h1 class="title is-inline-block is-5 mb-3">
             <a class="has-text-dark" href="<%= it.path %>">
-              <span class="mr-2"><!-- Bootstrap Icons v1.13.1 (MIT): /bootstrap-icons-LICENSE.txt -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-globe" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-  <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m7.5-6.923c-.67.204-1.335.82-1.887 1.855A8 8 0 0 0 5.145 4H7.5zM4.09 4a9.3 9.3 0 0 1 .64-1.539 7 7 0 0 1 .597-.933A7.03 7.03 0 0 0 2.255 4zm-.582 3.5c.03-.877.138-1.718.312-2.5H1.674a7 7 0 0 0-.656 2.5zM4.847 5a12.5 12.5 0 0 0-.338 2.5H7.5V5zM8.5 5v2.5h2.99a12.5 12.5 0 0 0-.337-2.5zM4.51 8.5a12.5 12.5 0 0 0 .337 2.5H7.5V8.5zm3.99 0V11h2.653c.187-.765.306-1.608.338-2.5zM5.145 12q.208.58.468 1.068c.552 1.035 1.218 1.65 1.887 1.855V12zm.182 2.472a7 7 0 0 1-.597-.933A9.3 9.3 0 0 1 4.09 12H2.255a7 7 0 0 0 3.072 2.472M3.82 11a13.7 13.7 0 0 1-.312-2.5h-2.49c.062.89.291 1.733.656 2.5zm6.853 3.472A7 7 0 0 0 13.745 12H11.91a9.3 9.3 0 0 1-.64 1.539 7 7 0 0 1-.597.933M8.5 12v2.923c.67-.204 1.335-.82 1.887-1.855q.26-.487.468-1.068zm3.68-1h2.146c.365-.767.594-1.61.656-2.5h-2.49a13.7 13.7 0 0 1-.312 2.5m2.802-3.5a7 7 0 0 0-.656-2.5H12.18c.174.782.282 1.623.312 2.5zM11.27 2.461c.247.464.462.98.64 1.539h1.835a7 7 0 0 0-3.072-2.472c.218.284.418.598.597.933M10.855 4a8 8 0 0 0-.468-1.068C9.835 1.897 9.17 1.282 8.5 1.077V4z"/>
-</svg></span><span>Apple Localization Terms Glossary</span>
+              <span class="mr-2"><%~ include("icon-globe.html") %></span><span>Apple Localization Terms Glossary</span>
             </a>
           </h1>
 
@@ -60,47 +57,29 @@
             </div>
             <div class="dropdown-menu" id="dropdown-menu-platform" role="menu">
               <div class="dropdown-content">
-                <a href="/" class="dropdown-item">
-                  <span>iOS 26</span><span class="fa-solid fa-mobile pl-2"></span>
+                <% it.datasets.forEach(function(dataset) { %>
+                <a href="<%= dataset.path %>" class="dropdown-item" data-search-path="<%= dataset.path %>">
+                  <span><%= dataset.platform %> <%= dataset.version %></span><span class="fa-solid <%= dataset.platformId === "ios" ? "fa-mobile" : "fa-desktop" %> pl-2"></span>
                 </a>
-                <a href="/ios/18" class="dropdown-item">
-                  <span>iOS 18</span><span class="fa-solid fa-mobile pl-2"></span>
-                </a>
-                <a href="/ios/17" class="dropdown-item">
-                  <span>iOS 17</span><span class="fa-solid fa-mobile pl-2"></span>
-                </a>
-                <a href="/ios/16" class="dropdown-item">
-                  <span>iOS 16</span><span class="fa-solid fa-mobile pl-2"></span>
-                </a>
-                <a href="/ios/15" class="dropdown-item">
-                  <span>iOS 15</span><span class="fa-solid fa-mobile pl-2"></span>
-                </a>
-                <a href="/macos" class="dropdown-item">
-                  <span>macOS 26</span><span class="fa-solid fa-desktop pl-2"></span>
-                </a>
-                <a href="/macos/15" class="dropdown-item">
-                  <span>macOS 15</span><span class="fa-solid fa-desktop pl-2"></span>
-                </a>
-                <a href="/macos/14" class="dropdown-item">
-                  <span>macOS 14</span><span class="fa-solid fa-desktop pl-2"></span>
-                </a>
-                <a href="/macos/13" class="dropdown-item">
-                  <span>macOS 13</span><span class="fa-solid fa-desktop pl-2"></span>
-                </a>
-                <a href="/macos/12" class="dropdown-item">
-                  <span>macOS 12</span><span class="fa-solid fa-desktop pl-2"></span>
-                </a>
+                <% }); %>
               </div>
             </div>
           </div>
 
-          <div class="is-inline-block is-size-7 has-text-grey">
-            <span id="data-count" class="pl-4"></span>
-            <span id="total-count"></span> / <%= it.count %>
+          <div id="search-summary" class="search-summary is-size-7 has-text-grey pl-4">
+            <span id="search-counts" hidden>
+              <span id="data-count"></span>
+              <span id="total-count"></span> / <%= it.count %>
+            </span>
+            <span id="search-status" class="search-status" hidden>
+              <span id="search-spinner" aria-hidden="true"></span>
+              <span id="search-status-message" role="status" aria-live="polite" aria-atomic="true"></span>
+              <button id="search-retry" type="button" hidden>Retry</button>
+            </span>
           </div>
         </div>
 
-        <div class="column pb-0">
+        <div class="column pb-0 search-links">
           <div class="content has-text-right">
             <span class="p-2">
               <a class="has-text-dark" href="https://github.com/kishikawakatsumi/applelocalization-web/issues/new"
@@ -159,13 +138,10 @@
               <div class="dropdown-trigger">
                 <button id="dropdown-filter-trigger" class="button is-small" aria-haspopup="true"
                   aria-controls="dropdown-menu-filter">
-                  <span class="icon is-small is-left has-text-grey-light">
-                    <span class=""><!-- Bootstrap Icons v1.13.1 (MIT): /bootstrap-icons-LICENSE.txt -->
-<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-sliders" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-  <path fill-rule="evenodd" d="M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z"/>
-</svg></span>
+                  <span class="icon is-small is-left has-text-grey">
+                    <%~ include("icon-globe.html") %>
                   </span>
-                  <span class="has-text-grey px-5">Languages</span>
+                  <span class="has-text-grey px-3">Languages</span>
                   <span class="icon is-small is-right has-text-grey">
                     <span class="fa-solid fa-angle-down" aria-hidden="true"></span>
                   </span>
@@ -182,6 +158,59 @@
 
                   <hr class="dropdown-divider">
 
+                  <section aria-labelledby="language-presets-heading">
+                    <div class="dropdown-item px-2 py-0">
+                      <h2 id="language-presets-heading" class="has-text-grey">Language Presets</h2>
+                    </div>
+                    <div class="dropdown-item language-presets">
+                      <div class="preset-toolbar">
+                        <span class="select is-small">
+                          <select id="language-presets" aria-label="Language presets"></select>
+                        </span>
+                        <button id="preset-delete" class="button is-small" type="button" disabled>Delete</button>
+                        <input id="preset-name" class="input is-small" type="text" maxlength="80" placeholder="Preset name" aria-label="New preset name">
+                        <button id="preset-save" class="button is-small" type="button">Save selection</button>
+                      </div>
+                      <p id="preset-notice" role="status" aria-live="polite" hidden></p>
+                    </div>
+                  </section>
+
+                  <hr class="dropdown-divider">
+
+                  <div class="dropdown-item px-2 py-0">
+                    <div class="has-text-grey">Platform</div>
+                  </div>
+
+                  <div class="dropdown-item">
+                    <% for (const platformId of ["ios", "macos"]) { %>
+                    <div class="field has-addons platform-row" data-platform="<%= platformId %>" role="group" aria-label="<%= platformId === "ios" ? "iOS" : "macOS" %> versions">
+                      <% it.datasets.filter(function(dataset) { return dataset.platformId === platformId; }).forEach(function(dataset) { %>
+                      <p class="control">
+                        <a href="/<%= dataset.platformId %>/<%= dataset.version %>" data-search-path="/<%= dataset.platformId %>/<%= dataset.version %>" class="button is-small<%= it.platformId === dataset.platformId && it.version === dataset.version ? " is-info is-selected" : "" %>">
+                          <span><%= dataset.platform %> <%= dataset.version %></span>
+                          <span class="icon is-small"><span class="fa-solid <%= dataset.platformId === "ios" ? "fa-mobile" : "fa-desktop" %> px-2"></span></span>
+                        </a>
+                      </p>
+                      <% }); %>
+                    </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="control">
+            <div id="dropdown-advanced" class="dropdown is-right">
+              <div class="dropdown-trigger">
+                <button id="advanced-trigger" class="button is-small" type="button"
+                  title="Advanced Search" aria-label="Advanced Search" aria-expanded="false"
+                  aria-controls="dropdown-menu-advanced">
+                  <span class="icon is-small"><%~ include("icon-sliders.html") %></span>
+                </button>
+              </div>
+              <div id="dropdown-menu-advanced" class="dropdown-menu" role="region" aria-label="Advanced Search">
+                <div class="dropdown-content px-0 py-3">
                   <div class="dropdown-item px-2 py-0">
                     <div class="has-text-grey">Advanced search</div>
                   </div>
@@ -211,7 +240,7 @@
                           </span>
                         </div>
                         <div id="sa-search-control" class="control is-small">
-                          <input id="sa-search-field" class="input is-small" type="text" form="search-form"
+                          <input id="sa-search-field" class="input is-small" type="text" form="search-form" aria-describedby="sa-search-error"
                             style="width: 20vw;">
                         </div>
                       </div>
@@ -224,118 +253,9 @@
                         </button>
                       </div>
                     </div>
+                    <p id="sa-search-error" class="help is-danger" role="alert" hidden>Enter a value for Advanced Search.</p>
                   </div>
 
-                  <hr class="dropdown-divider">
-
-                  <div class="dropdown-item px-2 py-0">
-                    <div class="has-text-grey">Platform</div>
-                  </div>
-
-                  <div class="dropdown-item">
-                    <div class="field has-addons">
-                      <p class="control">
-                        <a <% if (it.platform === "iOS" && it.version === "26") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/ios/26"
-                          class="button is-small" <% } %>>
-                          <span>iOS 26</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-mobile px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "iOS" && it.version === "18") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/ios/18"
-                          class="button is-small" <% } %>>
-                          <span>iOS 18</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-mobile px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "iOS" && it.version === "17") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/" class="button is-small"
-                          <% } %>>
-                          <span>iOS 17</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-mobile px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "iOS" && it.version === "16") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/" class="button is-small"
-                          <% } %>>
-                          <span>iOS 16</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-mobile px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "iOS" && it.version === "15") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/ios/15"
-                          class="button is-small" <% } %>>
-                          <span>iOS 15</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-mobile px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "macOS" && it.version === "26") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/macos/"
-                          class="button is-small" <% } %>>
-                          <span>macOS 26</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-desktop px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "macOS" && it.version === "15") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/macos/"
-                          class="button is-small" <% } %>>
-                          <span>macOS 15</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-desktop px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "macOS" && it.version === "14") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/macos/"
-                          class="button is-small" <% } %>>
-                          <span>macOS 14</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-desktop px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "macOS" && it.version === "13") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/macos/13"
-                          class="button is-small" <% } %>>
-                          <span>macOS 13</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-desktop px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                      <p class="control">
-                        <a <% if (it.platform === "macOS" && it.version === "12") { %>href="#" onclick="return false;"
-                          class="button is-small is-info is-selected" <% } else { %>href="/macos/12"
-                          class="button is-small" <% } %>>
-                          <span>macOS 12</span>
-                          <span class="icon is-small">
-                            <span class="fa-solid fa-desktop px-2"></span>
-                          </span>
-                        </a>
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -356,7 +276,9 @@
 
   <div class="block">
     <div class="container is-fluid">
-      <div id="table" class="table is-bordered is-narrow is-hoverable"></div>
+      <div class="search-results">
+        <div id="table" class="table is-bordered is-narrow is-hoverable" hidden></div>
+      </div>
     </div>
   </div>
 </body>

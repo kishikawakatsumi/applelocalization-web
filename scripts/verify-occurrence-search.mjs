@@ -63,7 +63,8 @@ export async function verifyOccurrenceSearch({ schema, verification, durable = f
   const report = JSON.parse(pack[0].report_json); assert.equal(report.counts.occurrences, expected.stats.rows);
   const environment = await query(`SELECT version(),(SELECT extversion FROM pg_extension WHERE extname='pgroonga') AS pgroonga`);
   const indexes = await query(`SELECT c.relname,a.amname,i.indisvalid,i.indisready,t.relname AS table_name,pg_get_indexdef(i.indexrelid,1,true) AS first_column FROM pg_index i JOIN pg_class c ON c.oid=i.indexrelid JOIN pg_class t ON t.oid=i.indrelid JOIN pg_am a ON a.oid=c.relam JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname=${sqlText(schema)} ORDER BY c.relname`);
-  assert.ok(indexes.every(i => i.indisvalid && i.indisready)); assert.equal(indexes.filter(i => i.amname === 'pgroonga').length, 2);
+  assert.ok(indexes.every(i => i.indisvalid && i.indisready)); assert.equal(indexes.filter(i => i.amname === 'pgroonga').length, 3);
+  assert.equal(indexes.filter(i => i.amname === 'pgroonga' && i.table_name === 'occurrence' && i.first_column === 'target_json').length, 1);
   const targetIndexes = indexes.filter(i => i.amname === 'pgroonga' && i.table_name === 'occurrence' && i.first_column === 'target_text');
   assert.equal(targetIndexes.length, 1);
   const profiles = await query(`SELECT l.id,l.code,l.raw,l.basis,l.status,l.expected_rows::text,o.id::text AS sample_id,
