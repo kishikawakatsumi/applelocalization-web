@@ -1,40 +1,7 @@
 "use strict";
-
 import { library, dom } from "@fortawesome/fontawesome-svg-core";
-import {
-  faSearch,
-  faToolbox,
-  faAngleDown,
-  faHeart,
-} from "@fortawesome/pro-solid-svg-icons";
-import { faMessageSmile, faAt } from "@fortawesome/pro-regular-svg-icons";
-import {
-  faGlobe,
-  faMobile,
-  faDesktop,
-  faSliders,
-  faMonitorHeartRate,
-} from "@fortawesome/pro-light-svg-icons";
-import { faSpinnerThird } from "@fortawesome/pro-duotone-svg-icons";
+import { faSearch, faToolbox, faAngleDown, faHeart, faAt, faMobile, faDesktop, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { faCommentDots } from "@fortawesome/free-regular-svg-icons";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
-
-library.add(
-  faSearch,
-  faToolbox,
-  faAngleDown,
-  faHeart,
-
-  faMessageSmile,
-  faAt,
-
-  faGlobe,
-  faMobile,
-  faDesktop,
-  faSliders,
-  faMonitorHeartRate,
-
-  faSpinnerThird,
-
-  faGithub
-);
+library.add(faSearch, faToolbox, faAngleDown, faHeart, faAt, faMobile, faDesktop, faSpinner, faCommentDots, faGithub);
 dom.watch();

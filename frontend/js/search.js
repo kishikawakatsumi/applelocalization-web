@@ -100,7 +100,7 @@ export function init() {
     langs: {
       default: {
         data: {
-          loading: `<span class="fa-duotone fa-spinner-third fa-spin fa-fw"></span><span class="p-2">Loading ...</span>`,
+          loading: `<span class="fa-solid fa-spinner fa-spin fa-fw"></span><span class="p-2">Loading ...</span>`,
           error: "Error",
         },
       },

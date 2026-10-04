@@ -44,3 +44,5 @@ body {
   color: #fff;
   width: 100%;
 }
+
+.bi { display: inline-block; vertical-align: -0.125em; flex-shrink: 0; }

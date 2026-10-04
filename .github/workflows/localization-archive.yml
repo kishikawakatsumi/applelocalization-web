@@ -1,0 +1,46 @@
+name: Archive localization data in Releases
+on:
+  workflow_dispatch:
+    inputs:
+      unified_run:
+        description: Successful unified image push run ID; exact upstream SQL/intermediates are discovered from its receipts
+        required: true
+        type: string
+      publish:
+        description: Save and publish a data prerelease after all asset hashes match (never deploy)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: localization-archive-${{ inputs.unified_run }}
+  cancel-in-progress: false
+jobs:
+  archive:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: node --test tests/archive-data-release.test.mjs
+      - name: Retain exact upstream artifacts without re-extraction or deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UNIFIED_RUN: ${{ inputs.unified_run }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          if [ "$PUBLISH" = true ]; then
+            node scripts/archive-data-release.mjs --unified-run "$UNIFIED_RUN" --publish
+          else
+            node scripts/archive-data-release.mjs --unified-run "$UNIFIED_RUN"
+          fi
