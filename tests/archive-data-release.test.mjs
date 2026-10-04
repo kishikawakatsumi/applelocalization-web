@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { repository, validateRun, validateArtifact, validateLineage, verifyAssetSet, releaseCommit } from '../scripts/archive-data-release.mjs';
+import { repository, validateRun, validateArtifact, validateLineage, verifyAssetSet, releaseCommit, createDraft } from '../scripts/archive-data-release.mjs';
 
 const run = { id: 1, run_attempt: 1, head_sha: 'a'.repeat(40), repository: { full_name: repository },
   head_repository: { full_name: repository }, path: '.github/workflows/localization-unified-candidate.yml',
@@ -13,6 +13,18 @@ test('tag pins archival code and resumes with the original archival commit', () 
   assert.throws(() => releaseCommit([], 'main'));
   assert.throws(() => releaseCommit([{ target_commitish: 'main' }], 'c'.repeat(40)));
   assert.throws(() => releaseCommit([{}, {}], 'c'.repeat(40)));
+});
+test('draft creation uses its response, not an eventually consistent list query', async () => {
+  const calls = [];
+  const release = { id: 42, tag_name: 'data-r1-a1', draft: true, target_commitish: 'a'.repeat(40) };
+  const result = await createDraft(release.tag_name, release.target_commitish, 'Data notes', async (...args) => {
+    calls.push(args);
+    return JSON.stringify(release);
+  });
+  assert.deepEqual(result, release);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(calls[0].slice(0, 4), ['api', '--method', 'POST', `repos/${repository}/releases`]);
+  for (const value of ['draft=true', 'prerelease=true', 'make_latest=false', 'body=Data notes']) assert.ok(calls[0].includes(value));
 });
 test('only successful same-repository main workflow runs are archived', () => {
   assert.equal(validateRun(run, 'localization-unified-candidate', 1), run);

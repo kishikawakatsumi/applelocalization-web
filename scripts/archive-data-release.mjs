@@ -94,6 +94,15 @@ export function releaseCommit(releases, currentCommit) {
   return commit;
 }
 
+export async function createDraft(tag, commit, notes, request = gh) {
+  // Use the creation response itself. The list endpoint may briefly return its
+  // pre-creation result, even after a draft has been successfully created.
+  return JSON.parse(await request('api', '--method', 'POST', `repos/${repository}/releases`,
+    '-f', `tag_name=${tag}`, '-f', `target_commitish=${commit}`,
+    '-f', `name=${tag}`, '-f', `body=${notes}`,
+    '-F', 'draft=true', '-F', 'prerelease=true', '-f', 'make_latest=false'));
+}
+
 async function hashFile(file) {
   const hash = createHash('sha256');
   for await (const bytes of createReadStream(file)) hash.update(bytes);
@@ -203,9 +212,7 @@ export async function archive(unifiedId, publish) {
       // Never overwrite a pre-existing tag, even if it has no release.
       const refs = await api(`git/matching-refs/tags/${tag}`);
       assert.ok(!refs.some(r => r.ref === `refs/tags/${tag}`), 'Existing tag without release');
-      await gh('release', 'create', tag, '--repo', repository, '--target', archiveCommit,
-        '--draft', '--prerelease', '--latest=false', '--title', tag, '--notes', notes);
-      releases = (await pages('releases?per_page=100')).filter(r => r.tag_name === tag);
+      releases = [await createDraft(tag, archiveCommit, notes)];
     }
     assert.equal(releases.length, 1);
     let release = releases[0];
