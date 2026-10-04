@@ -2,6 +2,75 @@
   border: 1px solid #dbdbdb;
 }
 
+.search-results > #table {
+  margin-bottom: 0;
+}
+
+.search-summary, .search-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+/* Reserve status width so loading/errors never add another header line. */
+.search-heading { min-width: 0; }
+.search-links { flex: none; }
+.search-summary { width: 20rem; max-width: 100%; }
+#search-counts {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-status { flex-shrink: 0; }
+
+#search-spinner {
+  display: none;
+  flex-shrink: 0;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-top-color: currentColor;
+  border-radius: 50%;
+}
+
+.search-status[data-phase="loading"] #search-spinner {
+  display: block;
+  animation: search-spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes search-spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-status[data-phase="loading"] #search-spinner {
+    animation: none;
+  }
+}
+
+#search-retry {
+  flex-shrink: 0;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.search-status[data-phase="error"] {
+  color: #a32424;
+}
+
+#search-counts[hidden], #search-status[hidden], #search-retry[hidden], #table[hidden] {
+  display: none !important;
+}
+
 .tabulator .tabulator-tableholder .tabulator-placeholder {
   width: 100% !important;
 }

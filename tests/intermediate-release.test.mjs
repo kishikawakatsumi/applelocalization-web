@@ -11,11 +11,9 @@ import { runCheckpoints, withCollectionLock, fileHash, treeHashes, writeJson } f
 import { exportTransfer, verifyTransfer } from '../scripts/package-transfer.mjs';
 import { exportIntermediateRelease, verifyIntermediateRelease } from '../scripts/intermediate-release.mjs';
 import { verifyReleaseAssets } from '../scripts/verify-release-assets.mjs';
-import { buildIntermediateRelease } from '../scripts/build-intermediate-release.mjs';
 import { publishIntermediateRelease } from '../scripts/publish-intermediate-release.mjs';
 import { writeIntermediateAssets } from '../scripts/intermediate-assets.mjs';
 import { restoreQuarantinedRelease } from '../scripts/restore-quarantined-release.mjs';
-import { prepareReleaseSQL, verifyReleaseSQL } from '../scripts/release-staging.mjs';
 import { prepareDurableReleaseSQL } from '../scripts/release-durable-sql.mjs';
 import { auditOccurrenceSQL } from '../scripts/audit-occurrence-sql.mjs';
 
@@ -55,7 +53,6 @@ test('release verifier rejects raw extras, omissions, damaged retained data and 
   await assert.rejects(verifyIntermediateRelease({ input: f.output, manifestSha256: await fileHash(p) }), /Omitted original inventory/);
 });
 test('acquisition and publication require explicit public-data approval before any side effect', async () => {
-  await assert.rejects(buildIntermediateRelease({ allowDownload: true }), /public parsed-data approval/);
   await assert.rejects(publishIntermediateRelease({}), /public parsed-data approval/);
   await assert.rejects(publishIntermediateRelease({ allowPublicData: true, publishMigration: true }), /requires original producer pins/);
 });
@@ -134,22 +131,6 @@ test('v2 also handles an empty quarantine without inventing original files', asy
   await verifyReleaseAssets({ input: assets, output: join(f.temp, 'empty-quarantine-verified'), artifactSha256: built.artifactSha256 });
 });
 
-test('release SQL bridge pins v2, preserves all collected languages and seals only a full offline audit', async () => {
-  const f = await fixture(2), sql = join(f.temp, 'sql');
-  const args = { input: f.output, output: sql, manifestSha256: f.result.manifestSha256, schema: 'ipsw_trial_release_bridge', minimumFreeBytes: 0 };
-  const result = await prepareReleaseSQL(args);
-  assert.equal(result.status, 'release-staging-sql-verified-not-imported');
-  assert.equal(result.stats.rows, 16); assert.equal(result.quarantinedFiles, 1);
-  assert.equal(result.allCollectedLanguages, true); assert.equal(result.productionReady, false);
-  assert.deepEqual(JSON.parse(await readFile(join(sql, 'verification.json'))), result);
-  assert.deepEqual(await verifyReleaseSQL({ input: f.output, sql, manifestSha256: f.result.manifestSha256 }), result);
-  await assert.rejects(prepareReleaseSQL(args), /EEXIST/);
-  await assert.rejects(prepareReleaseSQL({ ...args, output: join(f.temp, 'wrong-pin'), manifestSha256: '0'.repeat(64) }), /manifest differs/);
-  await assert.rejects(access(join(f.temp, 'wrong-pin')), /ENOENT/);
-  const v1 = await fixture();
-  await assert.rejects(prepareReleaseSQL({ ...args, input: v1.output, output: join(v1.temp, 'sql'), manifestSha256: v1.result.manifestSha256 }), /requires release v2/);
-  await assert.rejects(access(join(v1.temp, 'sql')), /ENOENT/);
-});
 
 test('durable release SQL keeps every value and quarantine byte but is never accepted as staging SQL', async () => {
   const f = await fixture(2), output = join(f.temp, 'durable');

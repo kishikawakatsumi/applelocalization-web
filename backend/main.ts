@@ -1,237 +1,120 @@
+import { Pool } from "https://deno.land/x/postgres@ls/mod.ts";
 import {
-  Application,
-  Eta,
-  isHttpError,
-  Router,
-  send,
-  Status,
-  STATUS_TEXT,
-} from "./deps.ts";
-import { search, searchAdvanced } from "./handlers/search.ts";
-import { healthCheck } from "./handlers/health.ts";
+  createReleaseReview,
+  parseReleaseMetadata,
+} from "./search/release-set.ts";
+import { createReleaseWeb } from "./web.ts";
+import type { Query, Snapshot } from "./search/api.ts";
 
-const templates = `${Deno.cwd()}/dist/templates`;
-const models = `${Deno.cwd()}/models`;
-
-const eta = new Eta({
-  views: templates,
-});
-
-async function readBundle(platform: string, version: string) {
-  return JSON.parse(
-    await Deno.readTextFile(`${models}/${platform}${version}/bundles.json`),
+const bytes = await Deno.readFile("/release/release-set.json");
+const catalog = JSON.parse(new TextDecoder().decode(bytes));
+const bundles: Record<string, Uint8Array> = {};
+for (const target of catalog.datasets) {
+  if (!/^(ios|macos)[0-9]+$/.test(target.id)) throw Error("Invalid target");
+  bundles[target.id] = await Deno.readFile(
+    `/release/bundles/${target.id}.json`,
   );
 }
-
-// deno-lint-ignore no-explicit-any
-const Platform: Record<string, any> = {
-  ios: {
-    latest: {
-      name: "iOS",
-      version: "26",
-      path: "/",
-      bundle: await readBundle("ios", "26"),
-      count: "16,339,749",
-    },
-    18: {
-      name: "iOS",
-      version: "18",
-      path: "/ios/18",
-      bundle: await readBundle("ios", "18"),
-      count: "11,935,831",
-    },
-    17: {
-      name: "iOS",
-      version: "17",
-      path: "/ios/17",
-      bundle: await readBundle("ios", "17"),
-      count: "9,175,537",
-    },
-    16: {
-      name: "iOS",
-      version: "16",
-      path: "/ios/16",
-      bundle: await readBundle("ios", "16"),
-      count: "7,298,644",
-    },
-    15: {
-      name: "iOS",
-      version: "15",
-      path: "/ios/15",
-      bundle: await readBundle("ios", "15"),
-      count: "5,643,937",
-    },
-  },
-  macos: {
-    latest: {
-      name: "macOS",
-      version: "26",
-      path: "/macos",
-      bundle: await readBundle("macos", "26"),
-      count: "18,371,166",
-    },
-    15: {
-      name: "macOS",
-      version: "15",
-      path: "/macos/15",
-      bundle: await readBundle("macos", "15"),
-      count: "17,281,221",
-    },
-    14: {
-      name: "macOS",
-      version: "14",
-      path: "/macos/14",
-      bundle: await readBundle("macos", "14"),
-      count: "14,383,340",
-    },
-    13: {
-      name: "macOS",
-      version: "13",
-      path: "/macos/13",
-      bundle: await readBundle("macos", "13"),
-      count: "13,254,016",
-    },
-    12: {
-      name: "macOS",
-      version: "12",
-      path: "/macos/12",
-      bundle: await readBundle("macos", "12"),
-      count: "25,261,971",
-    },
-  },
-};
-
-const router = new Router();
-router
-  .get("/healthz", async (context) => {
-    await healthCheck(context);
-  })
-  .get("/", (context) => {
-    context.response.body = renderBody(Platform.ios.latest);
-  })
-  .get("/ios", (context) => {
-    context.response.body = renderBody(Platform.ios.latest);
-  })
-  .get("/macos", (context) => {
-    context.response.body = renderBody(Platform.macos.latest);
-  })
-  .get(`/ios/${Platform.ios.latest.version}`, (context) => {
-    context.response.body = renderBody(Platform.ios.latest);
-  })
-  .get(`/macos/${Platform.macos.latest.version}`, (context) => {
-    context.response.body = renderBody(Platform.macos.latest);
-  })
-  .get("/ios/26", (context) => {
-    context.response.body = renderBody(Platform.ios["26"]);
-  })
-  .get("/ios/18", (context) => {
-    context.response.body = renderBody(Platform.ios["18"]);
-  })
-  .get("/ios/17", (context) => {
-    context.response.body = renderBody(Platform.ios["17"]);
-  })
-  .get("/ios/16", (context) => {
-    context.response.body = renderBody(Platform.ios["16"]);
-  })
-  .get("/ios/15", (context) => {
-    context.response.body = renderBody(Platform.ios["15"]);
-  })
-  .get("/macos/26", (context) => {
-    context.response.body = renderBody(Platform.macos["26"]);
-  })
-  .get("/macos/15", (context) => {
-    context.response.body = renderBody(Platform.macos["15"]);
-  })
-  .get("/macos/14", (context) => {
-    context.response.body = renderBody(Platform.macos["14"]);
-  })
-  .get("/macos/13", (context) => {
-    context.response.body = renderBody(Platform.macos["13"]);
-  })
-  .get("/macos/12", (context) => {
-    context.response.body = renderBody(Platform.macos["12"]);
-  })
-  .get("/api/:platform/search", async (context) => {
-    const platform = context.params.platform;
-    const version = Platform[platform].latest.version;
-    await search(context, `${platform}${version}`);
-  })
-  .get("/api/:platform/:version/search", async (context) => {
-    const platform = context.params.platform;
-    const version = context.params.version;
-    await search(context, `${platform}${version}`);
-  })
-  .get("/api/:platform/search/advanced", async (context) => {
-    const platform = context.params.platform;
-    const version = Platform[platform].latest.version;
-    await searchAdvanced(context, `${platform}${version}`);
-  })
-  .get("/api/:platform/:version/search/advanced", async (context) => {
-    const platform = context.params.platform;
-    const version = context.params.version;
-    await searchAdvanced(context, `${platform}${version}`);
-  });
-
-function renderBody(
-  platform: {
-    name: string;
-    version: string;
-    path: string;
-    bundle: string;
-    count: string;
-  },
-) {
-  return `${
-    eta.render("index.html", {
-      platform: platform.name,
-      version: platform.version,
-      path: platform.path,
-      bundles: platform.bundle,
-      count: platform.count,
-    })
-  }`;
+const configPath = Deno.env.get("RELEASE_CONFIG");
+const runtime = configPath
+  ? JSON.parse(await Deno.readTextFile(configPath))
+  : {};
+const metadata = parseReleaseMetadata(
+  bytes,
+  Deno.env.get("RELEASE_SHA256") ?? runtime.sha256,
+  bundles,
+);
+const password = (await Deno.readTextFile("/run/secrets/db_password"))
+  .trimEnd();
+const mode = Deno.env.get("RELEASE_MODE") ?? "review";
+if (!["review", "production"].includes(mode)) {
+  throw Error("Invalid release mode");
 }
-
-const app = new Application();
-
-app.use(async (context, next) => {
-  await next();
-  console.log(
-    `${context.request.method} | ${context.response.status} | ${context.request.url}`,
-  );
-});
-
-app.use(async (context, next) => {
+const validationOnly = mode !== "production";
+const contextMode = Deno.env.get("CONTEXT_INDEX_MODE") ?? "off";
+if (!["off", "auto"].includes(contextMode)) {
+  throw Error("Invalid context index mode");
+}
+const user = Deno.env.get("RELEASE_DB_USER") ?? runtime.user ?? "postgres";
+if (!validationOnly && !/^web_[a-f0-9]{24}$/.test(user)) {
+  throw Error("Production requires a dedicated read-only database role");
+}
+const pool = new Pool(
+  {
+    hostname: "db",
+    port: 5432,
+    user,
+    password,
+    database: "localization_staging",
+    applicationName: `localization-compose-${mode}`,
+    options: {
+      default_transaction_read_only: "on",
+      statement_timeout: "30s",
+      jit: "off",
+    },
+  },
+  4,
+  true,
+);
+const snapshot: Snapshot = async (work) => {
+  const client = await pool.connect();
   try {
-    await next();
+    await client.queryArray("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
+    const query: Query = async (sql, args = []) =>
+      (await client.queryObject<Record<string, unknown>>(sql, args)).rows;
+    const result = await work(query);
+    await client.queryArray("COMMIT");
+    return result;
   } catch (error) {
-    if (isHttpError(error)) {
-      const status = error.status;
-      const statusText = STATUS_TEXT[status];
-      context.response.status = status;
-      context.response.body = `${status} | ${statusText}`;
-
-      if (error.status === Status.NotFound) {
-        return;
-      }
-    }
+    await client.queryArray("ROLLBACK");
     throw error;
+  } finally {
+    client.release();
   }
-});
-
-app.use(router.routes());
-app.use(router.allowedMethods());
-
-app.use(async (context) => {
-  await send(context, context.request.url.pathname, {
-    root: `${Deno.cwd()}/dist/`,
+};
+try {
+  if (!validationOnly) {
+    await snapshot(async (query) => {
+      const [role] = await query(
+        "SELECT rolsuper, rolcreatedb, rolcreaterole, rolreplication, rolbypassrls FROM pg_roles WHERE rolname = current_user",
+      );
+      if (!role || Object.values(role).some(Boolean)) {
+        throw Error("Privileged database role refused");
+      }
+    });
+  }
+  const api = await createReleaseReview(metadata, snapshot, {
+    validationOnly,
+    contextIndexes: contextMode === "auto",
   });
-});
-
-app.addEventListener("listen", ({ hostname, port, secure }) => {
-  const scheme = secure ? "https" : "http";
-  const host = hostname ?? "localhost";
-  console.log(`Listening on: ${scheme}://${host}:${port}`);
-});
-
-await app.listen({ port: 8080 });
+  const app = await createReleaseWeb(
+    metadata.catalog.datasets,
+    api,
+    "/app/dist",
+    { validationOnly },
+  );
+  const server = Deno.serve(
+    { hostname: "0.0.0.0", port: 8080 },
+    async (request) => {
+      if (new URL(request.url).pathname === "/healthz") {
+        try {
+          await snapshot((query) => query("SELECT 1"));
+        } catch {
+          return Response.json({ ready: false }, { status: 503 });
+        }
+      }
+      return app(request);
+    },
+  );
+  const stop = () => {
+    void server.shutdown();
+  };
+  Deno.addSignalListener("SIGTERM", stop);
+  Deno.addSignalListener("SIGINT", stop);
+  console.log(
+    `RELEASE_WEB_READY: existing UI, twelve releases, read-only ${mode}`,
+  );
+  await server.finished;
+} finally {
+  await pool.end();
+}

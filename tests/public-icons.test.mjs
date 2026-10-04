@@ -10,7 +10,9 @@ test('icons and clean Docker builds need no private registry credentials', async
   }
   const html = await readFile('frontend/index.html', 'utf8');
   assert.doesNotMatch(html, /fa-light|fa-duotone|fa-message-smile|fa-regular fa-at/);
-  assert.match(html, /bi-globe/);
-  assert.match(html, /bi-sliders/);
+  for (const name of ['globe', 'sliders']) {
+    assert.ok(html.includes(`icon-${name}.html`));
+    assert.match(await readFile(`frontend/templates/icon-${name}.html`, 'utf8'), new RegExp(`bi-${name}`));
+  }
   assert.match(await readFile('frontend/static/bootstrap-icons-LICENSE.txt', 'utf8'), /The Bootstrap Authors/);
 });

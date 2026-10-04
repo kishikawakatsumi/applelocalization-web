@@ -7,6 +7,24 @@ import { ownershipPackageFixture } from './helpers/ownership-package-fixture.mjs
 import { exportOccurrenceSQL } from '../scripts/occurrence-staging.mjs';
 import { auditOccurrenceSQL } from '../scripts/audit-occurrence-sql.mjs';
 import { fileHash } from '../scripts/collection-checkpoints.mjs';
+import { structuredSearchIndexSQL } from '../scripts/structured-search.mjs';
+
+test('SQL auditor accepts pinned historical layout but does not accept missing JSON index in new layout', async () => {
+  const f = await ownershipPackageFixture(), input=f.v2, sql=join(f.temp,'old-index-sql');
+  const schema='ipsw_trial_old_index';
+  await exportOccurrenceSQL({input,output:sql,schema,minimumFreeBytes:0});
+  const report=JSON.parse(await readFile(join(sql,'report.json')));
+  assert.equal(report.searchIndexVersion,2);
+  const original=gunzipSync(await readFile(join(sql,'import.sql.gz'))).toString();
+  await writeFile(join(sql,'import.sql.gz'),gzipSync(original.replace(structuredSearchIndexSQL(schema)+'\n','')));
+  report.sqlSha256=await fileHash(join(sql,'import.sql.gz'));
+  await writeFile(join(sql,'report.json'),JSON.stringify(report));
+  const args={input,sql,packageManifest:await fileHash(join(input,'report.json'))};
+  await assert.rejects(auditOccurrenceSQL(args),/Unexpected SQL statement/);
+  delete report.searchIndexVersion;
+  await writeFile(join(sql,'report.json'),JSON.stringify(report));
+  assert.equal((await auditOccurrenceSQL(args)).status,'sql-file-full-roundtrip-verified');
+});
 
 test('offline SQL audit restores v1/v2 values, corrected owners, language profiles and originals', async () => {
   const f = await ownershipPackageFixture();

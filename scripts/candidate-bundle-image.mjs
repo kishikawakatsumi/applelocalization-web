@@ -34,6 +34,8 @@ import {
 } from "./load-occurrence-staging.mjs";
 import { auditOccurrenceStaging } from "./audit-occurrence-staging.mjs";
 import { psqlLines } from "./occurrence-staging.mjs";
+import { structuredSearchMigration } from "./structured-search.mjs";
+import { contextIndexMigration } from "./context-index-sql.mjs";
 import {
   searchQueries,
   searchSettings,
@@ -103,6 +105,26 @@ export async function prepareBundleContext({ sql, bundle, output }) {
       c.sqlSha256,
     );
     await mkdir(join(payload, c.key));
+    const migration = `${c.key}/structured-search.sql`;
+    await writeFile(
+      join(payload, migration),
+      structuredSearchMigration({
+        database: "localization_staging",
+        components: [c],
+      }),
+      { flag: "wx" },
+    );
+    files.push(migration);
+    const contextMigration = `${c.key}/context-index.sql`;
+    await writeFile(
+      join(payload, contextMigration),
+      contextIndexMigration({
+        database: "localization_staging",
+        components: [c],
+      }),
+      { flag: "wx" },
+    );
+    files.push(contextMigration);
     for (const file of ["import.sql.gz", "report.json", "verification.json"]) {
       const name = `${c.key}/${file}`;
       await copyFile(join(sql, name), join(payload, name));
@@ -159,7 +181,7 @@ export async function prepareBundleContext({ sql, bundle, output }) {
   await copyFile(
     fileURLToPath(
       new URL(
-        "./templates/durable-image/localization-entrypoint.sh",
+        "./templates/candidate-bundle/localization-entrypoint.sh",
         import.meta.url,
       ),
     ),
@@ -185,10 +207,14 @@ export async function verifyCandidateSearch({ component, lines }) {
       sqlText(s)
     } AND t.relname='occurrence' AND a.amname='pgroonga'`,
   );
-  assert.equal(indexes.length, 2);
+  // Historical images can still be audited before the additive migration.
+  // The new API itself requires both text and JSON indexes at startup.
+  assert.ok(indexes.length === 2 || indexes.length === 3);
   assert.ok(indexes.every((i) => i.indisvalid && i.indisready));
   const targetIndexes = indexes.filter((i) => i.first_column === "target_text");
   assert.equal(targetIndexes.length, 1);
+  const jsonIndexes = indexes.filter((i) => i.first_column === "target_json");
+  assert.equal(jsonIndexes.length, indexes.length - 2);
   const profiles = await query(
     `SELECT l.id,l.code,l.expected_rows::text,o.id::text AS sample_id FROM ${s}.language l LEFT JOIN LATERAL (SELECT id FROM ${s}.occurrence WHERE language_id=l.id AND target_text IS NOT NULL ORDER BY id LIMIT 1) o ON true ORDER BY l.id`,
   );
@@ -254,6 +280,7 @@ export async function verifyCandidateSearch({ component, lines }) {
   }
   return {
     status: "candidate-search-verified",
+    structuredSearchAvailable: jsonIndexes.length === 1,
     schema: s,
     packageManifest: component.packageManifest,
     profiles: exact,
