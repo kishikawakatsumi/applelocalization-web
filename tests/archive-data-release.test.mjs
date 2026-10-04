@@ -17,6 +17,7 @@ test('only successful same-repository main workflow runs are archived', () => {
 test('artifacts must match immutable pins and fit Release asset limits', () => {
   const pin = { id: 2, name: artifact.name, bytes: 100, digest: artifact.digest };
   assert.equal(validateArtifact(artifact, run, pin).digest, artifact.digest);
+  assert.equal(validateArtifact({ ...artifact, name: 'intermediate-macos26-systemos-x86_64-1-1' }, run).id, 2);
   for (const change of [{ expired: true }, { digest: null }, { id: 3 }, { size_in_bytes: 101 },
     { name: '../unsafe' }, { workflow_run: { id: 3 } }, { size_in_bytes: 2 * 1024 ** 3 }]) {
     assert.throws(() => validateArtifact({ ...artifact, ...change }, run, pin));
