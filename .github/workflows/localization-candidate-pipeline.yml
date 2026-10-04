@@ -38,6 +38,7 @@ jobs:
         with:
           node-version: "24"
           package-manager-cache: false
+      - run: npm ci
       - run: node --test tests/*.test.mjs
       - id: plan
         env:
