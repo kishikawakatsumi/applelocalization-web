@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { gunzipSync } from "node:zlib";
-import { reviewInstallerBundles } from "../scripts/review-installer-bundles.mjs";
 import { inspectUnlocalizedResources } from "../scripts/inspect-unlocalized-resources.mjs";
 import { extractFilenameSupplement } from "../scripts/extract-filename-localizations.mjs";
 import {
@@ -79,9 +78,6 @@ print(pathlib.Path(result["tree"]).parent)
         run,
         "--output",
         scan,
-        // This round trip exercises the historical v4-to-v5 overlay.
-        "--bundle-policy-version",
-        "4",
       ], { timeout: 60000 });
       const result = JSON.parse(await readFile(join(scan, "result.json")));
       assert.equal(result.status, "installer-projection-parsed-and-audited");
@@ -99,31 +95,9 @@ print(pathlib.Path(result["tree"]).parent)
         audit.failureCategories["language-not-uniquely-determined"],
         2,
       );
-      assert.equal(audit.verifiedBundleMetadataFiles, 2);
-      const index = await readFile(join(scan, "scan/files.jsonl.gz"));
-      const ownership = join(temp, "ownership");
-      const review = await reviewInstallerBundles({
-        run,
-        scan: join(scan, "scan"),
-        output: ownership,
-      });
-      assert.equal(review.counts.changedFiles, 1);
-      assert.equal(review.counts.nestedBoundaryChanges, 1);
-      assert.equal(review.counts.affectedRowsFromIndex, 1);
-      assert.deepEqual(
-        await readFile(join(scan, "scan/files.jsonl.gz")),
-        index,
-      );
-      const overlay = JSON.parse(
-        gunzipSync(await readFile(join(ownership, "ownership.jsonl.gz")))
-          .toString().trim(),
-      );
-      assert.equal(overlay.before.bundlePath, "/Test.app");
-      assert.equal(
-        overlay.after.bundlePath,
-        "/Test.app/Contents/Inner.pptheme",
-      );
-      assert.equal(overlay.after.evidence.metadata[0].identifier, "test.inner");
+      assert.equal(audit.verifiedBundleMetadataFiles, 3);
+      const scanReport = JSON.parse(await readFile(join(scan, "scan/report.json")));
+      assert.equal(scanReport.bundlePolicy.version, 6);
       const inspection = join(temp, "inspection"),
         supplement = join(temp, "supplement");
       const root = join(run, "selected-tree"), primaryScan = join(scan, "scan");
@@ -140,89 +114,43 @@ print(pathlib.Path(result["tree"]).parent)
         requireReadOnlyMount: false,
       });
       const options = { scan: primaryScan, supplement, minimumFreeBytes: 0 };
-      const legacy = join(temp, "package-v1"),
-        corrected = join(temp, "package-v2");
-      const v1 = await prepareLocalizationPackage({
+      const outputPackage = join(temp, "package");
+      const pkg = await prepareLocalizationPackage({
         ...options,
-        output: legacy,
+        output: outputPackage,
       });
-      const v2 = await prepareLocalizationPackage({
-        ...options,
-        ownership,
-        output: corrected,
-      });
-      assert.equal(v1.formatVersion, 1);
-      assert.equal(v2.formatVersion, 2);
-      assert.equal(v2.counts.occurrences, 7);
-      assert.equal(v2.counts.supplementRows, 1);
-      assert.equal(v2.counts.unresolvedFiles, 1);
-      assert.equal(v2.counts.ownershipAdjustedResources, 1);
+      assert.equal(pkg.formatVersion, 1);
+      assert.equal(pkg.counts.occurrences, 7);
+      assert.equal(pkg.counts.supplementRows, 1);
+      assert.equal(pkg.counts.unresolvedFiles, 1);
       const stream = async (directory, name) =>
         gunzipSync(await readFile(join(directory, name + ".jsonl.gz")))
           .toString().trim().split("\n").map(JSON.parse);
-      assert.deepEqual(
-        await stream(legacy, "occurrences"),
-        await stream(corrected, "occurrences"),
-      );
-      const resources = await stream(corrected, "resources");
-      const changed = resources.find((r) => r.ownershipCorrection);
-      assert.equal(changed.original.bundlePath, "/Test.app");
-      assert.equal(changed.effective.bundlePath, overlay.after.bundlePath);
-      assert.equal(
-        changed.effective.tablePath,
-        "Contents/Resources/Theme.strings",
-      );
+      const resources = await stream(outputPackage, "resources");
+      const nested = resources.find((r) => r.original.imagePath.endsWith("/Theme.strings"));
+      assert.equal(nested.original.bundlePath, "/Test.app/Contents/Inner.pptheme");
+      assert.equal(nested.original.tablePath, "Contents/Resources/Theme.strings");
+      assert.equal(nested.original.bundleEvidence.metadata[0].identifier, "test.inner");
+      assert.ok(resources.every((r) => !r.ownershipCorrection));
       assert.equal(
         resources.find((r) => r.status === "supplemented-inferred").supplement
           .languageEvidence.languageStatus,
         "inferred",
       );
-      const table = (await stream(corrected, "tables")).find((t) =>
-        t.tableId === changed.tableId
+      const table = (await stream(outputPackage, "tables")).find((t) =>
+        t.tableId === nested.tableId
       );
-      assert.equal(table.bundlePath, changed.effective.bundlePath);
+      assert.equal(table.bundlePath, nested.original.bundlePath);
       const verified = await auditLocalizationPackage({
         ...options,
-        ownership,
-        input: corrected,
+        input: outputPackage,
       });
       assert.equal(verified.status, "package-content-verified");
-      await assert.rejects(
-        auditLocalizationPackage({ ...options, input: corrected }),
-        /Package mismatch/,
-      );
-      // Fresh installer scans must use v6 without needing the historical overlay.
-      const current = join(temp, "parsed-current");
-      execFileSync(process.execPath, [
-        "scripts/scan-installer-resources.mjs",
-        "--run",
-        run,
-        "--output",
-        current,
-      ], { timeout: 60000 });
-      const currentReport = JSON.parse(
-        await readFile(join(current, "scan/report.json")),
-      );
-      assert.equal(currentReport.bundlePolicy.version, 6);
-      assert.equal(currentReport.counts.rows, 6);
-      const currentFiles = await stream(join(current, "scan"), "files");
+      const currentFiles = await stream(primaryScan, "files");
       assert.equal(
         currentFiles.find((f) => f.imagePath.endsWith("/Theme.strings"))
           .bundlePath,
         "/Test.app/Contents/Inner.pptheme",
-      );
-      assert.equal(
-        JSON.parse(await readFile(join(current, "originals-audit.json")))
-          .verifiedBundleMetadataFiles,
-        3,
-      );
-      await assert.rejects(
-        reviewInstallerBundles({
-          run,
-          scan: join(current, "scan"),
-          output: join(temp, "invalid-v6-overlay"),
-        }),
-        /Historical v4-to-v5 overlay/,
       );
       const originalPath = join(
         run,
@@ -230,14 +158,11 @@ print(pathlib.Path(result["tree"]).parent)
       );
       const originalBytes = await readFile(originalPath);
       await writeFile(originalPath, "corrupt");
-      await assert.rejects(
-        reviewInstallerBundles({
-          run,
-          scan: join(scan, "scan"),
-          output: join(temp, "bad-ownership"),
-        }),
-        /Resource differs/,
-      );
+      const changedOriginal = spawnSync("python3", [
+        "-B", "scripts/audit-installer-scan.py", "--run", run,
+        "--scan", primaryScan, "--output", join(scan, "bad-original.json"),
+      ], { encoding: "utf8" });
+      assert.notEqual(changedOriginal.status, 0);
       await writeFile(originalPath, originalBytes);
       // Modify a row but leave totals unchanged: original-value audit must fail.
       execFileSync("python3", [

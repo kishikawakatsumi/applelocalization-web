@@ -1,4 +1,4 @@
-// Opt-in tiny fixture on the review DB; all schemas and the role roll back.
+// Opt-in tiny fixture on an explicitly selected local test DB; everything rolls back.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
@@ -7,7 +7,11 @@ import {
   contextSchema,
 } from "../scripts/context-index-sql.mjs";
 import { readOnlyRoleSQL } from "../scripts/production-release.mjs";
+import { localDockerOnly } from "../scripts/load-occurrence-staging.mjs";
 assert.equal(process.env.ALLOW_CONTEXT_INDEX_TEST, "1");
+const container = process.env.LOCALIZATION_TEST_CONTAINER ?? "";
+assert.match(container, /^localization-test-[a-z0-9-]+$/, "Select a dedicated local test container");
+localDockerOnly();
 const nonce = randomBytes(8).toString("hex"),
   schema = "localization_ci_" + nonce,
   sidecar = contextSchema(schema);
@@ -73,11 +77,10 @@ RESET ROLE;
 ROLLBACK;
 SELECT to_regnamespace('${schema}') IS NULL AND to_regnamespace('${sidecar}') IS NULL AND NOT EXISTS(SELECT 1 FROM pg_roles WHERE rolname='${role}') AS removed;
 `;
-const child = spawn("ssh", [
-  "-o",
-  "BatchMode=yes",
-  "192.168.1.175",
-  "/usr/local/bin/docker exec -i localization-ui-3cac615c24f5-db-1 psql -X -q -At -v ON_ERROR_STOP=1 -U postgres -d localization_staging",
+const child = spawn("docker", [
+  "exec", "-i", container,
+  "psql", "-X", "-q", "-At", "-v", "ON_ERROR_STOP=1",
+  "-U", "postgres", "-d", "localization_staging",
 ], { stdio: ["pipe", "pipe", "pipe"] });
 let stdout = "", stderr = "";
 child.stdout.on("data", (b) => {

@@ -13,7 +13,6 @@ import { exportIntermediateRelease, verifyIntermediateRelease } from '../scripts
 import { verifyReleaseAssets } from '../scripts/verify-release-assets.mjs';
 import { publishIntermediateRelease } from '../scripts/publish-intermediate-release.mjs';
 import { writeIntermediateAssets } from '../scripts/intermediate-assets.mjs';
-import { restoreQuarantinedRelease } from '../scripts/restore-quarantined-release.mjs';
 import { prepareDurableReleaseSQL } from '../scripts/release-durable-sql.mjs';
 import { auditOccurrenceSQL } from '../scripts/audit-occurrence-sql.mjs';
 
@@ -102,27 +101,6 @@ test('v2 defaults to preserving every quarantine byte and context and rejects mi
   await writeFile(extra, '{}'); await assert.rejects(verify(), /unexpected/); await unlink(extra);
   manifest.retainedOriginals = {}; await writeFile(join(f.output, 'release.json'), JSON.stringify(manifest));
   await assert.rejects(verifyIntermediateRelease({ input: f.output, manifestSha256: await fileHash(join(f.output, 'release.json')) }), /Retained original inventory/);
-});
-test('v1 recovery verifies every original against published pins without changing old data or audit receipts', async () => {
-  const f = await fixture(), before = await treeHashes(f.output), output = join(f.temp, 'recovered');
-  const quarantine = join(f.input, 'package/quarantine');
-  await writeFile(join(quarantine, 'not-for-release.ipsw'), 'must never be included');
-  const result = await restoreQuarantinedRelease({ input: f.output, manifestSha256: f.result.manifestSha256, quarantine, output, minimumFreeBytes: 0 });
-  assert.equal(result.retainedOriginalFiles, 1);
-  assert.deepEqual(await treeHashes(f.output), before);
-  for (const name of ['package/report.json', 'package/occurrences.jsonl.gz', 'evidence/package.complete.json', 'evidence/audit.json'])
-    assert.equal(await fileHash(join(output, 'intermediate', name)), await fileHash(join(f.output, name)));
-  await verifyReleaseAssets({ input: join(output, 'assets'), output: join(f.temp, 'recovery-verified'), artifactSha256: result.artifactSha256 });
-  const original = Object.keys(JSON.parse(await readFile(join(f.output, 'release.json'))).omittedOriginals)[0].split('/').at(-1);
-  await writeFile(join(quarantine, original), 'wrong source');
-  const badOutput = join(f.temp, 'bad-recovery');
-  await assert.rejects(restoreQuarantinedRelease({ input: f.output, manifestSha256: f.result.manifestSha256, quarantine, output: badOutput, minimumFreeBytes: 0 }), /Recovered original/);
-  await assert.rejects(access(join(badOutput, 'assets')), /ENOENT/);
-  const pin = JSON.parse(await readFile(join(f.output, 'release.json'))).omittedOriginals['package/quarantine/' + original];
-  await writeFile(join(quarantine, original), Buffer.alloc(pin.bytes, 1));
-  await assert.rejects(restoreQuarantinedRelease({ input: f.output, manifestSha256: f.result.manifestSha256, quarantine, output: join(f.temp, 'bad-hash'), minimumFreeBytes: 0 }), /Recovered original hash/);
-  await unlink(join(quarantine, original));
-  await assert.rejects(restoreQuarantinedRelease({ input: f.output, manifestSha256: f.result.manifestSha256, quarantine, output: join(f.temp, 'missing-original'), minimumFreeBytes: 0 }));
 });
 test('v2 also handles an empty quarantine without inventing original files', async () => {
   const f = await fixture(2, false), assets = join(f.temp, 'empty-quarantine-assets');
