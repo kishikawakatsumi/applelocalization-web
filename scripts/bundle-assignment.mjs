@@ -82,6 +82,31 @@ bundlePolicies[5] = {
   ],
 };
 export const bundlePolicy = bundlePolicies[4];
+// v4/v5 remain immutable historical policies. New scans use v6: the previously
+// opt-in macOS rules plus containers confirmed from iOS/macOS 26.1 Info.plists.
+// These additions NEVER use the suffix-only fallback reserved for older types.
+bundlePolicies[6] = {
+  ...bundlePolicies[5],
+  version: 6,
+  metadataRequiredExtensions: [
+    ...bundlePolicies[5].metadataRequiredExtensions,
+    ".healthplugin",
+    ".axuiservice",
+    ".migrator",
+    ".wkbundle",
+    ".opplugin",
+    ".servicebundle",
+    ".settings",
+    ".lockbundle",
+    ".vsplugin",
+    ".aplmodel",
+    ".csutil",
+    ".daplug",
+    ".st",
+    ".qldisplay",
+  ],
+};
+export const currentBundlePolicy = bundlePolicies[6];
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 
 export async function assignBundle(

@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { constants } from "node:fs";
 import { lstat, mkdir, open, realpath, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, join, posix, resolve } from "node:path";
-import { gunzipSync } from "node:zlib";
+import { readJsonLines } from "./localization-jsonl.mjs";
 import { isDeepStrictEqual, parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
 import { decodePlist } from "./extract-mounted-bundle.mjs";
@@ -255,22 +255,45 @@ export async function inspectUnlocalizedResources(
   assert.ok(
     ["scanned-with-issues", "complete-within-scope"].includes(scan.status),
   );
-  const indexBytes = await safeRead(scanRoot, "files.jsonl.gz");
-  const files = gunzipSync(indexBytes, { maxOutputLength: 64 * 1024 ** 2 })
-    .toString("utf8")
-    .split("\n").filter(Boolean).map((line) => JSON.parse(line));
+  assert.ok(
+    (await lstat(join(scanRoot, "files.jsonl.gz"))).size <= 64 * 1024 ** 2,
+    "Compressed index exceeds 64 MiB",
+  );
+  const indexHashes = {}, files = [];
   const ids = new Set();
   const peers = new Map();
-  for (const file of files) {
+  for await (
+    const file of readJsonLines(scanRoot, "files.jsonl.gz", indexHashes)
+  ) {
     assert.ok(!ids.has(file.resourceId), "Duplicate resource ID");
     ids.add(file.resourceId);
     assert.equal(file.sourceId, scan.source.sourceId);
     assert.ok(file.imagePath.startsWith("/"));
-    if (file.status !== "parsed") continue;
-    const identity = tableIdentity(file.imagePath);
-    if (!identity) continue;
-    if (!peers.has(identity)) peers.set(identity, []);
-    peers.get(identity).push(file);
+    if (file.status === "failed" && file.error === languageError) {
+      files.push(file);
+    }
+  }
+  assert.equal(
+    ids.size,
+    scan.counts.resourceFiles,
+    "Index resource count differs from scan",
+  );
+  ids.clear();
+  const wanted = new Set(
+    files.map((file) => tableIdentity(file.imagePath)).filter(Boolean),
+  );
+  if (wanted.size) {
+    const peerHashes = {};
+    for await (
+      const file of readJsonLines(scanRoot, "files.jsonl.gz", peerHashes)
+    ) {
+      if (file.status !== "parsed") continue;
+      const identity = tableIdentity(file.imagePath);
+      if (!wanted.has(identity)) continue;
+      if (!peers.has(identity)) peers.set(identity, []);
+      peers.get(identity).push(file);
+    }
+    assert.deepEqual(peerHashes, indexHashes, "Index changed between passes");
   }
   const records = [];
   const counts = {
@@ -363,7 +386,7 @@ export async function inspectUnlocalizedResources(
     sourceId: scan.source.sourceId,
     imageRoot,
     scanRoot,
-    indexSha256: hash(indexBytes),
+    indexSha256: indexHashes["files.jsonl.gz"],
     counts,
     categories,
     limitations: [

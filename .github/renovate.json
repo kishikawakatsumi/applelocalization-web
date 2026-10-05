@@ -4,6 +4,11 @@
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
+    },
+    {
+      "description": "Localization datasets are selected manually after release verification.",
+      "matchPackageNames": ["kishikawakatsumi/applelocalization-data"],
+      "enabled": false
     }
   ]
 }

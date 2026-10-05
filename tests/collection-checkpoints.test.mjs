@@ -16,10 +16,14 @@ import {
   selectImage,
 } from "../scripts/collect-image-localizations.mjs";
 import {
+  fileHash,
   runCheckpoints,
   treeHashes,
   withCollectionLock,
 } from "../scripts/collection-checkpoints.mjs";
+import { readJsonLines } from "../scripts/localization-jsonl.mjs";
+import { exportOccurrenceSQL } from "../scripts/occurrence-staging.mjs";
+import { auditOccurrenceSQL } from "../scripts/audit-occurrence-sql.mjs";
 
 const fresh = () => mkdtemp(join(tmpdir(), "collection-checkpoint-test-"));
 
@@ -252,6 +256,21 @@ test("real extraction, inspection, supplement and all-language package stages ru
     join(root, "Demo.app", "Unknown.strings"),
     JSON.stringify({ Uncertain: "Do not infer English" }),
   );
+  const child = join(root, "Demo.app", "Child.healthplugin");
+  await mkdir(child);
+  await writeFile(
+    join(child, "Info.plist"),
+    JSON.stringify({
+      CFBundleIdentifier: "example.health",
+    }),
+  );
+  for (const [language, target] of [["en", "Open"], ["ja", "別の訳"]]) {
+    await mkdir(join(child, language + ".lproj"));
+    await writeFile(
+      join(child, language + ".lproj", "Localizable.strings"),
+      JSON.stringify({ Open: target }),
+    );
+  }
   const stages = collectionStages({
     root,
     label: "fixture-source",
@@ -274,6 +293,43 @@ test("real extraction, inspection, supplement and all-language package stages ru
     await readFile(join(result.outputs["package-audit"], "report.json")),
   );
   assert.equal(report.status, "package-content-verified");
-  assert.equal(report.counts.occurrences, 4);
+  assert.equal(report.counts.occurrences, 6);
+  const scan = JSON.parse(
+    await readFile(join(result.outputs.scan, "data/report.json")),
+  );
+  assert.equal(scan.bundlePolicy.version, 6);
+  const input = join(result.outputs.package, "data");
+  const resources = [];
+  for await (const resource of readJsonLines(input, "resources.jsonl.gz")) {
+    resources.push(resource);
+  }
+  const health = resources.filter((r) =>
+    r.original.imagePath.includes("Child.healthplugin/")
+  );
+  assert.equal(health.length, 2);
+  assert.ok(
+    health.every((r) =>
+      r.original.bundlePath === "/Demo.app/Child.healthplugin"
+    ),
+  );
+  const sql = join(temp, "sql");
+  await exportOccurrenceSQL({
+    input,
+    output: sql,
+    schema: "localization_policy_v6",
+    database: "localization_staging",
+    durable: true,
+    minimumFreeBytes: 0,
+  });
+  const sqlAudit = await auditOccurrenceSQL({
+    input,
+    sql,
+    database: "localization_staging",
+    durable: true,
+    packageManifest: await fileHash(join(input, "report.json")),
+  });
+  assert.equal(sqlAudit.status, "sql-file-full-roundtrip-verified");
+  assert.equal(sqlAudit.stats.rows, 6);
+  assert.equal(sqlAudit.imported, false);
   assert.equal(Object.keys((await run()).outputs).length, 7);
 });

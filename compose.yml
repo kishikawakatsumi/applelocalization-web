@@ -1,0 +1,83 @@
+# First startup imports the full dataset; subsequent starts reuse named volumes.
+# Separate project/volumes from the existing review and public service.
+name: applelocalization
+x-data: &data
+  image: kishikawakatsumi/applelocalization-data@sha256:080257e21ead6c99fa96b52e925a66fca0b2e6923bcd9833b09f61843f0fb49e
+  platform: linux/amd64
+x-web: &web
+  image: applelocalization-web:local
+  build: .
+services:
+  prepare:
+    <<: *data
+    user: "0:0"
+    entrypoint: ["/bin/sh", "/prepare.sh"]
+    network_mode: none
+    volumes:
+      - ./deploy/prepare.sh:/prepare.sh:ro
+      - database:/data
+      - metadata:/release
+      - admin-secret:/admin
+      - app-secret:/app-secret
+  db:
+    <<: *data
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: localization_staging
+      POSTGRES_PASSWORD_FILE: /admin/password
+    volumes:
+      - database:/var/lib/postgresql/data
+      - admin-secret:/admin:ro
+    depends_on:
+      prepare: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/localization-healthcheck.sh"]
+      interval: 30s
+      timeout: 20s
+      start_period: 24h
+      retries: 3
+    stop_grace_period: 1m
+    networks: [database]
+  setup:
+    <<: *web
+    user: "0:0"
+    command: ["run", "--node-modules-dir=none", "--cached-only", "--frozen", "--allow-read=/app,/release,/admin,/app-secret", "--allow-write=/release", "--allow-env=PGAPPNAME,PGDATABASE,PGHOST,PGOPTIONS,PGPASSWORD,PGPORT,PGUSER", "--allow-net=db:5432", "deploy/setup.ts"]
+    volumes:
+      - metadata:/release
+      - admin-secret:/admin:ro
+      - app-secret:/app-secret:ro
+    depends_on:
+      db: {condition: service_healthy}
+    networks: [database]
+  web:
+    <<: *web
+    restart: unless-stopped
+    environment:
+      RELEASE_MODE: production
+      RELEASE_CONFIG: /release/runtime.json
+      CONTEXT_INDEX_MODE: auto
+    volumes:
+      - metadata:/release:ro
+      - app-secret:/run/secrets:ro
+    ports: ["127.0.0.1:${WEB_PORT:-8080}:8080"]
+    depends_on:
+      setup: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD", "deno", "eval", "const r=await fetch('http://127.0.0.1:8080/healthz');if(!r.ok)Deno.exit(1)"]
+      interval: 30s
+      timeout: 35s
+      retries: 3
+      start_period: 1m
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [database, frontend]
+networks:
+  database: {internal: true}
+  frontend: {}
+volumes:
+  database: {}
+  metadata: {}
+  admin-secret: {}
+  app-secret: {}

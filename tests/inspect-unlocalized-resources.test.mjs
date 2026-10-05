@@ -121,6 +121,8 @@ async function fixture() {
     root,
     output: input,
     label: "fixture-1",
+    // Inspection must preserve the original assignment of historical scans.
+    bundlePolicyVersion: 4,
     decode,
     requireReadOnlyMount: false,
     minimumFreeBytes: 0,

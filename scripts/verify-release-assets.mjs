@@ -14,8 +14,8 @@ export async function verifyReleaseAssets({ input, output, artifactSha256, pytho
   assert.equal(await fileHash(join(input, 'artifact.json')), artifactSha256);
   assert.ok((await lstat(join(input, 'artifact.json'))).size <= 8 * 1024 ** 2);
   const artifact = JSON.parse(await readFile(join(input, 'artifact.json')));
-  assert.equal(artifact.formatVersion, 1); assert.equal(artifact.kind, 'localization-intermediate-release-artifact');
-  assert.equal(artifact.originalsRetained, false); assert.equal(artifact.imported, false); assert.equal(artifact.publishedToWeb, false);
+  assert.ok([1, 2].includes(artifact.formatVersion)); assert.equal(artifact.kind, 'localization-intermediate-release-artifact');
+  assert.equal(artifact.originalsRetained, artifact.formatVersion === 2); assert.equal(artifact.imported, false); assert.equal(artifact.publishedToWeb, false);
   assert.equal(artifact.archive.name, 'localization-intermediate.tar');
   const archive = join(input, artifact.archive.name);
   assert.ok(Number.isSafeInteger(artifact.archive.bytes) && artifact.archive.bytes > 0 && artifact.archive.bytes < 2 * 1024 ** 3);
@@ -24,6 +24,8 @@ export async function verifyReleaseAssets({ input, output, artifactSha256, pytho
   const checked = await verifyIntermediateRelease({ input: output, manifestSha256: artifact.manifestSha256 });
   for (const name of ['sourceId', 'counts', 'parentTransferSha256', 'omittedOriginalFiles', 'retainedBytes']) assert.deepEqual(artifact[name], checked[name]);
   const manifest = JSON.parse(await readFile(join(output, 'release.json')));
+  assert.equal(manifest.formatVersion, artifact.formatVersion);
+  if (artifact.formatVersion === 2) for (const name of ['releaseFormatVersion', 'originalScope', 'sourceImagesRetained', 'retainedOriginalFiles', 'retainedOriginalBytes']) assert.deepEqual(artifact[name], checked[name]);
   assert.deepEqual(artifact.provenance, manifest.provenance);
   return { ...checked, status: 'release-assets-verified', artifactSha256 };
 }

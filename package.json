@@ -1,18 +1,21 @@
 {
   "scripts": {
+    "dev": "webpack --progress --config webpack.dev.js",
     "prod": "webpack --progress --config webpack.prod.js",
-    "dev": "webpack --progress --config webpack.dev.js"
+    "test": "node --test tests/*.test.mjs",
+    "test:web": "deno test --node-modules-dir=none --frozen --allow-read --allow-write tests/validation-api.test.ts tests/context-index.test.ts tests/language-groups.test.ts tests/release-review.test.ts tests/release-web.test.ts",
+    "test:browser": "npm run prod && ALLOW_SEARCH_HISTORY_TEST=1 node --test tests/search-history.browser.mjs",
+    "data:collect": "node scripts/collect-release-batch.mjs",
+    "data:sql": "node scripts/candidate-pipeline.mjs",
+    "data:image": "node scripts/release-set-image.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-brands-svg-icons": "7.3.1",
-    "@fortawesome/pro-duotone-svg-icons": "6.4.0",
-    "@fortawesome/pro-light-svg-icons": "6.4.0",
-    "@fortawesome/pro-regular-svg-icons": "6.4.0",
-    "@fortawesome/pro-solid-svg-icons": "6.4.0",
     "bulma": "1.0.4",
-    "plausible-tracker": "0.3.9",
-    "tabulator-tables": "6.5.3"
+    "tabulator-tables": "6.5.3",
+    "@fortawesome/free-solid-svg-icons": "7.3.1",
+    "@fortawesome/free-regular-svg-icons": "7.3.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "14.0.0",

@@ -5,7 +5,35 @@ standard localization texts provided by the Apple platform.
 
 https://applelocalization.com/
 
+## Getting Started
+
+Requires Docker with Docker Compose v2.
+
+```sh
+git clone https://github.com/kishikawakatsumi/applelocalization-web.git
+cd applelocalization-web
+docker compose up
+```
+
+Open http://127.0.0.1:8080/ after initialization completes.
+The first startup imports the full dataset and builds search indexes; allow
+at least 200 GiB of free space on both the host and Docker's data disk.
+Subsequent starts reuse the database stored in Docker volumes.
+
+See [Deployment](docs/deployment.md) for configuration and update instructions.
+
 ## Release Note
+
+### [iOS 27, macOS 27] - 2026-10-05
+
+#### Added
+
+- iOS 27.0.1, macOS 27.0.1
+
+#### Updated
+
+- iOS 15.8.8, iOS 16.7.16, iOS 17.7.2, iOS 18.7.10, iOS 26.7.1
+- macOS 12.7.6, macOS 13.7.8, macOS 14.8.9, macOS 15.8.1, macOS 26.7.1
 
 ### [iOS 18, iOS 26, macOS 26] - 2025-11-16
 

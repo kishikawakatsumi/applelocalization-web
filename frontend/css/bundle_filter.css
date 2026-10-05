@@ -1,0 +1,70 @@
+.bundle-native[hidden], .bundle-picker [hidden] {
+  display: none !important;
+}
+.bundle-picker {
+  position: relative;
+}
+.bundle-trigger {
+  width: 100%;
+  justify-content: space-between;
+  padding-left: 2.5em;
+}
+.bundle-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bundle-trigger-arrow {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: 0.5em;
+}
+.bundle-menu {
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px #0002;
+}
+.bundle-menu .input {
+  flex: none;
+  margin-bottom: 4px;
+}
+.bundle-options {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.bundle-option {
+  display: block;
+  width: 100%;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  text-align: left;
+  white-space: nowrap;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #363636;
+  cursor: pointer;
+}
+.bundle-option[aria-pressed="true"] {
+  background: #e7f3fc;
+}
+.bundle-option:hover, .bundle-option:focus-visible {
+  background: #dceeff;
+  outline: 1px solid #3e8ed0;
+  outline-offset: -1px;
+}
+.bundle-empty {
+  font-size: 0.8rem;
+  padding: 6px;
+  color: #777;
+}

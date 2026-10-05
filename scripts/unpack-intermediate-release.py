@@ -1,12 +1,15 @@
-"""Extract the fixed parsed-only release layout into a new directory; no raw files."""
+"""Extract fixed intermediate layouts; v2 additionally allows manifest-pinned quarantine."""
 import argparse
 import os
 import tarfile
+import json
+import re
 
 FILES = {"release.json", "package/report.json", "package/catalog.json"}
 FILES.update("package/" + n + ".jsonl.gz" for n in ("sources", "resources", "tables", "occurrences", "issues", "symlinks"))
 FILES.update("evidence/" + n for n in ("package.complete.json", "package-audit.complete.json", "audit.json", "transfer-manifest.json"))
 DIRS = {"package", "evidence"}
+QUARANTINE = re.compile(r"package/quarantine/[a-f0-9]{64}\.(strings|stringsdict|loctable)\Z")
 
 
 def unpack(archive, output):
@@ -17,13 +20,28 @@ def unpack(archive, output):
         for entry in tar:
             assert entry.name not in names, "Duplicate tar member"
             names.add(entry.name)
-            assert (entry.name in DIRS and entry.isdir()) or (entry.name in FILES and entry.isfile()), "Unexpected tar path/type"
+            assert ((entry.name in DIRS or entry.name == "package/quarantine") and entry.isdir()) or ((entry.name in FILES or QUARANTINE.fullmatch(entry.name)) and entry.isfile()), "Unexpected tar path/type"
             total += entry.size
-            assert total < 2 * 1024**3 and len(names) <= len(FILES) + len(DIRS), "Archive exceeds budget"
+            assert total < 2 * 1024**3 and len(names) <= 20032, "Archive exceeds budget"
             members.append(entry)
-        assert names == FILES | DIRS, "Missing release entries"
+        manifests = [m for m in members if m.name == "release.json"]
+        assert len(manifests) == 1 and manifests[0].size <= 8 * 1024**2, "Missing/oversized manifest"
+        manifest = json.load(tar.extractfile(manifests[0]))
+        version = manifest.get("formatVersion")
+        assert version in (1, 2), "Unknown release format"
+        allowed_files, allowed_dirs = set(FILES), set(DIRS)
+        if version == 2:
+            for name, value in manifest["files"].items():
+                if QUARANTINE.fullmatch(name):
+                    assert value is not None
+                    allowed_files.add(name)
+                    allowed_dirs.add("package/quarantine")
+                elif name == "package/quarantine/":
+                    assert value is None
+                    allowed_dirs.add("package/quarantine")
+        assert names == allowed_files | allowed_dirs, "Missing or unexpected release entries"
         os.mkdir(output, 0o700)
-        for name in DIRS:
+        for name in sorted(allowed_dirs):
             os.mkdir(os.path.join(output, name), 0o700)
         for entry in members:
             if entry.isdir():

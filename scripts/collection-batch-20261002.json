@@ -1,0 +1,1284 @@
+{
+  "formatVersion": 1,
+  "checkedAt": "2026-10-02",
+  "policy": "latest-official-stable-per-major",
+  "published": false,
+  "completeOS": false,
+  "tool": {
+    "url": "https://github.com/blacktop/ipsw/releases/download/v3.1.728/ipsw_3.1.728_macOS_arm64.tar.gz",
+    "archiveBytes": 26946550,
+    "archiveSha256": "aee66c946eb29f5f52e8fafd971eec3354d410585eb132cc8b677ac22143b287",
+    "binarySha256": "1854dcac3b6b8f225660bca3ad0db15a91361cb57eefcb3a853432f29f5fa36f"
+  },
+  "targets": [
+    {
+      "id": "ios27",
+      "platform": "iOS",
+      "version": "27.0.1",
+      "build": "24A446",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios26",
+      "platform": "iOS",
+      "version": "26.7.1",
+      "build": "23H30",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios18",
+      "platform": "iOS",
+      "version": "18.7.10",
+      "build": "22H374",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios17",
+      "platform": "iOS",
+      "version": "17.7.2",
+      "build": "21H221",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/121754"
+    },
+    {
+      "id": "ios16",
+      "platform": "iOS",
+      "version": "16.7.16",
+      "build": "20H392",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "ios15",
+      "platform": "iOS",
+      "version": "15.8.8",
+      "build": "19H422",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/100100"
+    },
+    {
+      "id": "macos27",
+      "platform": "macOS",
+      "version": "27.0.1",
+      "build": "26A434",
+      "status": "ipsw-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    },
+    {
+      "id": "macos26",
+      "platform": "macOS",
+      "version": "26.7.1",
+      "build": "25G241",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    },
+    {
+      "id": "macos15",
+      "platform": "macOS",
+      "version": "15.8.1",
+      "build": "24H32",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    },
+    {
+      "id": "macos14",
+      "platform": "macOS",
+      "version": "14.8.9",
+      "build": "23J631",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    },
+    {
+      "id": "macos13",
+      "platform": "macOS",
+      "version": "13.7.8",
+      "build": "22H730",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    },
+    {
+      "id": "macos12",
+      "platform": "macOS",
+      "version": "12.7.6",
+      "build": "21H1320",
+      "status": "ota-input-pinned",
+      "evidenceUrl": "https://support.apple.com/en-us/109033"
+    }
+  ],
+  "jobs": [
+    {
+      "key": "ios27-os",
+      "target": "ios27",
+      "completeOS": false,
+      "schema": "localization_ios27_24a446_os",
+      "uncollectedManifestComponents": [
+        "Ap,ExclaveOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "27.0.1",
+        "build": "24A446",
+        "product": "iPhone17,3",
+        "board": "d47ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "043-69462-662.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/38dca0ee-bb5d-4132-ad13-62d57bcd6d32/iPhone17,3_27.0.1_24A446_Restore.ipsw",
+        "manifestSha256": "1d3df8a49cf134cbf3b9f46c67be5cfc000c6bc2fda014846784fa0a8993b461",
+        "maximumDownloadBytes": 10737418240,
+        "maximumImageBytes": 12884901888
+      }
+    },
+    {
+      "key": "ios27-appos",
+      "target": "ios27",
+      "completeOS": false,
+      "schema": "localization_ios27_24a446_appos",
+      "uncollectedManifestComponents": [
+        "Ap,ExclaveOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "27.0.1",
+        "build": "24A446",
+        "product": "iPhone17,3",
+        "board": "d47ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "043-69297-793.dmg",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/38dca0ee-bb5d-4132-ad13-62d57bcd6d32/iPhone17,3_27.0.1_24A446_Restore.ipsw",
+        "manifestSha256": "1d3df8a49cf134cbf3b9f46c67be5cfc000c6bc2fda014846784fa0a8993b461",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "ios27-systemos",
+      "target": "ios27",
+      "completeOS": false,
+      "schema": "localization_ios27_24a446_systemos",
+      "uncollectedManifestComponents": [
+        "Ap,ExclaveOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "27.0.1",
+        "build": "24A446",
+        "product": "iPhone17,3",
+        "board": "d47ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "043-70113-711.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/38dca0ee-bb5d-4132-ad13-62d57bcd6d32/iPhone17,3_27.0.1_24A446_Restore.ipsw",
+        "manifestSha256": "1d3df8a49cf134cbf3b9f46c67be5cfc000c6bc2fda014846784fa0a8993b461",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "ios18-os",
+      "target": "ios18",
+      "completeOS": false,
+      "schema": "localization_ios18_22h374_os",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "18.7.10",
+        "build": "22H374",
+        "product": "iPhone11,8",
+        "board": "n841ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "094-31934-038.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026WinterFCS/fullrestores/140-97953/5F3051CD-5405-4FEF-889E-C3B78E0F376F/iPhone11,8_18.7.10_22H374_Restore.ipsw",
+        "manifestSha256": "a324b0bbe0f119c26612697a62a0d39a39f28ee4b0bc1730cac049981c2b2b8c",
+        "maximumDownloadBytes": 10737418240,
+        "maximumImageBytes": 12884901888
+      }
+    },
+    {
+      "key": "ios18-appos",
+      "target": "ios18",
+      "completeOS": false,
+      "schema": "localization_ios18_22h374_appos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "18.7.10",
+        "build": "22H374",
+        "product": "iPhone11,8",
+        "board": "n841ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "094-32850-038.dmg",
+        "url": "https://updates.cdn-apple.com/2026WinterFCS/fullrestores/140-97953/5F3051CD-5405-4FEF-889E-C3B78E0F376F/iPhone11,8_18.7.10_22H374_Restore.ipsw",
+        "manifestSha256": "a324b0bbe0f119c26612697a62a0d39a39f28ee4b0bc1730cac049981c2b2b8c",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "ios18-systemos",
+      "target": "ios18",
+      "completeOS": false,
+      "schema": "localization_ios18_22h374_systemos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "18.7.10",
+        "build": "22H374",
+        "product": "iPhone11,8",
+        "board": "n841ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "094-32062-038.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026WinterFCS/fullrestores/140-97953/5F3051CD-5405-4FEF-889E-C3B78E0F376F/iPhone11,8_18.7.10_22H374_Restore.ipsw",
+        "manifestSha256": "a324b0bbe0f119c26612697a62a0d39a39f28ee4b0bc1730cac049981c2b2b8c",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "ios16-os",
+      "target": "ios16",
+      "completeOS": false,
+      "schema": "localization_ios16_20h392_os",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "16.7.16",
+        "build": "20H392",
+        "product": "iPhone10,6",
+        "board": "d221ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "087-86698-044.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77006/1158E502-D76D-4226-AA06-ED5E30CD1111/iPhone10,3,iPhone10,6_16.7.16_20H392_Restore.ipsw",
+        "manifestSha256": "2d1452103a2f5ad71cb78d94454977fc70632472201980a468c247fba14b10b7",
+        "maximumDownloadBytes": 6442450944,
+        "maximumImageBytes": 6442450944
+      }
+    },
+    {
+      "key": "ios16-appos",
+      "target": "ios16",
+      "completeOS": false,
+      "schema": "localization_ios16_20h392_appos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "16.7.16",
+        "build": "20H392",
+        "product": "iPhone10,6",
+        "board": "d221ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "087-86715-047.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77006/1158E502-D76D-4226-AA06-ED5E30CD1111/iPhone10,3,iPhone10,6_16.7.16_20H392_Restore.ipsw",
+        "manifestSha256": "2d1452103a2f5ad71cb78d94454977fc70632472201980a468c247fba14b10b7",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "ios16-systemos",
+      "target": "ios16",
+      "completeOS": false,
+      "schema": "localization_ios16_20h392_systemos",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "16.7.16",
+        "build": "20H392",
+        "product": "iPhone10,6",
+        "board": "d221ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "087-86593-047.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77006/1158E502-D76D-4226-AA06-ED5E30CD1111/iPhone10,3,iPhone10,6_16.7.16_20H392_Restore.ipsw",
+        "manifestSha256": "2d1452103a2f5ad71cb78d94454977fc70632472201980a468c247fba14b10b7",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "ios15-os",
+      "target": "ios15",
+      "completeOS": false,
+      "schema": "localization_ios15_19h422_os",
+      "uncollectedManifestComponents": [
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "iOS",
+        "version": "15.8.8",
+        "build": "19H422",
+        "product": "iPhone9,3",
+        "board": "d101ap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "098-68844-067.dmg",
+        "url": "https://updates.cdn-apple.com/2025FallFCS/fullrestores/122-77496/774C7319-F63C-4C05-9C6C-49F5F0966540/iPhone_4.7_P3_15.8.8_19H422_Restore.ipsw",
+        "manifestSha256": "1eb426fd4da23fc8d133a06c15f697924537d09b9dc192e49e23accf8dd9d015",
+        "maximumDownloadBytes": 6442450944,
+        "maximumImageBytes": 6442450944
+      }
+    },
+    {
+      "key": "macos27-os",
+      "target": "macos27",
+      "completeOS": false,
+      "schema": "localization_macos27_26a434_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "Cryptex1,RosettaOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "macOS",
+        "version": "27.0.1",
+        "build": "26A434",
+        "product": "VirtualMac2,1",
+        "board": "vma2macosap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "OS",
+        "imagePath": "043-70867-640.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/59241290-5d51-4ca8-9df4-31624b9a4eac/UniversalMac_27.0.1_26A434_Restore.ipsw",
+        "manifestSha256": "2585e3bd35a2491773bdf8c40803e0b10aa6ed222a27c790b34d25b5fa6842af",
+        "maximumDownloadBytes": 12884901888,
+        "maximumImageBytes": 17179869184
+      }
+    },
+    {
+      "key": "macos27-appos",
+      "target": "macos27",
+      "completeOS": false,
+      "schema": "localization_macos27_26a434_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "Cryptex1,RosettaOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "macOS",
+        "version": "27.0.1",
+        "build": "26A434",
+        "product": "VirtualMac2,1",
+        "board": "vma2macosap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,AppOS",
+        "imagePath": "043-70637-690.dmg",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/59241290-5d51-4ca8-9df4-31624b9a4eac/UniversalMac_27.0.1_26A434_Restore.ipsw",
+        "manifestSha256": "2585e3bd35a2491773bdf8c40803e0b10aa6ed222a27c790b34d25b5fa6842af",
+        "maximumDownloadBytes": 268435456,
+        "maximumImageBytes": 268435456
+      }
+    },
+    {
+      "key": "macos27-systemos",
+      "target": "macos27",
+      "completeOS": false,
+      "schema": "localization_macos27_26a434_systemos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "Cryptex1,RosettaOS",
+        "RestoreRamDisk"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "os": "macOS",
+        "version": "27.0.1",
+        "build": "26A434",
+        "product": "VirtualMac2,1",
+        "board": "vma2macosap",
+        "variant": "Customer Erase Install (IPSW)",
+        "component": "Cryptex1,SystemOS",
+        "imagePath": "043-70701-651.dmg.aea",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/59241290-5d51-4ca8-9df4-31624b9a4eac/UniversalMac_27.0.1_26A434_Restore.ipsw",
+        "manifestSha256": "2585e3bd35a2491773bdf8c40803e0b10aa6ed222a27c790b34d25b5fa6842af",
+        "maximumDownloadBytes": 4294967296,
+        "maximumImageBytes": 8589934592
+      }
+    },
+    {
+      "key": "macos26-os",
+      "target": "macos26",
+      "completeOS": false,
+      "schema": "localization_macos26_25g241_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "26.7.1",
+        "build": "25G241",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/8ec11cd7-dce3-46fa-9b24-28f72dd1f7ec/com_apple_MobileAsset_MacSoftwareUpdate/af34f3ce7e69c63e0635ee357f5405cefd45834a.zip",
+        "archiveSha256": "9b4d7af46d9f350e29fc66cca39675cd18c0dd6d3b9ff66f333cf3cf44a606b0",
+        "archiveBytes": 18352010723,
+        "metadataHashes": {
+          "Info.plist": "28e1a0c53ed9911056d6f27a845d2bcda82a3ad4c969218550dfab230214650e",
+          "AssetData/Info.plist": "7c4d2805c7252ec890ff9453ce3f760e6b44c6280d5c1a24d73f70cf35e373bc"
+        },
+        "otaVersion": "26.7.1",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 18352010723,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/51/17/142-28081-A_616Q67X32N/5atqz1miz61kmrim7fwkn7yi62xuzzcc0s/142-28081.English.dist",
+          "build": "25G241"
+        }
+      }
+    },
+    {
+      "key": "macos26-appos",
+      "target": "macos26",
+      "completeOS": false,
+      "schema": "localization_macos26_25g241_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "26.7.1",
+        "build": "25G241",
+        "component": "cryptex-app",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/8ec11cd7-dce3-46fa-9b24-28f72dd1f7ec/com_apple_MobileAsset_MacSoftwareUpdate/af34f3ce7e69c63e0635ee357f5405cefd45834a.zip",
+        "archiveSha256": "9b4d7af46d9f350e29fc66cca39675cd18c0dd6d3b9ff66f333cf3cf44a606b0",
+        "archiveBytes": 18352010723,
+        "metadataHashes": {
+          "Info.plist": "28e1a0c53ed9911056d6f27a845d2bcda82a3ad4c969218550dfab230214650e",
+          "AssetData/Info.plist": "7c4d2805c7252ec890ff9453ce3f760e6b44c6280d5c1a24d73f70cf35e373bc"
+        },
+        "otaVersion": "26.7.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-app",
+        "memberBytes": 31379146,
+        "maximumDownloadBytes": 18352010723,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/51/17/142-28081-A_616Q67X32N/5atqz1miz61kmrim7fwkn7yi62xuzzcc0s/142-28081.English.dist",
+          "build": "25G241"
+        }
+      }
+    },
+    {
+      "key": "macos26-systemos-arm64e",
+      "target": "macos26",
+      "completeOS": false,
+      "schema": "localization_macos26_25g241_systemos_arm64e",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "26.7.1",
+        "build": "25G241",
+        "component": "cryptex-system-arm64e",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/8ec11cd7-dce3-46fa-9b24-28f72dd1f7ec/com_apple_MobileAsset_MacSoftwareUpdate/af34f3ce7e69c63e0635ee357f5405cefd45834a.zip",
+        "archiveSha256": "9b4d7af46d9f350e29fc66cca39675cd18c0dd6d3b9ff66f333cf3cf44a606b0",
+        "archiveBytes": 18352010723,
+        "metadataHashes": {
+          "Info.plist": "28e1a0c53ed9911056d6f27a845d2bcda82a3ad4c969218550dfab230214650e",
+          "AssetData/Info.plist": "7c4d2805c7252ec890ff9453ce3f760e6b44c6280d5c1a24d73f70cf35e373bc"
+        },
+        "otaVersion": "26.7.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-arm64e",
+        "memberBytes": 4456428206,
+        "maximumDownloadBytes": 18352010723,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/51/17/142-28081-A_616Q67X32N/5atqz1miz61kmrim7fwkn7yi62xuzzcc0s/142-28081.English.dist",
+          "build": "25G241"
+        }
+      }
+    },
+    {
+      "key": "macos26-systemos-x86_64",
+      "target": "macos26",
+      "completeOS": false,
+      "schema": "localization_macos26_25g241_systemos_x86_64",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "26.7.1",
+        "build": "25G241",
+        "component": "cryptex-system-x86_64",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/8ec11cd7-dce3-46fa-9b24-28f72dd1f7ec/com_apple_MobileAsset_MacSoftwareUpdate/af34f3ce7e69c63e0635ee357f5405cefd45834a.zip",
+        "archiveSha256": "9b4d7af46d9f350e29fc66cca39675cd18c0dd6d3b9ff66f333cf3cf44a606b0",
+        "archiveBytes": 18352010723,
+        "metadataHashes": {
+          "Info.plist": "28e1a0c53ed9911056d6f27a845d2bcda82a3ad4c969218550dfab230214650e",
+          "AssetData/Info.plist": "7c4d2805c7252ec890ff9453ce3f760e6b44c6280d5c1a24d73f70cf35e373bc"
+        },
+        "otaVersion": "26.7.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-x86_64",
+        "memberBytes": 1600796034,
+        "maximumDownloadBytes": 18352010723,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/51/17/142-28081-A_616Q67X32N/5atqz1miz61kmrim7fwkn7yi62xuzzcc0s/142-28081.English.dist",
+          "build": "25G241"
+        }
+      }
+    },
+    {
+      "key": "macos15-os",
+      "target": "macos15",
+      "completeOS": false,
+      "schema": "localization_macos15_24h32_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "15.8.1",
+        "build": "24H32",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/ad22d07e-0d68-4679-9375-99a5c4fc95ae/com_apple_MobileAsset_MacSoftwareUpdate/a30f5f5e5659a0760382124bee535d7ac33cb51f.zip",
+        "archiveSha256": "b7fc1e1454c067db0fbd2e0334573e15081a70023bff907c95680c15a259dcef",
+        "archiveBytes": 15640056810,
+        "metadataHashes": {
+          "Info.plist": "e25dad0b77baa57fef887243499accea113503bc55bd08c084f7bda242aeb497",
+          "AssetData/Info.plist": "5463f604385346235be783f041c55a1871417a15d7dc10ef76839892ac5ce601"
+        },
+        "otaVersion": "15.8.1",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 15640056810,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/07/04/142-27431-A_VX0FXASAKC/m7trj81qnvp94e9nzr06e7qi9lqey7cwmu/142-27431.English.dist",
+          "build": "24H32"
+        }
+      }
+    },
+    {
+      "key": "macos15-appos",
+      "target": "macos15",
+      "completeOS": false,
+      "schema": "localization_macos15_24h32_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "15.8.1",
+        "build": "24H32",
+        "component": "cryptex-app",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/ad22d07e-0d68-4679-9375-99a5c4fc95ae/com_apple_MobileAsset_MacSoftwareUpdate/a30f5f5e5659a0760382124bee535d7ac33cb51f.zip",
+        "archiveSha256": "b7fc1e1454c067db0fbd2e0334573e15081a70023bff907c95680c15a259dcef",
+        "archiveBytes": 15640056810,
+        "metadataHashes": {
+          "Info.plist": "e25dad0b77baa57fef887243499accea113503bc55bd08c084f7bda242aeb497",
+          "AssetData/Info.plist": "5463f604385346235be783f041c55a1871417a15d7dc10ef76839892ac5ce601"
+        },
+        "otaVersion": "15.8.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-app",
+        "memberBytes": 9954342,
+        "maximumDownloadBytes": 15640056810,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/07/04/142-27431-A_VX0FXASAKC/m7trj81qnvp94e9nzr06e7qi9lqey7cwmu/142-27431.English.dist",
+          "build": "24H32"
+        }
+      }
+    },
+    {
+      "key": "macos15-systemos-arm64e",
+      "target": "macos15",
+      "completeOS": false,
+      "schema": "localization_macos15_24h32_systemos_arm64e",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "15.8.1",
+        "build": "24H32",
+        "component": "cryptex-system-arm64e",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/ad22d07e-0d68-4679-9375-99a5c4fc95ae/com_apple_MobileAsset_MacSoftwareUpdate/a30f5f5e5659a0760382124bee535d7ac33cb51f.zip",
+        "archiveSha256": "b7fc1e1454c067db0fbd2e0334573e15081a70023bff907c95680c15a259dcef",
+        "archiveBytes": 15640056810,
+        "metadataHashes": {
+          "Info.plist": "e25dad0b77baa57fef887243499accea113503bc55bd08c084f7bda242aeb497",
+          "AssetData/Info.plist": "5463f604385346235be783f041c55a1871417a15d7dc10ef76839892ac5ce601"
+        },
+        "otaVersion": "15.8.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-arm64e",
+        "memberBytes": 3740736002,
+        "maximumDownloadBytes": 15640056810,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/07/04/142-27431-A_VX0FXASAKC/m7trj81qnvp94e9nzr06e7qi9lqey7cwmu/142-27431.English.dist",
+          "build": "24H32"
+        }
+      }
+    },
+    {
+      "key": "macos15-systemos-x86_64",
+      "target": "macos15",
+      "completeOS": false,
+      "schema": "localization_macos15_24h32_systemos_x86_64",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "15.8.1",
+        "build": "24H32",
+        "component": "cryptex-system-x86_64",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/ad22d07e-0d68-4679-9375-99a5c4fc95ae/com_apple_MobileAsset_MacSoftwareUpdate/a30f5f5e5659a0760382124bee535d7ac33cb51f.zip",
+        "archiveSha256": "b7fc1e1454c067db0fbd2e0334573e15081a70023bff907c95680c15a259dcef",
+        "archiveBytes": 15640056810,
+        "metadataHashes": {
+          "Info.plist": "e25dad0b77baa57fef887243499accea113503bc55bd08c084f7bda242aeb497",
+          "AssetData/Info.plist": "5463f604385346235be783f041c55a1871417a15d7dc10ef76839892ac5ce601"
+        },
+        "otaVersion": "15.8.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-x86_64",
+        "memberBytes": 1354238974,
+        "maximumDownloadBytes": 15640056810,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/07/04/142-27431-A_VX0FXASAKC/m7trj81qnvp94e9nzr06e7qi9lqey7cwmu/142-27431.English.dist",
+          "build": "24H32"
+        }
+      }
+    },
+    {
+      "key": "macos14-os",
+      "target": "macos14",
+      "completeOS": false,
+      "schema": "localization_macos14_23j631_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "14.8.9",
+        "build": "23J631",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2026SpringFCS/patches/140-88610/0C176173-8545-411A-A339-D34839E9433B/com_apple_MobileAsset_MacSoftwareUpdate/7742064d78e178b2ed119862104e6620dad4caa5.zip",
+        "archiveSha256": "160654bf16646a8ab436e510bd6a390517dc0e7a49d21c3fc408ee21c0d94556",
+        "archiveBytes": 13634151792,
+        "metadataHashes": {
+          "Info.plist": "d9f1e69d02fe80c076097d4808b449f8697e4ddf06cb223e15c3e42b09f4c22f",
+          "AssetData/Info.plist": "80c93e8745908db4228ea6fc5a7d45b05d68bc5bdc157b71dd1c1cd6505a4509"
+        },
+        "otaVersion": "14.8.9",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 13634151792,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/13/30/140-88558-A_TN3FIE7J63/p61cqj3ktmcqilz3q64ls4ekp1os9c8qbp/140-88558.English.dist",
+          "build": "23J631"
+        }
+      }
+    },
+    {
+      "key": "macos14-appos",
+      "target": "macos14",
+      "completeOS": false,
+      "schema": "localization_macos14_23j631_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "14.8.9",
+        "build": "23J631",
+        "component": "cryptex-app",
+        "url": "https://updates.cdn-apple.com/2026SpringFCS/patches/140-88610/0C176173-8545-411A-A339-D34839E9433B/com_apple_MobileAsset_MacSoftwareUpdate/7742064d78e178b2ed119862104e6620dad4caa5.zip",
+        "archiveSha256": "160654bf16646a8ab436e510bd6a390517dc0e7a49d21c3fc408ee21c0d94556",
+        "archiveBytes": 13634151792,
+        "metadataHashes": {
+          "Info.plist": "d9f1e69d02fe80c076097d4808b449f8697e4ddf06cb223e15c3e42b09f4c22f",
+          "AssetData/Info.plist": "80c93e8745908db4228ea6fc5a7d45b05d68bc5bdc157b71dd1c1cd6505a4509"
+        },
+        "otaVersion": "14.8.9",
+        "member": "AssetData/payloadv2/image_patches/cryptex-app",
+        "memberBytes": 9378134,
+        "maximumDownloadBytes": 13634151792,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/13/30/140-88558-A_TN3FIE7J63/p61cqj3ktmcqilz3q64ls4ekp1os9c8qbp/140-88558.English.dist",
+          "build": "23J631"
+        }
+      }
+    },
+    {
+      "key": "macos14-systemos-arm64e",
+      "target": "macos14",
+      "completeOS": false,
+      "schema": "localization_macos14_23j631_systemos_arm64e",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "14.8.9",
+        "build": "23J631",
+        "component": "cryptex-system-arm64e",
+        "url": "https://updates.cdn-apple.com/2026SpringFCS/patches/140-88610/0C176173-8545-411A-A339-D34839E9433B/com_apple_MobileAsset_MacSoftwareUpdate/7742064d78e178b2ed119862104e6620dad4caa5.zip",
+        "archiveSha256": "160654bf16646a8ab436e510bd6a390517dc0e7a49d21c3fc408ee21c0d94556",
+        "archiveBytes": 13634151792,
+        "metadataHashes": {
+          "Info.plist": "d9f1e69d02fe80c076097d4808b449f8697e4ddf06cb223e15c3e42b09f4c22f",
+          "AssetData/Info.plist": "80c93e8745908db4228ea6fc5a7d45b05d68bc5bdc157b71dd1c1cd6505a4509"
+        },
+        "otaVersion": "14.8.9",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-arm64e",
+        "memberBytes": 3228268250,
+        "maximumDownloadBytes": 13634151792,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/13/30/140-88558-A_TN3FIE7J63/p61cqj3ktmcqilz3q64ls4ekp1os9c8qbp/140-88558.English.dist",
+          "build": "23J631"
+        }
+      }
+    },
+    {
+      "key": "macos14-systemos-x86_64",
+      "target": "macos14",
+      "completeOS": false,
+      "schema": "localization_macos14_23j631_systemos_x86_64",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "14.8.9",
+        "build": "23J631",
+        "component": "cryptex-system-x86_64",
+        "url": "https://updates.cdn-apple.com/2026SpringFCS/patches/140-88610/0C176173-8545-411A-A339-D34839E9433B/com_apple_MobileAsset_MacSoftwareUpdate/7742064d78e178b2ed119862104e6620dad4caa5.zip",
+        "archiveSha256": "160654bf16646a8ab436e510bd6a390517dc0e7a49d21c3fc408ee21c0d94556",
+        "archiveBytes": 13634151792,
+        "metadataHashes": {
+          "Info.plist": "d9f1e69d02fe80c076097d4808b449f8697e4ddf06cb223e15c3e42b09f4c22f",
+          "AssetData/Info.plist": "80c93e8745908db4228ea6fc5a7d45b05d68bc5bdc157b71dd1c1cd6505a4509"
+        },
+        "otaVersion": "14.8.9",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-x86_64",
+        "memberBytes": 1152948334,
+        "maximumDownloadBytes": 13634151792,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/13/30/140-88558-A_TN3FIE7J63/p61cqj3ktmcqilz3q64ls4ekp1os9c8qbp/140-88558.English.dist",
+          "build": "23J631"
+        }
+      }
+    },
+    {
+      "key": "macos13-os",
+      "target": "macos13",
+      "completeOS": false,
+      "schema": "localization_macos13_22h730_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "13.7.8",
+        "build": "22H730",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2025SummerFCS/patches/093-21919/26CB8378-0A7E-4002-A29A-783807562955/com_apple_MobileAsset_MacSoftwareUpdate/97a386b5182904411d3cf455febfcf86757eb2cd.zip",
+        "archiveSha256": "ebd3e939aa7d2f3fb0c68f36164884f50d4f490b568299c3fc6de0a12b6dbbc3",
+        "archiveBytes": 12185064350,
+        "metadataHashes": {
+          "Info.plist": "492a202f35dc9afffa8468d45740c06b717fe1f012a51e8daabe466990379426",
+          "AssetData/Info.plist": "3ce617e19edb7779adc87620114d4ad69dfa2db1c928de25ec5988faee4db20a"
+        },
+        "otaVersion": "13.7.8",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 12185064350,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/09/46/093-22004-A_QNZEDC334I/phigx2zvoggml6sh79my4y51fnvgy8hix4/093-22004.English.dist",
+          "build": "22H730"
+        }
+      }
+    },
+    {
+      "key": "macos13-appos",
+      "target": "macos13",
+      "completeOS": false,
+      "schema": "localization_macos13_22h730_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "13.7.8",
+        "build": "22H730",
+        "component": "cryptex-app",
+        "url": "https://updates.cdn-apple.com/2025SummerFCS/patches/093-21919/26CB8378-0A7E-4002-A29A-783807562955/com_apple_MobileAsset_MacSoftwareUpdate/97a386b5182904411d3cf455febfcf86757eb2cd.zip",
+        "archiveSha256": "ebd3e939aa7d2f3fb0c68f36164884f50d4f490b568299c3fc6de0a12b6dbbc3",
+        "archiveBytes": 12185064350,
+        "metadataHashes": {
+          "Info.plist": "492a202f35dc9afffa8468d45740c06b717fe1f012a51e8daabe466990379426",
+          "AssetData/Info.plist": "3ce617e19edb7779adc87620114d4ad69dfa2db1c928de25ec5988faee4db20a"
+        },
+        "otaVersion": "13.7.8",
+        "member": "AssetData/payloadv2/image_patches/cryptex-app",
+        "memberBytes": 8979534,
+        "maximumDownloadBytes": 12185064350,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/09/46/093-22004-A_QNZEDC334I/phigx2zvoggml6sh79my4y51fnvgy8hix4/093-22004.English.dist",
+          "build": "22H730"
+        }
+      }
+    },
+    {
+      "key": "macos13-systemos-arm64e",
+      "target": "macos13",
+      "completeOS": false,
+      "schema": "localization_macos13_22h730_systemos_arm64e",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "13.7.8",
+        "build": "22H730",
+        "component": "cryptex-system-arm64e",
+        "url": "https://updates.cdn-apple.com/2025SummerFCS/patches/093-21919/26CB8378-0A7E-4002-A29A-783807562955/com_apple_MobileAsset_MacSoftwareUpdate/97a386b5182904411d3cf455febfcf86757eb2cd.zip",
+        "archiveSha256": "ebd3e939aa7d2f3fb0c68f36164884f50d4f490b568299c3fc6de0a12b6dbbc3",
+        "archiveBytes": 12185064350,
+        "metadataHashes": {
+          "Info.plist": "492a202f35dc9afffa8468d45740c06b717fe1f012a51e8daabe466990379426",
+          "AssetData/Info.plist": "3ce617e19edb7779adc87620114d4ad69dfa2db1c928de25ec5988faee4db20a"
+        },
+        "otaVersion": "13.7.8",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-arm64e",
+        "memberBytes": 2782870154,
+        "maximumDownloadBytes": 12185064350,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/09/46/093-22004-A_QNZEDC334I/phigx2zvoggml6sh79my4y51fnvgy8hix4/093-22004.English.dist",
+          "build": "22H730"
+        }
+      }
+    },
+    {
+      "key": "macos13-systemos-x86_64",
+      "target": "macos13",
+      "completeOS": false,
+      "schema": "localization_macos13_22h730_systemos_x86_64",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "13.7.8",
+        "build": "22H730",
+        "component": "cryptex-system-x86_64",
+        "url": "https://updates.cdn-apple.com/2025SummerFCS/patches/093-21919/26CB8378-0A7E-4002-A29A-783807562955/com_apple_MobileAsset_MacSoftwareUpdate/97a386b5182904411d3cf455febfcf86757eb2cd.zip",
+        "archiveSha256": "ebd3e939aa7d2f3fb0c68f36164884f50d4f490b568299c3fc6de0a12b6dbbc3",
+        "archiveBytes": 12185064350,
+        "metadataHashes": {
+          "Info.plist": "492a202f35dc9afffa8468d45740c06b717fe1f012a51e8daabe466990379426",
+          "AssetData/Info.plist": "3ce617e19edb7779adc87620114d4ad69dfa2db1c928de25ec5988faee4db20a"
+        },
+        "otaVersion": "13.7.8",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-x86_64",
+        "memberBytes": 1001478362,
+        "maximumDownloadBytes": 12185064350,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/09/46/093-22004-A_QNZEDC334I/phigx2zvoggml6sh79my4y51fnvgy8hix4/093-22004.English.dist",
+          "build": "22H730"
+        }
+      }
+    },
+    {
+      "key": "macos12-os",
+      "target": "macos12",
+      "completeOS": false,
+      "schema": "localization_macos12_21h1320_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "macOS",
+        "version": "12.7.6",
+        "build": "21H1320",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2024SpringFCS/patches/062-40399/DE1EC861-93E8-4EC5-8C9D-66ABF9E03140/com_apple_MobileAsset_MacSoftwareUpdate/74d53fc10d4f444b01cb19944407a34a8edccebf.zip",
+        "archiveSha256": "283f0820576e1178ede0fbee4ef34148c67dfc7d6f0d1dc2a007a6e5abfe7925",
+        "archiveBytes": 11495541757,
+        "metadataHashes": {
+          "Info.plist": "e1fcd8bd0386f76da4f4ace6fb0e52a444e4d7c28110e08893e3c1186001538d",
+          "AssetData/Info.plist": "9f33c01f8ec7670820cf6dfb5c9ac3e22631eccfc964ee9e648e47fe8bf68ee9"
+        },
+        "otaVersion": "12.7.6",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 11495541757,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://swdist.apple.com/content/downloads/24/16/062-40406-A_LQ4WW26M04/j7bl9ygay5prezturwh72ai10fvseh2uhw/062-40406.English.dist",
+          "build": "21H1320"
+        }
+      }
+    },
+    {
+      "key": "ios17-os",
+      "target": "ios17",
+      "completeOS": false,
+      "schema": "localization_ios17_21h221_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "iOS",
+        "version": "17.7.2",
+        "build": "21H221",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2024FallFCS/patches/072-33150/29089A3D-C0E8-491C-9E52-180084279263/com_apple_MobileAsset_SoftwareUpdate/8430bf31743c9d06a6b8b47486b3dc13bf41d911.zip",
+        "archiveSha256": "0851adf24e622082089690b099fa1685fd31b89a4ccdf4e1bf1a10d76624d881",
+        "archiveBytes": 6180684083,
+        "metadataHashes": {
+          "Info.plist": "d3e2f7108dcd37b46a3c8f8f824873cfd565f94eef03a0d93023b1379d027cc4",
+          "AssetData/Info.plist": "91c5ebe39698a76d71592979f645f09855e36534968d1a533ebe3a2b5c800713"
+        },
+        "otaVersion": "9.9.17.7.2",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 6180684083,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://support.apple.com/en-us/121754",
+          "build": "21H221"
+        }
+      }
+    },
+    {
+      "key": "ios17-appos",
+      "target": "ios17",
+      "completeOS": false,
+      "schema": "localization_ios17_21h221_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "iOS",
+        "version": "17.7.2",
+        "build": "21H221",
+        "component": "cryptex-app",
+        "url": "https://updates.cdn-apple.com/2024FallFCS/patches/072-33150/29089A3D-C0E8-491C-9E52-180084279263/com_apple_MobileAsset_SoftwareUpdate/8430bf31743c9d06a6b8b47486b3dc13bf41d911.zip",
+        "archiveSha256": "0851adf24e622082089690b099fa1685fd31b89a4ccdf4e1bf1a10d76624d881",
+        "archiveBytes": 6180684083,
+        "metadataHashes": {
+          "Info.plist": "d3e2f7108dcd37b46a3c8f8f824873cfd565f94eef03a0d93023b1379d027cc4",
+          "AssetData/Info.plist": "91c5ebe39698a76d71592979f645f09855e36534968d1a533ebe3a2b5c800713"
+        },
+        "otaVersion": "9.9.17.7.2",
+        "member": "AssetData/payloadv2/image_patches/cryptex-app",
+        "memberBytes": 1708650,
+        "maximumDownloadBytes": 6180684083,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://support.apple.com/en-us/121754",
+          "build": "21H221"
+        }
+      }
+    },
+    {
+      "key": "ios17-systemos-arm64e",
+      "target": "ios17",
+      "completeOS": false,
+      "schema": "localization_ios17_21h221_systemos_arm64e",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "iOS",
+        "version": "17.7.2",
+        "build": "21H221",
+        "component": "cryptex-system-arm64e",
+        "url": "https://updates.cdn-apple.com/2024FallFCS/patches/072-33150/29089A3D-C0E8-491C-9E52-180084279263/com_apple_MobileAsset_SoftwareUpdate/8430bf31743c9d06a6b8b47486b3dc13bf41d911.zip",
+        "archiveSha256": "0851adf24e622082089690b099fa1685fd31b89a4ccdf4e1bf1a10d76624d881",
+        "archiveBytes": 6180684083,
+        "metadataHashes": {
+          "Info.plist": "d3e2f7108dcd37b46a3c8f8f824873cfd565f94eef03a0d93023b1379d027cc4",
+          "AssetData/Info.plist": "91c5ebe39698a76d71592979f645f09855e36534968d1a533ebe3a2b5c800713"
+        },
+        "otaVersion": "9.9.17.7.2",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-arm64e",
+        "memberBytes": 962044398,
+        "maximumDownloadBytes": 6180684083,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://support.apple.com/en-us/121754",
+          "build": "21H221"
+        }
+      }
+    },
+    {
+      "key": "ios26-os",
+      "target": "ios26",
+      "completeOS": false,
+      "schema": "localization_ios26_23h30_os",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "iOS",
+        "version": "26.7.1",
+        "build": "23H30",
+        "component": "regular-payload",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+        "archiveSha256": "ec688c37bd57c3c7387095001002d8ce57262831bc996a58811a64f75bc4c585",
+        "archiveBytes": 8833536040,
+        "metadataHashes": {
+          "Info.plist": "8e39abe66570c32c95cf612bc4016e8702662255f4cc23778a80ef5bc8487f93",
+          "AssetData/Info.plist": "c4027c7621c0557d92e3401e6581bacc47461f409736ca2a11dfdc04c3cb88b7"
+        },
+        "otaVersion": "9.9.26.7.1",
+        "member": null,
+        "memberBytes": 0,
+        "maximumDownloadBytes": 8724152320,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://support.apple.com/en-us/100100",
+          "build": "23H30"
+        },
+        "encryptedSource": {
+          "formatVersion": 1,
+          "kind": "ota-full-aea",
+          "os": "iOS",
+          "version": "26.7.1",
+          "build": "23H30",
+          "device": "iPhone17,3",
+          "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+          "archiveBytes": 8724152320,
+          "archiveSha256": "c02eee7549fe9b148193bba9fb68ab1d53e830b3e77755b93f3a15bf2bed694b",
+          "maximumDecryptedBytes": 12884901888,
+          "decryptedBytes": 8833545496,
+          "decryptedSha256": "20e88047d768379fd5c189733d168f9944c3ed418d053670d9066c700ee72df2",
+          "stableEvidence": "https://support.apple.com/en-us/100100"
+        }
+      }
+    },
+    {
+      "key": "ios26-appos",
+      "target": "ios26",
+      "completeOS": false,
+      "schema": "localization_ios26_23h30_appos",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "iOS",
+        "version": "26.7.1",
+        "build": "23H30",
+        "component": "cryptex-app",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+        "archiveSha256": "ec688c37bd57c3c7387095001002d8ce57262831bc996a58811a64f75bc4c585",
+        "archiveBytes": 8833536040,
+        "metadataHashes": {
+          "Info.plist": "8e39abe66570c32c95cf612bc4016e8702662255f4cc23778a80ef5bc8487f93",
+          "AssetData/Info.plist": "c4027c7621c0557d92e3401e6581bacc47461f409736ca2a11dfdc04c3cb88b7"
+        },
+        "otaVersion": "9.9.26.7.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-app",
+        "memberBytes": 6007598,
+        "maximumDownloadBytes": 8724152320,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://support.apple.com/en-us/100100",
+          "build": "23H30"
+        },
+        "encryptedSource": {
+          "formatVersion": 1,
+          "kind": "ota-full-aea",
+          "os": "iOS",
+          "version": "26.7.1",
+          "build": "23H30",
+          "device": "iPhone17,3",
+          "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+          "archiveBytes": 8724152320,
+          "archiveSha256": "c02eee7549fe9b148193bba9fb68ab1d53e830b3e77755b93f3a15bf2bed694b",
+          "maximumDecryptedBytes": 12884901888,
+          "decryptedBytes": 8833545496,
+          "decryptedSha256": "20e88047d768379fd5c189733d168f9944c3ed418d053670d9066c700ee72df2",
+          "stableEvidence": "https://support.apple.com/en-us/100100"
+        }
+      }
+    },
+    {
+      "key": "ios26-systemos-arm64e",
+      "target": "ios26",
+      "completeOS": false,
+      "schema": "localization_ios26_23h30_systemos_arm64e",
+      "uncollectedManifestComponents": [
+        "BaseSystem",
+        "RestoreRamDisk",
+        "other OTA assets"
+      ],
+      "input": {
+        "formatVersion": 1,
+        "kind": "ota-full",
+        "os": "iOS",
+        "version": "26.7.1",
+        "build": "23H30",
+        "component": "cryptex-system-arm64e",
+        "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+        "archiveSha256": "ec688c37bd57c3c7387095001002d8ce57262831bc996a58811a64f75bc4c585",
+        "archiveBytes": 8833536040,
+        "metadataHashes": {
+          "Info.plist": "8e39abe66570c32c95cf612bc4016e8702662255f4cc23778a80ef5bc8487f93",
+          "AssetData/Info.plist": "c4027c7621c0557d92e3401e6581bacc47461f409736ca2a11dfdc04c3cb88b7"
+        },
+        "otaVersion": "9.9.26.7.1",
+        "member": "AssetData/payloadv2/image_patches/cryptex-system-arm64e",
+        "memberBytes": 1408803566,
+        "maximumDownloadBytes": 8724152320,
+        "maximumImageBytes": 17179869184,
+        "stableEvidence": {
+          "url": "https://support.apple.com/en-us/100100",
+          "build": "23H30"
+        },
+        "encryptedSource": {
+          "formatVersion": 1,
+          "kind": "ota-full-aea",
+          "os": "iOS",
+          "version": "26.7.1",
+          "build": "23H30",
+          "device": "iPhone17,3",
+          "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+          "archiveBytes": 8724152320,
+          "archiveSha256": "c02eee7549fe9b148193bba9fb68ab1d53e830b3e77755b93f3a15bf2bed694b",
+          "maximumDecryptedBytes": 12884901888,
+          "decryptedBytes": 8833545496,
+          "decryptedSha256": "20e88047d768379fd5c189733d168f9944c3ed418d053670d9066c700ee72df2",
+          "stableEvidence": "https://support.apple.com/en-us/100100"
+        }
+      }
+    }
+  ]
+}

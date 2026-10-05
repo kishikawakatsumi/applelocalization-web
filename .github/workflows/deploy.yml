@@ -1,38 +1,66 @@
-name: Deploy
+name: Deploy to VPS
 on:
   workflow_dispatch:
-
+    inputs:
+      action:
+        description: proxy-install is one-time; maintenance/resume control downtime; publish/rollback change only routing
+        type: choice
+        options: [preflight, proxy-install, proxy-status, prepare, check, maintenance, resume, publish, rollback]
+        default: preflight
+      deployment_id:
+        description: Unique lowercase ID; use the same ID for check
+        type: string
+        required: true
+      web_image:
+        description: For prepare, Web image repository@sha256 from Release Web image at this commit
+        type: string
+      port:
+        description: Unused loopback port for candidate review
+        type: string
+        default: '8085'
+permissions:
+  contents: read
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
+    timeout-minutes: 30
+    environment: production
     steps:
       - uses: actions/checkout@v7
-
-      - uses: docker/login-action@v4
+      - uses: actions/setup-node@v6
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - uses: docker/build-push-action@v7
-        with:
-          context: .
-          build-args: FONTAWESOME_TOKEN=${{ secrets.FONTAWESOME_TOKEN }}
-          push: true
-          tags: kishikawakatsumi/applelocalization-web:latest
-
-      - uses: appleboy/ssh-action@v1.2.5
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          timeout: 60m
-          command_timeout: 60m
-          script: |
-            cd applelocalization-web
-            git pull --rebase origin main
-
-            docker compose down
-            docker system prune --all -f
-            docker system prune --volumes -f
-            docker compose up -d
+          node-version: '24'
+          package-manager-cache: false
+      - name: Deployment safety tests
+        run: node --test tests/vps-deploy.test.mjs tests/vps-resources.test.mjs tests/proxy-vps.test.mjs tests/deployment-layout.test.mjs
+      - name: Proxy regression (synthetic upstreams, no VPS connection)
+        env:
+          ALLOW_PROXY_TEST: '1'
+        run: node tests/proxy-vps.integration.mjs
+      - name: Configure SSH with a pinned host key
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          test -n "$SSH_KEY" && test -n "$SSH_KNOWN_HOSTS"
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+      - name: Run explicitly requested operation
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ vars.SSH_PORT }}
+          DEPLOY_ACTION: ${{ inputs.action }}
+          DEPLOY_ID: ${{ inputs.deployment_id }}
+          DEPLOY_PORT: ${{ inputs.port }}
+          DEPLOY_WEB_IMAGE: ${{ inputs.web_image }}
+        run: node scripts/deploy-vps.mjs
+      - name: Remove runner SSH credentials
+        if: always()
+        run: rm -f "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"

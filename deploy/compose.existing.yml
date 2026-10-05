@@ -1,0 +1,69 @@
+# Existing verified-volume adoption only, through scripts/production-release.mjs.
+# Public TLS/proxy routing is intentionally separate. No import or volume deletion.
+services:
+  db:
+    image: ${RELEASE_DB_IMAGE:?prepare required}
+    platform: linux/amd64
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: localization_staging
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
+    secrets: [db_admin_password]
+    volumes:
+      - database:/var/lib/postgresql/data
+    entrypoint: ["/bin/bash", "-ec", "cmp -s /opt/localization/identity /var/lib/postgresql/data/.localization-ready || { echo 'Verified restored data required'; exit 1; }; exec /usr/local/bin/localization-entrypoint.sh postgres"]
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/localization-healthcheck.sh"]
+      interval: 15s
+      timeout: 15s
+      retries: 6
+    stop_grace_period: 1m
+    networks: [database]
+    logging: &logging
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}
+  web:
+    image: ${RELEASE_WEB_IMAGE:?prepare required}
+    platform: linux/amd64
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      RELEASE_MODE: production
+      RELEASE_DB_USER: ${RELEASE_DB_USER:?prepare required}
+      RELEASE_SHA256: ${RELEASE_CATALOG_SHA256:?prepare required}
+      CONTEXT_INDEX_MODE: ${RELEASE_CONTEXT_INDEX_MODE:-auto}
+    secrets: [db_password]
+    volumes:
+      - type: bind
+        source: ${RELEASE_METADATA:?prepare required}
+        target: /release
+        read_only: true
+        bind: {create_host_path: false}
+    ports: ["127.0.0.1:${RELEASE_PORT:?prepare required}:8080"]
+    depends_on:
+      db: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "deno", "eval", "const r=await fetch('http://127.0.0.1:8080/healthz');if(!r.ok)Deno.exit(1)"]
+      interval: 15s
+      timeout: 35s
+      retries: 4
+      start_period: 60s
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [database, frontend]
+    logging: *logging
+networks:
+  frontend: {}
+  database: {internal: true}
+volumes:
+  database:
+    external: true
+    name: ${RELEASE_DB_VOLUME:?prepare required}
+secrets:
+  db_admin_password:
+    file: ${RELEASE_ADMIN_PASSWORD_FILE:?prepare required}
+  db_password:
+    file: ${RELEASE_APP_PASSWORD_FILE:?prepare required}

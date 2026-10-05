@@ -1,0 +1,15 @@
+{
+  "formatVersion": 1,
+  "kind": "ota-full-aea",
+  "os": "iOS",
+  "version": "26.7.1",
+  "build": "23H30",
+  "device": "iPhone17,3",
+  "url": "https://updates.cdn-apple.com/2026FallFCS/1b8ab536-20e9-482d-9c8f-65f5d8dbcd52/com_apple_MobileAsset_SoftwareUpdate/b7ac1b66a793d59ba9412728a3ae27aa8c41a6dbbe6c3cc02a5bca29dcbe2468.aea",
+  "archiveBytes": 8724152320,
+  "archiveSha256": "c02eee7549fe9b148193bba9fb68ab1d53e830b3e77755b93f3a15bf2bed694b",
+  "maximumDecryptedBytes": 12884901888,
+  "decryptedBytes": 8833545496,
+  "decryptedSha256": "20e88047d768379fd5c189733d168f9944c3ed418d053670d9066c700ee72df2",
+  "stableEvidence": "https://support.apple.com/en-us/100100"
+}

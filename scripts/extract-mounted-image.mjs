@@ -18,8 +18,16 @@ import { pipeline } from "node:stream/promises";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
-import { decodePlist, resourceParserPolicy, resourceRows } from "./extract-mounted-bundle.mjs";
-import { assignBundle, bundlePolicy } from "./bundle-assignment.mjs";
+import {
+  decodePlist,
+  resourceParserPolicy,
+  resourceRows,
+} from "./extract-mounted-bundle.mjs";
+import {
+  assignBundle,
+  bundlePolicies,
+  currentBundlePolicy,
+} from "./bundle-assignment.mjs";
 import { readBundleMetadata } from "./bundle-metadata.mjs";
 
 const formats = new Set([".strings", ".loctable", ".stringsdict"]);
@@ -83,9 +91,20 @@ export async function extractMountedImage(
     progress = () => {},
     subtree = null,
     installerProjection = null,
+    otaProjection = null,
+    bundlePolicyVersion = currentBundlePolicy.version,
   },
 ) {
+  const bundlePolicy = bundlePolicies[bundlePolicyVersion];
+  if (!Number.isInteger(bundlePolicyVersion) || !bundlePolicy) {
+    throw new Error("Unsupported bundle policy version");
+  }
   if (!label) throw new Error("A unique image source label is required");
+  if (installerProjection !== null && otaProjection !== null) {
+    throw new Error("Ambiguous projection identity");
+  }
+  const ota = otaProjection !== null;
+  installerProjection ??= otaProjection;
   // Describes already verified input, not an alternate mount verification path.
   // The installer runner must verify the projection before calling this API.
   let projectionScope = null;
@@ -100,7 +119,7 @@ export async function extractMountedImage(
       )
     ) throw new Error("Invalid installer projection identity or scan options");
     projectionScope = {
-      kind: "installer-resource-projection",
+      kind: ota ? "ota-resource-projection" : "installer-resource-projection",
       version: installerProjection.version,
       build: installerProjection.build,
       archiveSha256: installerProjection.archiveSha256,
@@ -330,6 +349,7 @@ export async function extractMountedImage(
       path,
       imagePath,
       inherited,
+      policy: bundlePolicy,
       device: sourceDevice,
       decode: decode === decodePlist ? readBundleMetadata : decode,
       onIssue: async (p, error) => {
@@ -449,6 +469,7 @@ if (
         output: { type: "string" },
         label: { type: "string" },
         subtree: { type: "string" },
+        "bundle-policy-version": { type: "string" },
       },
     });
     for (const key of ["root", "output", "label"]) {
@@ -456,6 +477,9 @@ if (
     }
     const report = await extractMountedImage({
       ...values,
+      ...(values["bundle-policy-version"] === undefined ? {} : {
+        bundlePolicyVersion: Number(values["bundle-policy-version"]),
+      }),
       progress: (counts) => console.log(JSON.stringify({ progress: counts })),
     });
     console.log(
