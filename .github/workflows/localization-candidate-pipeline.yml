@@ -25,7 +25,7 @@ concurrency:
 jobs:
   plan:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
       sha256: ${{ steps.plan.outputs.sha256 }}
