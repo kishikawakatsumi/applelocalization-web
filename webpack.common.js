@@ -6,6 +6,7 @@ const CopyWebbackPlugin = require("copy-webpack-plugin");
 module.exports = {
   entry: {
     index: "./frontend/index.js",
+    agents: "./frontend/agents.js",
   },
   output: {
     globalObject: "self",
@@ -38,6 +39,11 @@ module.exports = {
       chunks: ["index"],
       filename: "templates/index.html",
       template: "frontend/index.html",
+    }),
+    new HtmlWebpackPlugin({
+      chunks: ["agents"],
+      filename: "templates/agents.html",
+      template: "frontend/agents.html",
     }),
     new MiniCssExtractPlugin({
       filename: "[name].[contenthash].css",

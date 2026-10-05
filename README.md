@@ -22,6 +22,9 @@ Subsequent starts reuse the database stored in Docker volumes.
 
 See [Deployment](docs/deployment.md) for configuration and update instructions.
 
+For API, MCP and AI-assisted localization reviews, see [Agent access](docs/agent-access.md)
+and the [Agent skill](docs/agent-skill.md).
+
 ## Release Note
 
 ### [iOS 27, macOS 27] - 2026-10-05
