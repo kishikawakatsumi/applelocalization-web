@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Use Apple Localization Terms Glossary with AI assistants, a localization review skill, or the read-only JSON API.">
+  <link rel="icon" href="/favicon.ico">
+  <title>AI / API — Apple Localization Terms Glossary</title>
+</head>
+<body>
+  <header class="block pt-3">
+    <div class="container">
+      <div class="columns">
+        <div class="column pb-0">
+          <h1 class="title is-inline-block is-5 mb-3"><a class="has-text-dark" href="/"><span class="mr-2"><%~ include("icon-globe.html") %></span>Apple Localization Terms Glossary</a></h1>
+        </div>
+        <div class="column pb-0 search-links"><%~ include("site-links.html") %></div>
+      </div>
+    </div>
+  </header>
+  <main class="agent-guide">
+    <a class="agent-back" href="/">← Back to search</a>
+    <h2>AI / API</h2>
+    <p class="agent-lead">Use Apple Localization Terms Glossary from your AI assistant or your own tools.<br>Search Apple’s translations, or review your app’s wording with a localization skill.</p>
+    <section>
+      <h3>Connect your AI assistant</h3>
+      <p>Add this MCP server in a compatible client to search translations by platform, OS version, and language.</p>
+      <div class="agent-endpoint"><code id="mcp-url">https://applelocalization.com/mcp</code><button id="copy-mcp-url" type="button" aria-label="Copy MCP server URL" title="Copy MCP server URL"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="1"/><path d="M11 3V2H2v9h1"/></svg></button></div>
+      <p id="copy-error" class="agent-error" role="alert" hidden>Could not copy. Select and copy the URL above.</p>
+      <p class="agent-hint">Streamable HTTP · Read-only · No API key required</p>
+      <div class="agent-links"><a href="/docs/agent-access.md">Connection instructions →</a></div>
+    </section>
+    <section>
+      <h3>Review translations with a skill</h3>
+      <p>Give your assistant a workflow for comparing your app’s translations with Apple’s terminology, while preserving context, placeholders, and language variants.</p>
+      <div class="agent-links"><a href="/docs/agent-skill.md">Installation guide →</a><a href="https://github.com/kishikawakatsumi/applelocalization-web/tree/main/skills/apple-localization" target="_blank" rel="noopener noreferrer">View skill on GitHub ↗</a></div>
+      <p class="agent-hint mt-3">Install the complete skill folder, including scripts and references. The helper script requires Node.js 22 or later.</p>
+    </section>
+    <section>
+      <h3>Build with the API</h3>
+      <p>Use the read-only JSON API directly. Choose an explicit platform and OS major version for each search.</p>
+      <div class="agent-links"><a href="/skills/apple-localization/references/api.md">API reference →</a><a href="/openapi.json">OpenAPI ↗</a><a href="/llms.txt">llms.txt ↗</a></div>
+    </section>
+    <p class="agent-foot">Unofficial reference. Apple’s translations are examples in context, not universal translation rules.<br>Queries reach this service. Do not submit confidential app text without permission.</p>
+  </main>
+</body>
+</html>

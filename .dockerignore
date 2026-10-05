@@ -5,6 +5,13 @@
 !webpack.*.js
 !backend/
 !backend/**
+!skills/
+!skills/apple-localization/
+!skills/apple-localization/**
+!docs/
+!docs/agent-access.md
+!docs/agent-skill.md
+!docs/llms.txt
 !frontend/
 !frontend/**
 !scripts/

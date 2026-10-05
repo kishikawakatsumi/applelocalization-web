@@ -117,6 +117,28 @@ try {
   const request=async path=>{
     const r=await fetch(baseURL+path,{headers:{Connection:"close"}});assert.equal(r.status,200,await r.clone().text());return r.json();
   };
+  assert.equal((await request("/openapi.json")).openapi,"3.1.1");
+  for(const path of ["/llms.txt","/docs/agent-access.md","/skills/apple-localization/SKILL.md"]){
+    const response=await fetch(baseURL+path);
+    assert.equal(response.status,200);assert.ok((await response.text()).length>0);
+  }
+  const mcp=async(method,params,id=1)=>{
+    const response=await fetch(baseURL+"/mcp",{method:"POST",headers:{
+      "Content-Type":"application/json",Accept:"application/json, text/event-stream",
+      "MCP-Protocol-Version":"2025-11-25",Connection:"close",
+    },body:JSON.stringify({jsonrpc:"2.0",id,method,params})});
+    assert.equal(response.status,200,await response.clone().text());
+    const body=await response.json();assert.ok(!body.error,JSON.stringify(body));return body.result;
+  };
+  assert.ok((await mcp("initialize",{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"compose-test",version:"1"}})).capabilities.tools);
+  assert.equal((await mcp("tools/list",{})).tools.length,3);
+  for(const platform of ["ios","macos"]){
+    const result=await mcp("tools/call",{name:"search_translations",arguments:{platform,major:27,query:"Open",languages:["English","Japanese"],limit:20}});
+    assert.ok(!result.isError,JSON.stringify(result));
+    assert.equal(result.structuredContent.dataset.id,platform+"27");
+    assert.ok(result.structuredContent.rows.length>0);
+    assert.ok(result.structuredContent.rows.every(row=>row.component.startsWith(platform+"27-")));
+  }
   for(const d of catalog.datasets){
     const path=`/api/${d.platform.toLowerCase()}/${d.version.split(".")[0]}/search`;
     const r=await request(path+"?q="+encodeURIComponent("開く")+"&l=English&l=Japanese");

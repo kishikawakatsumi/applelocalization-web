@@ -1,6 +1,7 @@
 // Public UI backed by the verified occurrence search API.
 import { Eta } from "https://deno.land/x/eta@eta-v4.0.0-alpha.2/src/index.ts";
 import { defaultLanguages, languageMapping } from "./models/languages.ts";
+import { createAgentRoutes } from "./agents/routes.ts";
 
 export function releasePageModel(target: any, catalog: any) {
   // UI choices are fixed, as in the public UI. Availability belongs to the
@@ -31,6 +32,7 @@ export async function createReleaseWeb(
   dist: string,
   { validationOnly = true } = {},
 ) {
+  const agents = await createAgentRoutes(api);
   const eta = new Eta({ views: `${dist}/templates` });
   const models = await Promise.all(targets.map(async (target) => {
     const response = await api(
@@ -57,6 +59,7 @@ export async function createReleaseWeb(
     pages.set(`/${platform}`, pages.get(latest.path)!);
     if (platform === "ios") pages.set("/", pages.get(latest.path)!);
   }
+  pages.set("/ai", eta.render("agents.html", {}));
   const assets = new Map<string, { bytes: Uint8Array; type: string }>();
   const mime: Record<string, string> = {
     js: "text/javascript",
@@ -88,6 +91,8 @@ export async function createReleaseWeb(
   return async (request: Request) => {
     const path = new URL(request.url).pathname;
     if (path.startsWith("/api/")) return api(request);
+    const agentResponse = agents(request);
+    if (agentResponse) return await agentResponse;
     if (!["GET", "HEAD"].includes(request.method)) {
       return new Response(null, { status: 405 });
     }
