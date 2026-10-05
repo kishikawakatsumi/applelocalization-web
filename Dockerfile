@@ -12,6 +12,8 @@ FROM denoland/deno:2.9.7@sha256:fa335acdf6b72106eda2cb6a8cb5f4187e7630e357467489
 WORKDIR /app
 COPY package.json deno.lock ./
 COPY backend ./backend
+COPY skills/apple-localization ./skills/apple-localization
+COPY docs/agent-access.md docs/agent-skill.md docs/llms.txt ./docs/
 # Only runtime dependencies, not the collection/benchmark toolchain.
 COPY scripts/occurrence-package.mjs scripts/package-ownership.mjs scripts/bundle-assignment.mjs scripts/bundle-metadata.mjs scripts/inspect-unlocalized-resources.mjs scripts/extract-mounted-bundle.mjs scripts/localization-jsonl.mjs scripts/context-index-sql.mjs scripts/structured-search.mjs scripts/database-role.mjs ./scripts/
 COPY deploy ./deploy

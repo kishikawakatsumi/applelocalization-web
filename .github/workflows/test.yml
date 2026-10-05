@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           package-manager-cache: false
@@ -22,6 +22,7 @@ jobs:
           test --node-modules-dir=none --frozen --allow-read --allow-write
           tests/validation-api.test.ts tests/context-index.test.ts
           tests/language-groups.test.ts tests/release-review.test.ts tests/release-web.test.ts
+          tests/agent-access.test.ts
       - name: Database initialization regression
         env:
           ALLOW_INITIALIZATION_TEST: '1'

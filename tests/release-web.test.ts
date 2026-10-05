@@ -25,7 +25,8 @@ Deno.test("real production template serves twelve scoped versions and API withou
   try {
     await Deno.mkdir(`${dir}/templates`);
     await Deno.copyFile("frontend/index.html", `${dir}/templates/index.html`);
-    for (const name of ["language-filter.html", "icon-globe.html", "icon-sliders.html", "icon-phone.html", "icon-display.html"]) {
+    await Deno.copyFile("frontend/agents.html", `${dir}/templates/agents.html`);
+    for (const name of ["language-filter.html", "icon-globe.html", "icon-sliders.html", "icon-phone.html", "icon-display.html", "icon-terminal.html", "site-links.html"]) {
       await Deno.copyFile(`frontend/templates/${name}`, `${dir}/templates/${name}`);
     }
     const targets = ["iOS", "macOS"].flatMap((platform) =>
@@ -63,6 +64,10 @@ Deno.test("real production template serves twelve scoped versions and API withou
       assert.equal(r.status, 200);
       const html = await r.text();
       assert.match(html, /id="table"/);
+      assert.match(html, /href="\/ai"/);
+      assert.match(html, /class="bi bi-terminal"/);
+      assert.ok(html.indexOf("Source Code") < html.indexOf("AI / API"));
+      assert.ok(html.indexOf("AI / API") < html.indexOf("Maintainer"));
       assert.equal((html.match(/class="bi bi-globe"/g) ?? []).length, 2);
       assert.equal((html.match(/class="bi bi-sliders"/g) ?? []).length, 1);
       assert.equal((html.match(/class="bi bi-phone"/g) ?? []).length, 12);
@@ -80,6 +85,19 @@ Deno.test("real production template serves twelve scoped versions and API withou
         12,
       );
     }
+    const guide = await app(new Request("http://localhost/ai"));
+    assert.equal(guide.status, 200);
+    const guideHtml = await guide.text();
+    assert.match(guideHtml, /Connect your AI assistant/);
+    assert.match(guideHtml, /Review translations with a skill/);
+    assert.match(guideHtml, /Build with the API/);
+    assert.doesNotMatch(guideHtml, /id="search-field"/);
+    for (const [, path] of guideHtml.matchAll(/href="(\/[^"#]*)"/g)) {
+      if (path === "/favicon.ico") continue;
+      assert.equal((await app(new Request(`http://localhost${path}`))).status, 200, path);
+    }
+    assert.equal(await (await app(new Request("http://localhost/ai", { method: "HEAD" }))).text(), "");
+    assert.equal((await app(new Request("http://localhost/ai", { method: "POST" }))).status, 405);
     assert.match(
       await (await app(new Request("http://localhost/"))).text(),
       /for iOS 27/,
