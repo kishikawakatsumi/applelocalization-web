@@ -57,5 +57,16 @@ test("retained source imports and workflow entry points exist after cleanup",asy
   }
   for(const file of await walk(".github/workflows")){
     for(const m of (await readFile(file,"utf8")).matchAll(/\b(?:scripts|tests)\/[A-Za-z0-9_.\/-]+\.(?:mjs|ts|py)\b/g)) await access(m[0]);
+    for(const m of (await readFile(file,"utf8")).matchAll(/\bbackend\/[A-Za-z0-9_.\/-]+\.ts\b/g)) await access(m[0]);
+  }
+});
+
+test("SQL fixture tests require explicit local test containers, never a personal SSH host",async()=>{
+  for(const file of ["tests/context-index-sql.integration.mjs","tests/structured-search.integration.ts"]){
+    const source=await readFile(file,"utf8");
+    assert.match(source,/LOCALIZATION_TEST_CONTAINER/);
+    assert.match(source,/localDockerOnly\(\)/);
+    assert.match(source,/localization-test-/);
+    assert.doesNotMatch(source,/192\.168\.|\bssh\b|localization-ui-/);
   }
 });

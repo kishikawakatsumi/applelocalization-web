@@ -35,5 +35,21 @@ SQLは圧縮COPY形式。全体のIPSW/OTAを恒久保存する必要はない�
 既に配布した旧イメージを標準Composeで起動する場合は `deploy/setup.ts` が不足分を追加する。
 検索高速化だけの更新で原本の再抽出は不要。
 
-残した監査スクリプトは再抽出の正確性確認に使う。試作した英日ペア専用DBや旧JSONからの移行APIは運用経路に含めない。
+監査スクリプトは再抽出の正確性確認に使う。
+完了済みの旧形式移行・v4→v5バンドル補正ツールと当時の検証の要約は
+[`archive/localization-pre-cleanup-20261005`](https://github.com/kishikawakatsumi/applelocalization-web/tree/archive/localization-pre-cleanup-20261005)
+に保存している。通常運用や新規抽出には使用しない。
 Font Awesomeの認証は不要。Docker HubへのPushにはGitHub Environmentの承認設定とDocker HubのSecretsが必要。
+
+## ローカルDBの回帰テスト
+
+`context-index-sql.integration.mjs` と `structured-search.integration.ts` は、
+`localization_staging` DBとPGroongaを用意した専用ローカルDockerコンテナで実行する。
+コンテナ名は `localization-test-` で始め、`LOCALIZATION_TEST_CONTAINER` で明示する。
+本番・検証サービスには接続しない。テスト用の行・スキーマはトランザクション終了時に戻す。
+
+```sh
+export LOCALIZATION_TEST_CONTAINER=localization-test-search
+ALLOW_CONTEXT_INDEX_TEST=1 node tests/context-index-sql.integration.mjs
+ALLOW_STRUCTURED_SEARCH_DB_TEST=1 deno test --node-modules-dir=none --frozen --allow-env --allow-read --allow-run tests/structured-search.integration.ts
+```

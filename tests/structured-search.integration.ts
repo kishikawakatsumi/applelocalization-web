@@ -1,5 +1,5 @@
-// Opt-in against the review DB; creates only a unique transaction-local fixture
-// schema and always rolls it back. No release rows/indexes are changed here.
+// Opt-in against an explicitly selected local test DB; creates only a unique
+// transaction-local fixture schema and always rolls it back.
 import { strict as assert } from "node:assert";
 import {
   buildSearch,
@@ -7,12 +7,16 @@ import {
   presentRow,
 } from "../backend/search/api.ts";
 import { sqlText } from "../scripts/verify-occurrence-search.mjs";
+import { localDockerOnly } from "../scripts/load-occurrence-staging.mjs";
 
 Deno.test({
   name:
     "JSON fulltext: indexed/reference parity, context, filters, pagination and lossless values",
   ignore: Deno.env.get("ALLOW_STRUCTURED_SEARCH_DB_TEST") !== "1",
   fn: async () => {
+    const container = Deno.env.get("LOCALIZATION_TEST_CONTAINER") ?? "";
+    assert.match(container, /^localization-test-[a-z0-9-]+$/, "Select a dedicated local test container");
+    localDockerOnly();
     const schema = `ipsw_trial_structured_${Deno.pid}`;
     const catalog: Catalog = {
       manifest: "fixture",
@@ -167,12 +171,11 @@ SELECT json_agg(id ORDER BY id) FROM occurrence WHERE ${predicate};
 EXPLAIN (FORMAT JSON) SELECT id FROM occurrence WHERE ${predicate};
 WITH reference AS MATERIALIZED (SELECT * FROM occurrence) SELECT json_agg(id ORDER BY id) FROM reference WHERE ${predicate};
 ROLLBACK;`);
-    const child = new Deno.Command("ssh", {
+    const child = new Deno.Command("docker", {
       args: [
-        "-o",
-        "BatchMode=yes",
-        "192.168.1.175",
-        "/usr/local/bin/docker exec -i localization-ui-3cac615c24f5-db-1 psql -X -q -At -U postgres -d localization_staging -v ON_ERROR_STOP=1",
+        "exec", "-i", container,
+        "psql", "-X", "-q", "-At", "-U", "postgres",
+        "-d", "localization_staging", "-v", "ON_ERROR_STOP=1",
       ],
       stdin: "piped",
       stdout: "piped",
