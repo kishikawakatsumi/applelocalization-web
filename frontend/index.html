@@ -59,7 +59,7 @@
               <div class="dropdown-content">
                 <% it.datasets.forEach(function(dataset) { %>
                 <a href="<%= dataset.path %>" class="dropdown-item" data-search-path="<%= dataset.path %>">
-                  <span><%= dataset.platform %> <%= dataset.version %></span><span class="fa-solid <%= dataset.platformId === "ios" ? "fa-mobile" : "fa-desktop" %> pl-2"></span>
+                  <span><%= dataset.platform %> <%= dataset.version %></span><span class="pl-2"><%~ include(dataset.platformId === "ios" ? "icon-phone.html" : "icon-display.html") %></span>
                 </a>
                 <% }); %>
               </div>
@@ -188,7 +188,7 @@
                       <p class="control">
                         <a href="/<%= dataset.platformId %>/<%= dataset.version %>" data-search-path="/<%= dataset.platformId %>/<%= dataset.version %>" class="button is-small<%= it.platformId === dataset.platformId && it.version === dataset.version ? " is-info is-selected" : "" %>">
                           <span><%= dataset.platform %> <%= dataset.version %></span>
-                          <span class="icon is-small"><span class="fa-solid <%= dataset.platformId === "ios" ? "fa-mobile" : "fa-desktop" %> px-2"></span></span>
+                          <span class="icon is-small"><%~ include(dataset.platformId === "ios" ? "icon-phone.html" : "icon-display.html") %></span>
                         </a>
                       </p>
                       <% }); %>
