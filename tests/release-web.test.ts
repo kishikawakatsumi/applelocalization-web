@@ -25,7 +25,7 @@ Deno.test("real production template serves twelve scoped versions and API withou
   try {
     await Deno.mkdir(`${dir}/templates`);
     await Deno.copyFile("frontend/index.html", `${dir}/templates/index.html`);
-    for (const name of ["language-filter.html", "icon-globe.html", "icon-sliders.html"]) {
+    for (const name of ["language-filter.html", "icon-globe.html", "icon-sliders.html", "icon-phone.html", "icon-display.html"]) {
       await Deno.copyFile(`frontend/templates/${name}`, `${dir}/templates/${name}`);
     }
     const targets = ["iOS", "macOS"].flatMap((platform) =>
@@ -65,7 +65,9 @@ Deno.test("real production template serves twelve scoped versions and API withou
       assert.match(html, /id="table"/);
       assert.equal((html.match(/class="bi bi-globe"/g) ?? []).length, 2);
       assert.equal((html.match(/class="bi bi-sliders"/g) ?? []).length, 1);
-      assert.doesNotMatch(html, /fa-globe|fa-sliders/);
+      assert.equal((html.match(/class="bi bi-phone"/g) ?? []).length, 12);
+      assert.equal((html.match(/class="bi bi-display"/g) ?? []).length, 12);
+      assert.doesNotMatch(html, /fa-globe|fa-sliders|fa-mobile|fa-desktop/);
       assert.match(html, /value="Japanese"/);
       assert.deepEqual(
         [...html.matchAll(/name="language" type="checkbox" value="([^"]+)"/g)]
