@@ -57,7 +57,7 @@ jobs:
         env:
           IMAGE_DIGEST: ${{ steps.image.outputs.digest }}
         run: node scripts/web-release-receipt.mjs
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: inputs.publish
         with:
           name: web-release-${{ github.run_id }}-${{ github.run_attempt }}
