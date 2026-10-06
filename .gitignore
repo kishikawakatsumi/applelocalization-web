@@ -161,8 +161,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Rebuilt databases and local validation reports
-.localization-artifacts/
+# Local work files, validation reports, backups and worktrees
+.work/
 
 # Host-local release configuration and credentials
 .deployment-releases/
