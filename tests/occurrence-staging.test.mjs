@@ -15,11 +15,11 @@ import {
 } from "../scripts/occurrence-staging.mjs";
 
 test("durable layout requires explicit target and creates logged tables in a new restricted schema", () => {
-  const layout = occurrenceSQLLayout({ durable: true, schema: 'localization_fixture', database: 'localization_staging' });
+  const layout = occurrenceSQLLayout({ durable: true, schema: 'localization_fixture', database: 'applelocalization' });
   assert.ok(!layout.header.includes('UNLOGGED'));
   assert.equal((layout.header.match(/CREATE TABLE /g) ?? []).length, 10);
   assert.ok(layout.header.includes('REVOKE ALL ON SCHEMA localization_fixture FROM PUBLIC;'));
-  assert.ok(layout.header.includes("current_database() <> 'localization_staging'"));
+  assert.ok(layout.header.includes("current_database() <> 'applelocalization'"));
   for (const database of [undefined, 'postgres', 'template0', "x';DROP"]) {
     assert.throws(() => occurrenceSQLLayout({ durable: true, schema: 'localization_fixture', database }));
   }

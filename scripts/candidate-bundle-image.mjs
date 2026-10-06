@@ -1,5 +1,6 @@
 // Per-OS candidate image: exact artifact lineage, fresh-cluster restore, full row audit, then optional push.
 import assert from "node:assert/strict";
+import { bundleDatabase } from "./database-name.mjs";
 import { execFile, spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import {
@@ -75,6 +76,7 @@ export function candidateTag(target, p) {
   return `candidate-${target.id}-${target.version}-${target.build.toLowerCase()}-r${p.runId}-a${p.attempt}`;
 }
 export async function prepareBundleContext({ sql, bundle, output }) {
+  const database = bundleDatabase(bundle);
   assert.deepEqual(await json(join(sql, "bundle.json")), bundle);
   const expected = batch.jobs.filter((c) => c.target === bundle.target.id);
   assert.deepEqual(
@@ -98,7 +100,7 @@ export async function prepareBundleContext({ sql, bundle, output }) {
       verification,
     });
     assert.equal(report.schema, c.schema);
-    assert.equal(report.database, "localization_staging");
+    assert.equal(report.database, database);
     assert.equal(report.packageManifest, c.packageManifest);
     assert.equal(
       await fileHash(join(sql, c.key, "import.sql.gz")),
@@ -109,7 +111,7 @@ export async function prepareBundleContext({ sql, bundle, output }) {
     await writeFile(
       join(payload, migration),
       structuredSearchMigration({
-        database: "localization_staging",
+        database,
         components: [c],
       }),
       { flag: "wx" },
@@ -119,7 +121,7 @@ export async function prepareBundleContext({ sql, bundle, output }) {
     await writeFile(
       join(payload, contextMigration),
       contextIndexMigration({
-        database: "localization_staging",
+        database,
         components: [c],
       }),
       { flag: "wx" },
@@ -145,7 +147,7 @@ export async function prepareBundleContext({ sql, bundle, output }) {
   await writeFile(join(payload, "identity"), identity + "\n", { flag: "wx" });
   await writeFile(
     join(payload, "dataset.env"),
-    "DATASET_DATABASE=localization_staging\n",
+    `DATASET_DATABASE=${database}\n`,
     { flag: "wx" },
   );
   await writeFile(
@@ -294,6 +296,7 @@ export async function verifyCandidateSearch({ component, lines }) {
 async function rehearseBundle(
   { bundle, image, identity, releases, sql, output },
 ) {
+  const database = bundleDatabase(bundle);
   await mkdir(output);
   localDockerOnly();
   const p = pipelineProducer(), nonce = randomBytes(16).toString("hex");
@@ -352,7 +355,7 @@ async function rehearseBundle(
       "-U",
       "postgres",
       "-d",
-      "localization_staging",
+      database,
       "-v",
       "ON_ERROR_STOP=1",
       "-At",
@@ -386,7 +389,7 @@ async function rehearseBundle(
       "--mount",
       `type=volume,source=${volume},target=/var/lib/postgresql/data`,
       "-e",
-      "POSTGRES_DB=localization_staging",
+      `POSTGRES_DB=${database}`,
       "-e",
       `POSTGRES_PASSWORD=${randomBytes(24).toString("hex")}`,
       image,

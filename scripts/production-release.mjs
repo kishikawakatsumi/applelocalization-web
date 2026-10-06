@@ -1,5 +1,6 @@
 // Local Docker only. Prepares/starts a separate release; never switches public routing.
 import assert from "node:assert/strict";
+import { validateReleaseDatabase } from "./database-name.mjs";
 import { execFileSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { chmod, copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
@@ -180,6 +181,7 @@ async function prepare(v) {
   await remember("metadata/release-set.json");
   await chmod(join(output, "metadata/release-set.json"), 0o644);
   const catalog = await json(join(output, "metadata/release-set.json"));
+  validateReleaseDatabase(catalog.database);
   for (const pin of catalog.inputs) {
     assert.match(pin.target, /^(ios|macos)[0-9]+$/);
     const file = `metadata/bundles/${pin.target}.json`;
@@ -274,8 +276,8 @@ async function prepare(v) {
       "-U",
       "postgres",
       "-d",
-      "localization_staging",
-    ], readOnlyRoleSQL(role, password, schemas));
+      catalog.database,
+    ], readOnlyRoleSQL(role, password, schemas, catalog.database));
   } finally {
     if (started) {
       validateLocalContainer(inspect(owned.name), owned);

@@ -3,6 +3,10 @@ import { strict as assert } from "node:assert";
 import { createHash } from "node:crypto";
 import { languageGroups } from "../models/language_groups.ts";
 import {
+  bundleDatabase,
+  validateReleaseDatabase,
+} from "../../scripts/database-name.mjs";
+import {
   buildSearch,
   type Catalog,
   loadCatalog,
@@ -27,7 +31,7 @@ export function parseReleaseMetadata(
   );
   assert.equal(catalog.formatVersion, 1);
   assert.equal(catalog.status, "release-set-sql-context-prepared-not-restored");
-  assert.equal(catalog.database, "localization_staging");
+  validateReleaseDatabase(catalog.database);
   assert.equal(catalog.searchScope, "one-platform-major-version");
   assert.equal(catalog.allPlannedTargets, true);
   assert.deepEqual(catalog.missingTargets, []);
@@ -53,6 +57,7 @@ export function parseReleaseMetadata(
     );
     assert.equal(b.formatVersion, 1);
     assert.equal(b.status, "candidate-sql-bundle-verified");
+    assert.equal(bundleDatabase(b), catalog.database);
     for (const field of ["id", "platform", "version", "build"]) {
       assert.equal(b.target[field], d[field]);
     }
@@ -269,7 +274,7 @@ export async function createReleaseReview(
       if ((error as any).fields?.code === "57014") {
         return json({
           error:
-            "検索がタイムアウトしました。言語やコンポーネントで絞り込んでください。",
+            "The search timed out. Try narrowing the search by language or component.",
         }, 503);
       }
       console.error(

@@ -1,5 +1,6 @@
 // Assemble already-generated per-version SQL. No extraction, DB writes or publication.
 import assert from "node:assert/strict";
+import { bundleDatabase } from "./database-name.mjs";
 import {
   copyFile,
   lstat,
@@ -46,7 +47,13 @@ export function releaseCatalog(bundles, requested = releaseTargets()) {
     "Every selected version is required",
   );
   const byId = new Map();
+  const database = bundleDatabase(bundles[0]);
   for (const b of bundles) {
+    assert.equal(
+      bundleDatabase(b),
+      database,
+      "Mixed database names; regenerate SQL for a single database",
+    );
     assert.equal(b.formatVersion, 1);
     assert.equal(b.status, "candidate-sql-bundle-verified");
     assert.equal(b.apiCompatible, false);
@@ -102,7 +109,7 @@ export function releaseCatalog(bundles, requested = releaseTargets()) {
   return {
     formatVersion: 1,
     status: "release-set-sql-context-prepared-not-restored",
-    database: "localization_staging",
+    database,
     allPlannedTargets: requested.length === batch.targets.length,
     missingTargets: batch.targets.filter((t) => !requested.includes(t.id)).map((
       t,
@@ -221,7 +228,7 @@ export async function composeReleaseContext(
   await writeFile(join(payload, "identity"), identity + "\n", { flag: "wx" });
   await writeFile(
     join(payload, "dataset.env"),
-    "DATASET_DATABASE=localization_staging\n",
+    `DATASET_DATABASE=${catalog.database}\n`,
     { flag: "wx" },
   );
   await writeFile(join(payload, "sources.tsv"), sources.join(""), {

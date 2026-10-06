@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { validateReleaseDatabase } from "./database-name.mjs";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { constants, createReadStream } from "node:fs";
@@ -28,13 +29,14 @@ export function validateLoadReport(
   report,
   { durable = false, reportSha256, verification, reportBytes } = {},
 ) {
-  assert.equal(report.database, stagingDatabase);
   if (!durable) {
+    assert.equal(report.database, stagingDatabase);
     assert.equal(report.status, "staging-sql-prepared");
     assert.equal(report.container, stagingContainer);
     validateSchema(report.schema);
     return;
   }
+  validateReleaseDatabase(report.database);
   assert.match(reportSha256 ?? "", /^[a-f0-9]{64}$/);
   assert.equal(
     createHash("sha256").update(reportBytes).digest("hex"),
@@ -108,6 +110,7 @@ export async function loadOccurrenceStaging(
       : undefined,
   });
   // Unique connection tag permits cancelling only this import if capacity runs low.
+  assert.equal(report.database, stagingDatabase);
   const previousApplication = process.env.LOCALIZATION_STAGING_APPLICATION_NAME;
   const application = `durable_import_${process.pid}_${Date.now()}`;
   async function capacity(minimum) {

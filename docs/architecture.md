@@ -1,6 +1,7 @@
 # アーキテクチャ
 
-1つのPostgreSQLデータベース `localization_staging` を使用する。名称は配布SQLとの互換性のため維持しているが、
+新しく生成するデータは、1つのPostgreSQLデータベース `applelocalization` に格納する。
+接続先は配布メタデータに従う。既存の配布データは `localization_staging` のまま利用でき、既存DBの改名は行わない。
 配布用テーブルはUNLOGGEDではなく通常の永続テーブル。
 各OS・ビルド・構成要素は `localization_<OS系列>_<build>_<component>` スキーマで分離する。
 同じ版のOS/AppOS/SystemOSは検索時に束ね、別OSや別版とは混ぜない。

@@ -45,7 +45,7 @@ const pool = new Pool(
     port: 5432,
     user,
     password,
-    database: "localization_staging",
+    database: metadata.catalog.database,
     applicationName: `localization-compose-${mode}`,
     options: {
       default_transaction_read_only: "on",

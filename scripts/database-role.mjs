@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { contextSchema } from "./context-index-sql.mjs";
+import { releaseDatabase, validateReleaseDatabase } from "./database-name.mjs";
 
-export function readOnlyRoleSQL(role, password, schemas) {
+export function readOnlyRoleSQL(
+  role,
+  password,
+  schemas,
+  database = releaseDatabase,
+) {
+  validateReleaseDatabase(database);
   assert.match(role, /^web_[a-f0-9]{24}$/);
   assert.match(password, /^[a-f0-9]{64}$/);
   assert.ok(schemas.length > 0 && new Set(schemas).size === schemas.length);
@@ -11,7 +18,7 @@ SET LOCAL log_statement='none';
 SET LOCAL log_min_error_statement='panic';
 CREATE ROLE ${role} LOGIN PASSWORD '${password}' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
 ALTER ROLE ${role} SET default_transaction_read_only=on;
-GRANT CONNECT ON DATABASE localization_staging TO ${role};
+GRANT CONNECT ON DATABASE ${database} TO ${role};
 ${
     schemas.map((s) =>
       `GRANT USAGE ON SCHEMA ${s} TO ${role};\nGRANT SELECT ON ALL TABLES IN SCHEMA ${s} TO ${role};

@@ -40,7 +40,7 @@ const statements = contextIndexStatements({
   schema,
   packageManifest: manifest,
 });
-const permissions = readOnlyRoleSQL(role, "b".repeat(64), [schema]).replace(
+const permissions = readOnlyRoleSQL(role, "b".repeat(64), [schema], "localization_staging").replace(
   /^BEGIN;\n/,
   "",
 ).replace(/COMMIT;\s*$/, "");

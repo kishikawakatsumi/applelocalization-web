@@ -196,7 +196,7 @@ async function sqlFixture(id = "ios27") {
     );
     const report = {
       status: "durable-occurrence-sql-prepared",
-      database: "localization_staging",
+      database: "applelocalization",
       schema: c.schema,
       storage: "logged",
       packageManifest: "b".repeat(64),
@@ -220,7 +220,11 @@ async function sqlFixture(id = "ios27") {
       sqlReportSha256,
     });
   }
-  const bundle = { target: batch.targets.find((t) => t.id === id), components };
+  const bundle = {
+    database: "applelocalization",
+    target: batch.targets.find((t) => t.id === id),
+    components,
+  };
   await writeFile(join(sql, "bundle.json"), JSON.stringify(bundle));
   return { sql, bundle, output: join(root, "context") };
 }

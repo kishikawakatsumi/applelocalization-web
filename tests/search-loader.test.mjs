@@ -73,6 +73,15 @@ for (
     [
       "database timeout",
       async () =>
+        Response.json({
+          error:
+            "The search timed out. Try narrowing the search by language or component.",
+        }, { status: 503 }),
+      "timeout",
+    ],
+    [
+      "legacy database timeout",
+      async () =>
         Response.json({ error: "検索がタイムアウトしました。" }, {
           status: 503,
         }),

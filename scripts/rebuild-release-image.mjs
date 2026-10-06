@@ -1,5 +1,6 @@
 // Release assets -> verified SQL payload -> candidate image. Never reads Actions artifacts.
 import assert from 'node:assert/strict';
+import { validateReleaseDatabase } from "./database-name.mjs";
 import { execFile, spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { appendFile, mkdir, readFile, rm, stat, statfs } from 'node:fs/promises';
@@ -86,7 +87,7 @@ export function validateOriginalCatalog(manifest, catalog, pushed) {
   assert.equal(pushed.catalogSha256, manifest.image.catalogSha256);
   assert.deepEqual(pushed.producer, manifest.producer);
   assert.equal(catalog.allPlannedTargets, true); assert.deepEqual(catalog.missingTargets, []);
-  assert.equal(catalog.database, 'localization_staging');
+  validateReleaseDatabase(catalog.database);
   assert.equal(catalog.searchScope, 'one-platform-major-version');
   assert.deepEqual(catalog.datasets, manifest.datasets);
   assert.equal(sha256(JSON.stringify(catalog)), manifest.image.identity);

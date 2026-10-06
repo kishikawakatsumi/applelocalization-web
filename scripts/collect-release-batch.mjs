@@ -1,5 +1,6 @@
 // One pinned IPSW component per disposable macOS runner. No release/image push or DB connection.
 import assert from "node:assert/strict";
+import { releaseDatabase } from "./database-name.mjs";
 import { execFile } from "node:child_process";
 import { mkdir, readFile, statfs } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -287,7 +288,7 @@ export async function runBatchComponent(
       output: join(output, "sql"),
       manifestSha256: collection.manifestSha256,
       schema: job.schema,
-      database: "localization_staging",
+      database: releaseDatabase,
       progress: (event) => console.log(JSON.stringify(event)),
     });
     const receipt = {

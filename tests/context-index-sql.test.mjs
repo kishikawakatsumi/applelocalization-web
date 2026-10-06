@@ -7,7 +7,7 @@ import {
   contextSchema,
 } from "../scripts/context-index-sql.mjs";
 const input = {
-  database: "localization_staging",
+  database: "applelocalization",
   schema: "localization_fixture",
   packageManifest: "a".repeat(64),
 };

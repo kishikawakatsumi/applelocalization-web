@@ -17,6 +17,7 @@ function bundle(id) {
   return {
     formatVersion: 1,
     status: "candidate-sql-bundle-verified",
+    database: "applelocalization",
     target: batch.targets.find((t) => t.id === id),
     components: batch.jobs.filter((c) => c.target === id).map((c) => ({
       key: c.key,
@@ -33,7 +34,7 @@ function bundle(id) {
 test("one DB catalog retains explicit platform, version, build and all components", () => {
   const ids = releaseTargets("macos27,ios27,macos15,ios15");
   const c = releaseCatalog(ids.map(bundle), ids);
-  assert.equal(c.database, "localization_staging");
+  assert.equal(c.database, "applelocalization");
   assert.equal(c.allPlannedTargets, false);
   const ios = resolveReleaseScope(c, "ios27"),
     mac = resolveReleaseScope(c, "macos27");
@@ -77,6 +78,8 @@ test("missing versions, duplicate releases, mixed OS/builds and missing componen
       (b) => b[0].components[0] = structuredClone(b[1].components[0]),
       (b) => b[0].components[0].schema = b[1].components[0].schema,
       (b) => b[0].published = true,
+      (b) => b[0].database = "localization_staging",
+      (b) => b[0].database = "postgres",
     ]
   ) {
     const b = structuredClone(ids.map(bundle));
@@ -95,11 +98,12 @@ test("missing versions, duplicate releases, mixed OS/builds and missing componen
   assert.throws(() => releaseTargets("ios99"));
 });
 
-async function fixture() {
+async function fixture(database = "applelocalization") {
   const root = await mkdtemp(join(tmpdir(), "release-set-"));
   const inputs = [];
   for (const id of ["ios15", "macos15"]) {
     const b = bundle(id), sql = join(root, id);
+    if (database === "localization_staging") delete b.database;
     await mkdir(sql);
     for (const c of b.components) {
       const dir = join(sql, c.key);
@@ -112,7 +116,7 @@ async function fixture() {
       const report = {
         status: "durable-occurrence-sql-prepared",
         storage: "logged",
-        database: "localization_staging",
+        database,
         schema: c.schema,
         packageManifest: c.packageManifest,
         sqlSha256: c.sqlSha256,
@@ -170,15 +174,43 @@ test("assembler reuses byte-identical SQL in one DB context and checksums the ve
     await readFile(join(result.context, "initialize.sh"), "utf8"),
     /done < \/opt\/localization\/sources.tsv/,
   );
-  assert.match(
+  assert.doesNotMatch(
     await readFile(join(result.context, "Dockerfile"), "utf8"),
-    /ENV POSTGRES_DB=localization_staging/,
+    /ENV POSTGRES_DB=/,
+  );
+  assert.equal(
+    await readFile(join(payload, "dataset.env"), "utf8"),
+    "DATASET_DATABASE=applelocalization\n",
   );
   assert.match(
     await readFile(join(result.context, "postgres-init-entrypoint.sh"), "utf8"),
     /-c autovacuum=off/,
   );
   await assert.rejects(composeReleaseContext(f), /EEXIST/);
+});
+test("archived SQL bundles keep their original database without rewriting SQL", async () => {
+  const f = await fixture("localization_staging");
+  const result = await composeReleaseContext(f);
+  const payload = join(result.context, "payload");
+  assert.equal(result.catalog.database, "localization_staging");
+  assert.equal(
+    await readFile(join(payload, "dataset.env"), "utf8"),
+    "DATASET_DATABASE=localization_staging\n",
+  );
+  for (const input of f.inputs) {
+    const b = JSON.parse(await readFile(join(input.sql, "bundle.json")));
+    assert.equal(b.database, undefined);
+    for (const c of b.components) {
+      assert.equal(
+        await fileHash(join(payload, c.key, "import.sql.gz")),
+        c.sqlSha256,
+      );
+      assert.match(
+        await readFile(join(payload, c.key, "context-index.sql"), "utf8"),
+        /current_database\(\)<>'localization_staging'/,
+      );
+    }
+  }
 });
 test("assembler refuses altered SQL, bad bundle pins and implicit partial all-version release", async () => {
   let f = await fixture();

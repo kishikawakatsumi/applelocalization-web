@@ -1,11 +1,12 @@
 // Additive, logged sidecars. Source COPY payloads and their manifests stay unchanged.
 import assert from "node:assert/strict";
+import { validateReleaseDatabase } from "./database-name.mjs";
 export function contextSchema(schema) {
   assert.match(schema, /^localization_[a-z0-9_]{1,40}$/);
   return schema.replace(/^localization_/, "context_");
 }
 export function contextIndexStatements({ database, schema, packageManifest }) {
-  assert.equal(database, "localization_staging");
+  validateReleaseDatabase(database);
   const sidecar = contextSchema(schema);
   assert.match(packageManifest, /^[a-f0-9]{64}$/);
   return [

@@ -40,7 +40,7 @@ for (const target of batch.targets) {
     const c = {...job,sourceId,rows:4,packageManifest:manifest,sqlSha256:"a".repeat(64),sqlReportSha256:"b".repeat(64)};
     components.push(c);
     sources.push([c.key,c.schema,manifest].join("\t"));
-    const s=c.schema, layout=occurrenceSQLLayout({schema:s,durable:true,database:"localization_staging",searchIndexVersion:1});
+    const s=c.schema, layout=occurrenceSQLLayout({schema:s,durable:true,database:"applelocalization",searchIndexVersion:1});
     sql += layout.header + "\n";
     sql += `INSERT INTO ${s}.package VALUES(1,${quote(manifest)},${quote(report)},${quote(JSON.stringify({sourceId}))});\n`;
     sql += `INSERT INTO ${s}.source VALUES(1,'{}'); INSERT INTO ${s}.bundle VALUES(1,'/Example.app'); INSERT INTO ${s}.resource_table VALUES(1,'table','{}');\n`;
@@ -53,7 +53,7 @@ for (const target of batch.targets) {
     }
     sql += layout.footer + "\n";
   }
-  bundles.push({formatVersion:1,status:"candidate-sql-bundle-verified",target,components,apiCompatible:false,productionReady:false,published:false});
+  bundles.push({formatVersion:1,status:"candidate-sql-bundle-verified",database:"applelocalization",target,components,apiCompatible:false,productionReady:false,published:false});
 }
 const inputs=[];
 for(const b of bundles) {
@@ -65,7 +65,7 @@ const catalog={...releaseCatalog(bundles),inputs};
 await writeFile(join(payload,"release-set.json"),JSON.stringify(catalog));
 await writeFile(join(payload,"import.sql"),sql);
 await writeFile(join(payload,"identity"),sha256(sql)+"\n");
-await writeFile(join(payload,"dataset.env"),"DATASET_DATABASE=localization_staging\n");
+await writeFile(join(payload,"dataset.env"),"DATASET_DATABASE=applelocalization\n");
 await writeFile(join(payload,"sources.tsv"),sources.join("\n")+"\n");
 await writeFile(join(payload,"SHA256SUMS"),sha256(sql)+"  import.sql\n");
 for(const [from,to] of [
@@ -75,7 +75,7 @@ for(const [from,to] of [
 ])await copyFile(from,join(root,to));
 await writeFile(join(root,"init.sh"),`#!/usr/bin/env bash
 set -Eeuo pipefail
-psql -X -v ON_ERROR_STOP=1 -U postgres -d localization_staging -f /opt/localization/import.sql
+psql -X -v ON_ERROR_STOP=1 -U postgres -d applelocalization -f /opt/localization/import.sql
 cp /opt/localization/identity "$PGDATA/.localization-ready"
 `);
 await writeFile(join(root,"Dockerfile"),`FROM ${base}
@@ -149,7 +149,7 @@ try {
   }
   const before=await request("/api/macos/26/search?q=Open");
   const db=compose(["ps","-q","db"]);
-  const query=s=>docker(["exec","-i",db,"psql","-X","-v","ON_ERROR_STOP=1","-U","postgres","-d","localization_staging","-At"],s);
+  const query=s=>docker(["exec","-i",db,"psql","-X","-v","ON_ERROR_STOP=1","-U","postgres","-d","applelocalization","-At"],s);
   if(lowMemory){
     assert.equal(query("SHOW shared_buffers; SHOW maintenance_work_mem; SHOW max_parallel_maintenance_workers; SHOW max_connections;"),"128MB\n64MB\n0\n40");
     assert.equal(docker(["inspect","--format","{{.HostConfig.Memory}}",db]),String(2304*1024**2));

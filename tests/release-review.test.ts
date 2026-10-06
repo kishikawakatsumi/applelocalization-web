@@ -10,10 +10,11 @@ import {
 import type { Snapshot } from "../backend/search/api.ts";
 const hash = (s: string | Uint8Array) =>
   createHash("sha256").update(s).digest("hex");
-function fixture() {
+function fixture(legacy = false) {
   const bundles = batch.targets.map((t: any) => ({
     formatVersion: 1,
     status: "candidate-sql-bundle-verified",
+    ...(legacy ? {} : { database: "applelocalization" }),
     target: t,
     apiCompatible: false,
     productionReady: false,
@@ -175,6 +176,66 @@ Deno.test("current API preserves legacy GET shapes, strict settings and errors",
     (await app(new Request("http://localhost/api/macos/99/search?q=x"))).status,
     404,
   );
+});
+Deno.test("search timeouts return an English error for normal and advanced searches", async () => {
+  const f = fixture();
+  let timeout = false;
+  const snapshot: Snapshot = (work) => {
+    if (timeout) {
+      return Promise.reject(Object.assign(new Error("statement timeout"), {
+        fields: { code: "57014" },
+      }));
+    }
+    return f.snapshot(work);
+  };
+  const app = await createReleaseReview(
+    parseReleaseMetadata(f.bytes, hash(f.bytes), f.raw),
+    snapshot,
+  );
+  timeout = true;
+  for (
+    const prefix of ["/api/macos", "/api/macos/26", "/api/ios", "/api/ios/26"]
+  ) {
+    for (
+      const suffix of ["search?q=Open", "search/advanced?c=key&o=equal&q=Open"]
+    ) {
+      const response = await app(
+        new Request("http://localhost" + prefix + "/" + suffix),
+      );
+      assert.equal(response.status, 503);
+      assert.deepEqual(await response.json(), {
+        error:
+          "The search timed out. Try narrowing the search by language or component.",
+      });
+    }
+  }
+});
+Deno.test("release metadata supports existing bundles but rejects mismatched and unknown database names", async () => {
+  for (const legacy of [false, true]) {
+    const f = fixture(legacy);
+    const metadata = parseReleaseMetadata(f.bytes, hash(f.bytes), f.raw);
+    assert.equal(
+      metadata.catalog.database,
+      legacy ? "localization_staging" : "applelocalization",
+    );
+    const app = await createReleaseReview(metadata, f.snapshot);
+    assert.equal(
+      (await app(new Request("http://localhost/api/macos/search?q=Open")))
+        .status,
+      200,
+    );
+    for (
+      const database of [
+        legacy ? "applelocalization" : "localization_staging",
+        "postgres",
+      ]
+    ) {
+      const bytes = new TextEncoder().encode(
+        JSON.stringify({ ...f.catalog, database }),
+      );
+      assert.throws(() => parseReleaseMetadata(bytes, hash(bytes), f.raw));
+    }
+  }
 });
 Deno.test("review metadata binds all twelve releases and refuses changed bundle bytes", () => {
   const f = fixture();

@@ -29,7 +29,7 @@ const pool = new Pool(
   {
     hostname: "db",
     port: 5432,
-    database: "localization_staging",
+    database: metadata.catalog.database,
     user: "postgres",
     password: adminPassword,
     options: { statement_timeout: "30min", jit: "off" },
@@ -66,7 +66,7 @@ try {
         await query("SET LOCAL lock_timeout='5s'");
         for (
           const statement of contextIndexStatements({
-            database: "localization_staging",
+            database: metadata.catalog.database,
             schema: c.schema,
             packageManifest: c.packageManifest,
           })
@@ -85,7 +85,12 @@ try {
   );
   if (!roles.length) {
     await query(
-      readOnlyRoleSQL(role, appPassword, components.map((c: any) => c.schema)),
+      readOnlyRoleSQL(
+        role,
+        appPassword,
+        components.map((c: any) => c.schema),
+        metadata.catalog.database,
+      ),
     );
   } else if (Object.values(roles[0]).some(Boolean)) {
     throw Error("Privileged web role refused");
@@ -95,7 +100,7 @@ try {
     {
       hostname: "db",
       port: 5432,
-      database: "localization_staging",
+      database: metadata.catalog.database,
       user: role,
       password: appPassword,
     },

@@ -1,5 +1,6 @@
 // CI-only aggregation of previously audited SQL. No original resource download or production deployment.
 import assert from "node:assert/strict";
+import { validateReleaseDatabase } from "./database-name.mjs";
 import { execFile, spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { appendFile, mkdir, readFile, statfs } from "node:fs/promises";
@@ -305,7 +306,7 @@ export async function buildRelease(
       "-U",
       "postgres",
       "-d",
-      "localization_staging",
+      composed.catalog.database,
       "-v",
       "ON_ERROR_STOP=1",
       "-At",
@@ -394,7 +395,7 @@ export async function buildRelease(
       "--mount",
       `type=volume,source=${volume},target=/var/lib/postgresql/data`,
       "-e",
-      "POSTGRES_DB=localization_staging",
+      `POSTGRES_DB=${composed.catalog.database}`,
       "-e",
       `POSTGRES_PASSWORD=${randomBytes(24).toString("hex")}`,
       built.Id,
@@ -522,7 +523,7 @@ export function validateAssembled(d, producer) {
   );
   assert.equal(d.identity, sha256(JSON.stringify(d.catalog)));
   assert.equal(d.components, batch.jobs.length);
-  assert.equal(d.catalog.database, "localization_staging");
+  validateReleaseDatabase(d.catalog.database);
   assert.equal(d.catalog.searchScope, "one-platform-major-version");
   assert.equal(d.catalog.allPlannedTargets, true);
   assert.deepEqual(d.catalog.missingTargets, []);

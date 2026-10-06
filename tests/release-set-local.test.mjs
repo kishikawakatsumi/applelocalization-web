@@ -23,6 +23,7 @@ function fixture() {
   const bundles = releaseTargets().map((id) => ({
     formatVersion: 1,
     status: "candidate-sql-bundle-verified",
+    database: "applelocalization",
     target: batch.targets.find((t) => t.id === id),
     components: batch.jobs.filter((c) => c.target === id).map((c) => ({
       ...c,

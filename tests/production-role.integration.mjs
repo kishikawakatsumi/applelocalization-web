@@ -37,7 +37,7 @@ try {
     "-e",
     "POSTGRES_PASSWORD=" + randomBytes(32).toString("hex"),
     "-e",
-    "POSTGRES_DB=localization_staging",
+    "POSTGRES_DB=applelocalization",
     base,
   ]);
   created = true;
@@ -54,7 +54,7 @@ try {
         "-U",
         "postgres",
         "-d",
-        "localization_staging",
+        "applelocalization",
       ]);
       ready = true;
       break;
@@ -75,7 +75,7 @@ try {
       "-U",
       user,
       "-d",
-      "localization_staging",
+      "applelocalization",
       "-At",
     ], input);
   sql(

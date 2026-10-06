@@ -1,5 +1,6 @@
 // Trusted Actions artifacts -> per-version SQL bundle. Never connects to production.
 import assert from "node:assert/strict";
+import { bundleDatabase, releaseDatabase } from "./database-name.mjs";
 import { execFile } from "node:child_process";
 import { appendFile, mkdir, readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
@@ -260,7 +261,7 @@ export async function prepareCandidateSQL(
       output: join(sql, c.key),
       manifestSha256,
       schema: c.schema,
-      database: "localization_staging",
+      database: releaseDatabase,
       progress: (x) =>
         console.log(JSON.stringify({ component: c.key, progress: x })),
     });
@@ -280,6 +281,7 @@ export async function prepareCandidateSQL(
   await writeJson(join(sql, "bundle.json"), {
     formatVersion: 1,
     status: "candidate-sql-bundle-verified",
+    database: releaseDatabase,
     producer,
     source: plan.source,
     target: selected.target,
@@ -336,7 +338,7 @@ export async function verifyCandidateSQL(
     );
     assert.equal(report.schema, c.schema);
     assert.equal(report.packageManifest, c.packageManifest);
-    assert.equal(report.database, "localization_staging");
+    assert.equal(report.database, bundleDatabase(bundle));
     assert.equal(verification.releaseManifestSha256, c.manifestSha256);
     assert.equal(verification.sourceId, c.sourceId);
     assert.equal(
@@ -348,7 +350,7 @@ export async function verifyCandidateSQL(
       sql: join(sql, c.key),
       packageManifest: c.packageManifest,
       durable: true,
-      database: "localization_staging",
+      database: bundleDatabase(bundle),
     });
     assert.equal(audit.sqlSha256, c.sqlSha256);
     assert.equal(audit.sqlReportSha256, c.sqlReportSha256);

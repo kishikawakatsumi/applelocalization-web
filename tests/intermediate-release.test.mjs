@@ -113,7 +113,7 @@ test('v2 also handles an empty quarantine without inventing original files', asy
 test('durable release SQL keeps every value and quarantine byte but is never accepted as staging SQL', async () => {
   const f = await fixture(2), output = join(f.temp, 'durable');
   const result = await prepareDurableReleaseSQL({ input: f.output, output, manifestSha256: f.result.manifestSha256,
-    schema: 'localization_fixture', database: 'localization_staging', minimumFreeBytes: 0 });
+    schema: 'localization_fixture', database: 'applelocalization', minimumFreeBytes: 0 });
   assert.equal(result.status, 'durable-release-sql-verified-not-imported'); assert.equal(result.storage, 'logged');
   assert.equal(result.stats.rows, 16); assert.equal(result.quarantinedFiles, 1);
   assert.equal(result.apiCompatible, false); assert.equal(result.productionReady, false);

@@ -23,6 +23,9 @@
    unified workflowを実行する。全系列を1つのDBへ収録するイメージになる。
 5. 新しいデータdigestをComposeへ反映し、新しいプロジェクト/ボリュームで検証する。
    既存ボリュームを新しいイメージへそのまま付け替えない。異なるデータの組み合わせは起動時に拒否する。
+   新しく生成するSQLのDB名は `applelocalization`。旧名 `localization_staging` のSQLとは混在できないため、
+   継続して収録する旧OS系列も保存済み中間形式からSQLを再生成する（原本の再抽出は不要）。
+   既存DBの改名・移行は行わず、接続先は新しい成果物のメタデータに従う。
 6. 統合イメージの成功run IDで `localization-archive.yml` を実行し、中間形式・未解析原本・SQL・receiptを
    このリポジトリのReleasesへ保存する。手順は [Data releases](data-retention.md) を参照。
 

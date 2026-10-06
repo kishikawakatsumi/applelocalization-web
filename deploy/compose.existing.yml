@@ -7,7 +7,7 @@ services:
     pull_policy: never
     restart: unless-stopped
     environment:
-      POSTGRES_DB: localization_staging
+      # The data image declares its database name; do not override it here.
       POSTGRES_PASSWORD_FILE: /run/secrets/db_admin_password
     secrets: [db_admin_password]
     volumes:

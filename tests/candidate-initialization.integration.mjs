@@ -62,7 +62,7 @@ for (const broken of [false, true]) {
   );
   const contents = {
     "identity": `${nonce}-${kind}\n`,
-    "dataset.env": "DATASET_DATABASE=localization_staging\n",
+    "dataset.env": "DATASET_DATABASE=applelocalization\n",
     "sources.tsv": `first\tlocalization_first\t${
       "a".repeat(64)
     }\nsecond\tlocalization_second\t${"a".repeat(64)}\n`,
@@ -71,11 +71,11 @@ for (const broken of [false, true]) {
     const schema = `localization_${c}`;
     await mkdir(join(payload, c));
     contents[`${c}/structured-search.sql`] = structuredSearchMigration({
-      database: "localization_staging",
+      database: "applelocalization",
       components: [{ schema, packageManifest: "a".repeat(64) }],
     });
     contents[`${c}/context-index.sql`] = contextIndexMigration({
-      database: "localization_staging",
+      database: "applelocalization",
       components: [{ schema, packageManifest: "a".repeat(64) }],
     });
     contents[`${c}/import.sql.gz`] = gzipSync(`BEGIN;
@@ -150,7 +150,7 @@ for (const broken of [false, true]) {
       "-U",
       "postgres",
       "-d",
-      "localization_staging",
+      "applelocalization",
       "-At",
       "-v",
       "ON_ERROR_STOP=1",

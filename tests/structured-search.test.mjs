@@ -11,12 +11,12 @@ test("new SQL and additive migration index lossless JSON without modifying origi
   const footer = occurrenceSQLLayout({
     schema,
     durable: true,
-    database: "localization_staging",
+    database: "applelocalization",
   }).footer;
   assert.ok(footer.includes(structuredSearchIndexSQL(schema)));
   assert.equal((footer.match(/USING pgroonga/g) ?? []).length, 3);
   const sql = structuredSearchMigration({
-    database: "localization_staging",
+    database: "applelocalization",
     components: [{ schema, packageManifest: "a".repeat(64) }],
   });
   assert.match(sql, /manifest_sha256/);
@@ -42,7 +42,7 @@ test("migration refuses unpinned, duplicate or unsafe schema/database targets", 
   ) {
     assert.throws(() =>
       structuredSearchMigration({
-        database: "localization_staging",
+        database: "applelocalization",
         components,
       })
     );

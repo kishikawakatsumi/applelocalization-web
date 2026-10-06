@@ -317,14 +317,14 @@ test("real extraction, inspection, supplement and all-language package stages ru
     input,
     output: sql,
     schema: "localization_policy_v6",
-    database: "localization_staging",
+    database: "applelocalization",
     durable: true,
     minimumFreeBytes: 0,
   });
   const sqlAudit = await auditOccurrenceSQL({
     input,
     sql,
-    database: "localization_staging",
+    database: "applelocalization",
     durable: true,
     packageManifest: await fileHash(join(input, "report.json")),
   });
