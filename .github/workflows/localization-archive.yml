@@ -32,7 +32,7 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
-      - run: node --test tests/archive-data-release.test.mjs
+      - run: node --test tests/release/archive-data-release.test.mjs
       - name: Retain exact upstream artifacts without re-extraction or deployment
         env:
           GH_TOKEN: ${{ github.token }}
@@ -40,7 +40,7 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
         run: |
           if [ "$PUBLISH" = true ]; then
-            node scripts/archive-data-release.mjs --unified-run "$UNIFIED_RUN" --publish
+            node scripts/release/archive-data-release.mjs --unified-run "$UNIFIED_RUN" --publish
           else
-            node scripts/archive-data-release.mjs --unified-run "$UNIFIED_RUN"
+            node scripts/release/archive-data-release.mjs --unified-run "$UNIFIED_RUN"
           fi

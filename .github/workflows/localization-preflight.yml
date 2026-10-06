@@ -33,12 +33,12 @@ jobs:
           package-manager-cache: false
       - name: Collection safety regression tests (synthetic data only)
         run: |
-          node --test tests/runner-preflight.test.mjs tests/acquire-ipsw-component.test.mjs tests/collection-checkpoints.test.mjs tests/extract-filename-localizations.test.mjs tests/extract-mounted-bundle.test.mjs tests/extract-mounted-image.test.mjs tests/inspect-unlocalized-resources.test.mjs tests/prepare-localization-package.test.mjs tests/package-ownership.test.mjs tests/select-image-volume.test.mjs tests/bundle-assignment.test.mjs
-          python3 -B tests/audit_image_originals.py
+          node --test tests/collection/runner-preflight.test.mjs tests/collection/acquire-ipsw-component.test.mjs tests/shared/collection-checkpoints.test.mjs tests/extraction/extract-filename-localizations.test.mjs tests/extraction/extract-mounted-bundle.test.mjs tests/extraction/extract-mounted-image.test.mjs tests/extraction/inspect-unlocalized-resources.test.mjs tests/package/prepare-localization-package.test.mjs tests/package/package-ownership.test.mjs tests/collection/select-image-volume.test.mjs tests/package/bundle-assignment.test.mjs
+          python3 -B tests/extraction/audit_image_originals.py
       - name: Synthetic capacity, read-only mount and extraction check
         env:
           PREFLIGHT_OUTPUT: ${{ runner.temp }}/localization-preflight
-        run: node scripts/preflight-localization-runner.mjs --output "$PREFLIGHT_OUTPUT"
+        run: node scripts/collection/preflight-localization-runner.mjs --output "$PREFLIGHT_OUTPUT"
       - name: Retain small diagnostic report only
         if: always()
         uses: actions/upload-artifact@v7

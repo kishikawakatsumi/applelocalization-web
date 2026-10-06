@@ -26,9 +26,9 @@ jobs:
           node-version: "24"
           package-manager-cache: false
       - name: Test acquisition guards
-        run: node --test tests/encrypted-ota.test.mjs
+        run: node --test tests/collection/encrypted-ota.test.mjs
       - name: Download decrypt and inspect only metadata
-        run: node scripts/acquire-encrypted-ota.mjs --output "$RUNNER_TEMP/ios26-ota-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --allow-download
+        run: node scripts/collection/acquire-encrypted-ota.mjs --output "$RUNNER_TEMP/ios26-ota-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" --allow-download
       - name: Save bounded layout metadata only
         if: always()
         uses: actions/upload-artifact@v7

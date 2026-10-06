@@ -39,13 +39,13 @@ jobs:
           node-version: "24"
           package-manager-cache: false
       - run: npm ci
-      - run: node --test tests/*.test.mjs
+      - run: node --test tests/*/*.test.mjs
       - id: plan
         env:
           GH_TOKEN: ${{ github.token }}
           SOURCE_RUN: ${{ inputs.source_run }}
           TARGETS: ${{ inputs.targets }}
-        run: node scripts/candidate-pipeline.mjs --mode plan --source-run "$SOURCE_RUN" --targets "$TARGETS" --output "$RUNNER_TEMP/candidate-plan.json"
+        run: node scripts/release/candidate-pipeline.mjs --mode plan --source-run "$SOURCE_RUN" --targets "$TARGETS" --output "$RUNNER_TEMP/candidate-plan.json"
       - id: upload
         uses: actions/upload-artifact@v7
         with:

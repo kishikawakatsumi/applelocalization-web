@@ -5,21 +5,21 @@
 
 | 工程 | GitHub Actions | 主な実装 |
 | --- | --- | --- |
-| 取得・抽出 | localization-release-batch.yml | collect-release-batch.mjs |
-| OS別SQL・DBイメージ | localization-candidate-pipeline.yml / localization-build-target.yml | candidate-pipeline.mjs / candidate-bundle-image.mjs |
-| 全系列統合イメージ | localization-unified-candidate.yml | compose-release-set.mjs / release-set-image.mjs |
-| 成果物の長期保存 | localization-archive.yml | archive-data-release.mjs |
-| ReleaseからDBイメージ再生成 | localization-rebuild-release.yml | rebuild-release-image.mjs |
-| Webイメージ | release-web.yml | Dockerfile / web-release-receipt.mjs |
+| 取得・抽出 | localization-release-batch.yml | scripts/collection/collect-release-batch.mjs |
+| OS別SQL・DBイメージ | localization-candidate-pipeline.yml / localization-build-target.yml | scripts/release/candidate-pipeline.mjs / candidate-bundle-image.mjs |
+| 全系列統合イメージ | localization-unified-candidate.yml | scripts/release/compose-release-set.mjs / release-set-image.mjs |
+| 成果物の長期保存 | localization-archive.yml | scripts/release/archive-data-release.mjs |
+| ReleaseからDBイメージ再生成 | localization-rebuild-release.yml | scripts/release/rebuild-release-image.mjs |
+| Webイメージ | release-web.yml | Dockerfile / scripts/deploy/web-release-receipt.mjs |
 
-1. `scripts/collection-batch-20261002.json` の取得計画を更新する。OS・正式版ビルド、URL・ハッシュ、
+1. `scripts/plans/collection-batch-20261002.json` の取得計画を更新する。OS・正式版ビルド、URL・ハッシュ、
    構成要素、必要容量を明示する。日付付きファイル名は検証済み計画の識別子で、最新OSの自動解決ではない。
 2. collectionをmainから `allow_download=true` と対象 `targets` で実行する。
    全系列の場合も各コンポーネントは別ジョブ。途中で失敗した系列を黙って完成扱いにしない。
 3. 成功した抽出runを `source_run` に指定してcandidate pipelineを実行する。
    `all-ready` は揃った系列だけを選び、全12系列が揃ったという意味ではない。
    SQLとイメージ検証後、明示した場合だけ一意のcandidateタグをPushする。
-4. 統合対象のSQLのrun・ハッシュを `scripts/release-set-inputs-20261002.json` に固定し、
+4. 統合対象のSQLのrun・ハッシュを `scripts/plans/release-set-inputs-20261002.json` に固定し、
    unified workflowを実行する。全系列を1つのDBへ収録するイメージになる。
 5. 新しいデータdigestをComposeへ反映し、新しいプロジェクト/ボリュームで検証する。
    既存ボリュームを新しいイメージへそのまま付け替えない。異なるデータの組み合わせは起動時に拒否する。
@@ -53,6 +53,6 @@ Font Awesomeの認証は不要。Docker HubへのPushにはGitHub Environmentの
 
 ```sh
 export LOCALIZATION_TEST_CONTAINER=localization-test-search
-ALLOW_CONTEXT_INDEX_TEST=1 node tests/context-index-sql.integration.mjs
-ALLOW_STRUCTURED_SEARCH_DB_TEST=1 deno test --node-modules-dir=none --frozen --allow-env --allow-read --allow-run tests/structured-search.integration.ts
+ALLOW_CONTEXT_INDEX_TEST=1 node tests/integration/context-index-sql.integration.mjs
+ALLOW_STRUCTURED_SEARCH_DB_TEST=1 deno test --node-modules-dir=none --frozen --allow-env --allow-read --allow-run tests/integration/structured-search.integration.ts
 ```

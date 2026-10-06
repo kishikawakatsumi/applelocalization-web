@@ -7,9 +7,9 @@ import {
   loadStrictSearchPolicy,
 } from "../backend/search/api.ts";
 import type { Query } from "../backend/search/api.ts";
-import { contextIndexStatements } from "../scripts/context-index-sql.mjs";
-import { structuredSearchIndexSQL } from "../scripts/structured-search.mjs";
-import { readOnlyRoleSQL } from "../scripts/database-role.mjs";
+import { contextIndexStatements } from "../scripts/database/context-index-sql.mjs";
+import { structuredSearchIndexSQL } from "../scripts/database/structured-search.mjs";
+import { readOnlyRoleSQL } from "../scripts/database/database-role.mjs";
 import { createHash } from "node:crypto";
 
 const bytes = await Deno.readFile("/release/release-set.json");

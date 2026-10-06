@@ -58,7 +58,7 @@ jobs:
           digest-mismatch: error
       - name: Generate and fully audit independent component SQL in one version bundle
         id: sql
-        run: node scripts/candidate-pipeline.mjs --mode sql --plan "$RUNNER_TEMP/plan/candidate-plan.json" --plan-sha256 "$PLAN_SHA256" --target "$TARGET" --input "$RUNNER_TEMP/intermediate" --output "$RUNNER_TEMP/prepared"
+        run: node scripts/release/candidate-pipeline.mjs --mode sql --plan "$RUNNER_TEMP/plan/candidate-plan.json" --plan-sha256 "$PLAN_SHA256" --target "$TARGET" --input "$RUNNER_TEMP/intermediate" --output "$RUNNER_TEMP/prepared"
       - id: upload
         uses: actions/upload-artifact@v7
         with:
@@ -105,7 +105,7 @@ jobs:
         id: build
         env:
           BUNDLE_SHA256: ${{ needs.sql.outputs.sha256 }}
-        run: node scripts/candidate-bundle-image.mjs --mode build --plan "$RUNNER_TEMP/plan/candidate-plan.json" --plan-sha256 "$PLAN_SHA256" --target "$TARGET" --input "$RUNNER_TEMP/intermediate" --sql "$RUNNER_TEMP/sql" --bundle-sha256 "$BUNDLE_SHA256" --output "$RUNNER_TEMP/built"
+        run: node scripts/release/candidate-bundle-image.mjs --mode build --plan "$RUNNER_TEMP/plan/candidate-plan.json" --plan-sha256 "$PLAN_SHA256" --target "$TARGET" --input "$RUNNER_TEMP/intermediate" --sql "$RUNNER_TEMP/sql" --bundle-sha256 "$BUNDLE_SHA256" --output "$RUNNER_TEMP/built"
       - id: upload
         uses: actions/upload-artifact@v7
         with:
@@ -136,7 +136,7 @@ jobs:
       - name: Verify exact successful image job output before registry login
         env:
           SHA256: ${{ needs.image.outputs.sha256 }}
-        run: node scripts/candidate-bundle-image.mjs --mode verify --input "$RUNNER_TEMP/distribution" --sha256 "$SHA256"
+        run: node scripts/release/candidate-bundle-image.mjs --mode verify --input "$RUNNER_TEMP/distribution" --sha256 "$SHA256"
       - uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -144,7 +144,7 @@ jobs:
       - name: Push unique candidate tag only (no production deployment)
         env:
           SHA256: ${{ needs.image.outputs.sha256 }}
-        run: node scripts/candidate-bundle-image.mjs --mode push --input "$RUNNER_TEMP/distribution" --sha256 "$SHA256" --allow-push --output "$RUNNER_TEMP/pushed.json"
+        run: node scripts/release/candidate-bundle-image.mjs --mode push --input "$RUNNER_TEMP/distribution" --sha256 "$SHA256" --allow-push --output "$RUNNER_TEMP/pushed.json"
       - uses: actions/upload-artifact@v7
         with:
           name: candidate-pushed-${{ inputs.target }}-${{ github.run_id }}-${{ github.run_attempt }}

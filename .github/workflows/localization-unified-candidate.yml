@@ -28,16 +28,16 @@ jobs:
           node-version: "24"
           package-manager-cache: false
       - name: Test release intake and composition guards
-        run: node --test tests/release-set.test.mjs tests/release-set-image.test.mjs tests/release-set-local.test.mjs
+        run: node --test tests/release/release-set.test.mjs tests/release/release-set-image.test.mjs tests/release/release-set-local.test.mjs
       - name: Verify temporary-only maintenance guard and failed-restore refusal on tiny data
         env:
           ALLOW_INITIALIZATION_TEST: "1"
-        run: node tests/candidate-initialization.integration.mjs
+        run: node tests/integration/candidate-initialization.integration.mjs
       - name: Verify immutable SQL artifact pins and successful per-version image audits
         id: plan
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/release-set-image.mjs --mode plan --output "$RUNNER_TEMP/release-plan.json"
+        run: node scripts/release/release-set-image.mjs --mode plan --output "$RUNNER_TEMP/release-plan.json"
       - name: Download pinned ios27 SQL (no extraction)
         uses: actions/download-artifact@v8
         with:
@@ -150,7 +150,7 @@ jobs:
         id: build
         env:
           PLAN_SHA256: ${{ steps.plan.outputs.plan_sha256 }}
-        run: node scripts/release-set-image.mjs --mode assemble --plan "$RUNNER_TEMP/release-plan.json" --plan-sha256 "$PLAN_SHA256" --input "$RUNNER_TEMP/sql" --output "$RUNNER_TEMP/unified"
+        run: node scripts/release/release-set-image.mjs --mode assemble --plan "$RUNNER_TEMP/release-plan.json" --plan-sha256 "$PLAN_SHA256" --input "$RUNNER_TEMP/sql" --output "$RUNNER_TEMP/unified"
       - uses: docker/login-action@v4
         if: inputs.publish == true
         with:
@@ -160,7 +160,7 @@ jobs:
         if: inputs.publish == true
         env:
           ASSEMBLED_SHA256: ${{ steps.build.outputs.assembled_sha256 }}
-        run: node scripts/release-set-image.mjs --mode push --input "$RUNNER_TEMP/unified/assembled.json" --sha256 "$ASSEMBLED_SHA256" --allow-push --allow-unrestored-candidate --output "$RUNNER_TEMP/unified/pushed.json"
+        run: node scripts/release/release-set-image.mjs --mode push --input "$RUNNER_TEMP/unified/assembled.json" --sha256 "$ASSEMBLED_SHA256" --allow-push --allow-unrestored-candidate --output "$RUNNER_TEMP/unified/pushed.json"
       - name: Retain bounded receipts and capacity diagnostics only
         if: always()
         uses: actions/upload-artifact@v7

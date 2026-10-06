@@ -5,7 +5,7 @@ import { languageGroups } from "../models/language_groups.ts";
 import {
   bundleDatabase,
   validateReleaseDatabase,
-} from "../../scripts/database-name.mjs";
+} from "../../scripts/database/database-name.mjs";
 import {
   buildSearch,
   type Catalog,

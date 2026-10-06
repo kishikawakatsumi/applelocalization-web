@@ -1,4 +1,4 @@
-# Existing verified-volume adoption only, through scripts/production-release.mjs.
+# Existing verified-volume adoption only, through scripts/deploy/production-release.mjs.
 # Public TLS/proxy routing is intentionally separate. No import or volume deletion.
 services:
   db:

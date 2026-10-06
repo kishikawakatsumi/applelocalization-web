@@ -33,3 +33,34 @@ JSON表現のtext列 `target_json` に保持する。jsonbへの変換で原本�
 
 Web起動時にrelease-setと各bundleのハッシュ、全コンポーネントの存在・出典を検査する。
 URLから任意のスキーマを指定できない。通常運用のDB接続は専用の読み取り専用ユーザー。
+
+## ソース構成
+
+`scripts/` は処理の段階ごとに分ける。
+
+| ディレクトリ | 役割 |
+| --- | --- |
+| `collection/` | IPSW・OTAの取得、マウント、収集ジョブの実行 |
+| `extraction/` | リソースの解析・抽出、原本との照合 |
+| `package/` | 出典・バンドル情報を保持する中間形式の作成・検証・転送 |
+| `database/` | SQL出力・監査、検索索引・権限、ローカルDB検証 |
+| `release/` | SQLの統合、DBイメージの生成、GitHub Releasesへの保存・復元 |
+| `release/templates/` | DBイメージのDockerfile・初期化処理 |
+| `deploy/` | CI側のデプロイ処理（VPS側の設定・処理はルートの `deploy/`） |
+| `plans/` | 取得対象・ビルド・成果物の固定済み計画 |
+| `shared/` | JSONL、ハッシュ、チェックポイントなどの共通処理 |
+
+入口は `npm run data:collect`・`npm run data:sql`・`npm run data:image`。
+具体的な実行手順は [データ更新](data-pipeline.md) を参照。
+
+`tests/` も同じ役割のディレクトリに分類し、画面は `frontend/`、APIは `backend/`、
+Skill・MCPは `agents/`、構成の整合性は `project/` に置く。
+ブラウザテストは `browser/`、DB・Docker・起動済みサービスを使うテストは `integration/`、
+共通補助コードと固定データは `helpers/`・`fixtures/` に分ける。
+
+- `npm test`：各分類のNodeテスト（外部サービス不要）。
+- `npm run test:web`：Denoによる検索API・Web・MCPテスト。
+- `npm run test:browser`：フロントエンドをビルドし、専用のテストサーバーで検索UIを確認。
+
+`integration/` のテストは通常のテストには含めず、各ファイルの実行条件・許可フラグを確認して起動する。
+コマンドの実行位置はリポジトリのルートとする。

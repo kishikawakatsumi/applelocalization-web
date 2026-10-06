@@ -36,11 +36,11 @@ jobs:
           node-version: '24'
           package-manager-cache: false
       - name: Deployment safety tests
-        run: node --test tests/vps-deploy.test.mjs tests/vps-resources.test.mjs tests/proxy-vps.test.mjs tests/deployment-layout.test.mjs
+        run: node --test tests/deploy/vps-deploy.test.mjs tests/deploy/vps-resources.test.mjs tests/deploy/proxy-vps.test.mjs tests/project/deployment-layout.test.mjs
       - name: Proxy regression (synthetic upstreams, no VPS connection)
         env:
           ALLOW_PROXY_TEST: '1'
-        run: node tests/proxy-vps.integration.mjs
+        run: node tests/integration/proxy-vps.integration.mjs
       - name: Configure SSH with a pinned host key
         env:
           SSH_KEY: ${{ secrets.SSH_KEY }}
@@ -60,7 +60,7 @@ jobs:
           DEPLOY_ID: ${{ inputs.deployment_id }}
           DEPLOY_PORT: ${{ inputs.port }}
           DEPLOY_WEB_IMAGE: ${{ inputs.web_image }}
-        run: node scripts/deploy-vps.mjs
+        run: node scripts/deploy/deploy-vps.mjs
       - name: Remove runner SSH credentials
         if: always()
         run: rm -f "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"

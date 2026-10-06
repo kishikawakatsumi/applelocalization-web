@@ -54,7 +54,7 @@ See [official skill documentation](https://learn.chatgpt.com/docs/build-skills).
 ## Verification
 
 ```sh
-node --test tests/localization-skill.test.mjs
+node --test tests/agents/localization-skill.test.mjs
 ```
 
 Tests use synthetic HTTP responses and do not call the public service. Check a

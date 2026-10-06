@@ -15,7 +15,14 @@
 !frontend/
 !frontend/**
 !scripts/
-!scripts/*.mjs
+!scripts/package/
+!scripts/package/*.mjs
+!scripts/extraction/
+!scripts/extraction/*.mjs
+!scripts/shared/
+!scripts/shared/*.mjs
+!scripts/database/
+!scripts/database/*.mjs
 !deploy/
 !deploy/**
 **/.DS_Store

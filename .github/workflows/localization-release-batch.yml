@@ -42,11 +42,11 @@ jobs:
           node-version: "24"
           package-manager-cache: false
       - run: npm ci
-      - run: node --test tests/*.test.mjs
+      - run: node --test tests/*/*.test.mjs
       - id: plan
         env:
           TARGETS: ${{ inputs.targets }}
-        run: echo "matrix=$(node scripts/collect-release-batch.mjs --mode matrix --targets "$TARGETS")" >> "$GITHUB_OUTPUT"
+        run: echo "matrix=$(node scripts/collection/collect-release-batch.mjs --mode matrix --targets "$TARGETS")" >> "$GITHUB_OUTPUT"
   collect:
     needs: plan
     runs-on: macos-15
@@ -70,7 +70,7 @@ jobs:
           package-manager-cache: false
       - name: Extract and audit all collected languages; keep quarantine originals
         id: extract
-        run: node scripts/collect-release-batch.mjs --mode collect --key "$COMPONENT" --output "$OUTPUT" --allow-download
+        run: node scripts/collection/collect-release-batch.mjs --mode collect --key "$COMPONENT" --output "$OUTPUT" --allow-download
       - name: Save intermediate before SQL generation
         uses: actions/upload-artifact@v7
         with:
@@ -84,7 +84,7 @@ jobs:
           if-no-files-found: error
       - name: Generate logged SQL and verify every exported row (no database connection)
         if: inputs.generate_sql == true
-        run: node scripts/collect-release-batch.mjs --mode sql --key "$COMPONENT" --output "$OUTPUT"
+        run: node scripts/collection/collect-release-batch.mjs --mode sql --key "$COMPONENT" --output "$OUTPUT"
       - name: Save verified SQL only
         if: inputs.generate_sql == true
         uses: actions/upload-artifact@v7

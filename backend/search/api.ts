@@ -3,7 +3,7 @@ import { languageMapping } from "../models/languages.ts";
 import {
   effectiveResource,
   validateOccurrencePackage,
-} from "../../scripts/occurrence-package.mjs";
+} from "../../scripts/package/occurrence-package.mjs";
 
 export type Query = (
   sql: string,

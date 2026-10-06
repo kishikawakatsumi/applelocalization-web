@@ -190,26 +190,26 @@ DBの起動とloopback 8084の応答を確認してから、CIのresumeで旧サ
 
 ## 既に復元・検証済みの専用DBを使う場合
 
-再インポートを避けるための管理者向けの経路だけを `scripts/production-release.mjs` と
+再インポートを避けるための管理者向けの経路だけを `scripts/deploy/production-release.mjs` と
 `deploy/compose.existing.yml` に残している。標準起動の必須手順ではない。
 復元は `verify-release-set-local.mjs` の出力・receiptが必要で、任意の稼働DBを流用する機能ではない。
 公開中または検証UIで使用中のボリュームは共有しない。
 
 ```sh
-node scripts/production-release.mjs prepare \
+node scripts/deploy/production-release.mjs prepare \
   --verified-root /path/to/verified-root --output /path/to/new-release \
   --web-receipt /path/to/web-release.json \
   --web-receipt-sha256 <SHA256> --port 8085 --allow-prepare
-node scripts/production-release.mjs config --output /path/to/new-release
-node scripts/production-release.mjs up --output /path/to/new-release
-node scripts/production-release.mjs check --output /path/to/new-release
+node scripts/deploy/production-release.mjs config --output /path/to/new-release
+node scripts/deploy/production-release.mjs up --output /path/to/new-release
+node scripts/deploy/production-release.mjs check --output /path/to/new-release
 ```
 
 新WebにはJSON全文検索索引が必要。既存ボリューム経路では不足分を自動追加しないため、
 索引込みで復元したイメージか、別途索引の適用を確認した専用DBを使う。
 文脈索引は任意で、準備時に `--context-index-mode off` を選べる。
 準備したファイルはハッシュで固定するので手編集せず、新しい準備ディレクトリを作る。
-停止は `node scripts/production-release.mjs stop --output /path/to/new-release`。
+停止は `node scripts/deploy/production-release.mjs stop --output /path/to/new-release`。
 
 ## 障害時・データ更新
 

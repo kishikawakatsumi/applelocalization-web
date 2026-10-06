@@ -3,12 +3,12 @@ import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { gzipSync } from "node:zlib";
-import { extractMountedImage } from "../../scripts/extract-mounted-image.mjs";
-import { inspectUnlocalizedResources } from "../../scripts/inspect-unlocalized-resources.mjs";
-import { extractFilenameSupplement } from "../../scripts/extract-filename-localizations.mjs";
-import { prepareLocalizationPackage } from "../../scripts/prepare-localization-package.mjs";
-import { bundlePolicies } from "../../scripts/bundle-assignment.mjs";
-import { readJsonLines, sha256 } from "../../scripts/localization-jsonl.mjs";
+import { extractMountedImage } from "../../scripts/extraction/extract-mounted-image.mjs";
+import { inspectUnlocalizedResources } from "../../scripts/extraction/inspect-unlocalized-resources.mjs";
+import { extractFilenameSupplement } from "../../scripts/extraction/extract-filename-localizations.mjs";
+import { prepareLocalizationPackage } from "../../scripts/package/prepare-localization-package.mjs";
+import { bundlePolicies } from "../../scripts/package/bundle-assignment.mjs";
+import { readJsonLines, sha256 } from "../../scripts/shared/localization-jsonl.mjs";
 
 export async function records(root, name) {
   const result = [];

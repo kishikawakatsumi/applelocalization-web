@@ -15,7 +15,10 @@ COPY backend ./backend
 COPY skills/apple-localization ./skills/apple-localization
 COPY docs/agent-access.md docs/agent-skill.md docs/llms.txt ./docs/
 # Only runtime dependencies, not the collection/benchmark toolchain.
-COPY scripts/occurrence-package.mjs scripts/package-ownership.mjs scripts/bundle-assignment.mjs scripts/bundle-metadata.mjs scripts/inspect-unlocalized-resources.mjs scripts/extract-mounted-bundle.mjs scripts/localization-jsonl.mjs scripts/context-index-sql.mjs scripts/structured-search.mjs scripts/database-role.mjs scripts/database-name.mjs ./scripts/
+COPY scripts/package/occurrence-package.mjs scripts/package/package-ownership.mjs scripts/package/bundle-assignment.mjs scripts/package/bundle-metadata.mjs ./scripts/package/
+COPY scripts/extraction/inspect-unlocalized-resources.mjs scripts/extraction/extract-mounted-bundle.mjs ./scripts/extraction/
+COPY scripts/shared/localization-jsonl.mjs ./scripts/shared/
+COPY scripts/database/context-index-sql.mjs scripts/database/structured-search.mjs scripts/database/database-role.mjs scripts/database/database-name.mjs ./scripts/database/
 COPY deploy ./deploy
 COPY --from=frontend /build/dist ./dist
 RUN deno cache --node-modules-dir=none --frozen backend/main.ts deploy/setup.ts
