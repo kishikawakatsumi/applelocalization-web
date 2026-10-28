@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Public dependencies only: a clean clone needs no npm or Font Awesome token.
-FROM node:24-bookworm-slim AS frontend
+FROM node:26-bookworm-slim AS frontend
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN npm ci
