@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: '26'
           package-manager-cache: false
       - run: node --test tests/release/archive-data-release.test.mjs
       - name: Retain exact upstream artifacts without re-extraction or deployment
