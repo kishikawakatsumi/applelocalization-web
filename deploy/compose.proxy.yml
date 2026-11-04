@@ -1,7 +1,7 @@
 # Independent of all application/database generations. Linux VPS only.
 services:
   proxy:
-    image: caddy:2.11.8-alpine@sha256:eb37f58646a901dc7727cf448cae36daaefaba79de33b5058dab79aa4c04aefb
+    image: caddy:2.11.8-alpine@sha256:3db3a09e418f86a8fce8de4bc0026fccd2b4cd925aef00cc7d843d9fdc75e442
     platform: linux/amd64
     restart: unless-stopped
     network_mode: host
