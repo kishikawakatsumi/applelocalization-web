@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: "24"
+          node-version: "26"
           package-manager-cache: false
       - name: Test release intake and composition guards
         run: node --test tests/release/release-set.test.mjs tests/release/release-set-image.test.mjs tests/release/release-set-local.test.mjs
