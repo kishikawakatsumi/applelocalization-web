@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: '26'
           package-manager-cache: false
       - name: Collection safety regression tests (synthetic data only)
         run: |
