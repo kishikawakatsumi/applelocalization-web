@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: '26'
           package-manager-cache: false
       - name: Deployment safety tests
         run: node --test tests/deploy/vps-deploy.test.mjs tests/deploy/vps-resources.test.mjs tests/deploy/proxy-vps.test.mjs tests/project/deployment-layout.test.mjs
